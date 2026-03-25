@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   Loader2,
   ScrollText,
   Mail,
+  Pencil,
   PanelLeftOpen,
   PanelLeftClose,
   PanelRightOpen,
@@ -23,8 +24,20 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { EngagementSuiteInlinePanels } from "@/components/engagement/EngagementSuiteInlinePanels";
+import {
+  AFS_BUNDLED_SYNC_VERSION_ID,
+  type EngagementLetterVersionId,
+} from "@/lib/engagement-letter-constants";
+import { normalizeLetterWhitespace, normalizeScopeForStorage } from "@/lib/engagement-letter-text";
 
 const ACCENT = "#C8A96E";
+
+function mergeLetterBody(introduction?: string | null, scope?: string | null): string {
+  const a = introduction?.trim();
+  const b = scope?.trim();
+  if (a && b) return `${a}\n\n${b}`;
+  return a || b || "";
+}
 
 const SUITE_NAV = [
   { id: "template", label: "This template" },
@@ -156,9 +169,6 @@ function EmailPreviewPanelContent({
                 </p>
               </div>
             ))}
-            <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link href="/engagement-letters/settings#emails">Open full suite settings</Link>
-            </Button>
           </>
         )}
       </div>
@@ -174,7 +184,7 @@ export default function EditLetterVersionPage() {
 
   const version = useQuery(
     api.engagementLetters.getLetterVersion,
-    userId && versionId ? { userId, versionId: versionId as Id<"engagementLetterVersions"> } : "skip"
+    userId && versionId ? { userId, versionId: versionId as EngagementLetterVersionId } : "skip"
   );
   const emailTemplates = useQuery(
     api.engagementLetters.getEngagementEmailTemplates,
@@ -182,22 +192,72 @@ export default function EditLetterVersionPage() {
   );
 
   const updateLetterVersion = useMutation(api.engagementLetters.updateLetterVersion);
+  const applyBundledAfsCompilationLetter = useMutation(
+    api.engagementLetters.applyBundledAfsCompilationLetter
+  );
+  const repairLegacyAfsBodies = useMutation(api.engagementLetters.repairLegacyAfsBundledLetterBodies);
 
   const [name, setName] = useState("");
-  const [introduction, setIntroduction] = useState("");
-  const [scope, setScope] = useState("");
+  const [letterBody, setLetterBody] = useState("");
   const [saving, setSaving] = useState(false);
   const [showEmailPanel, setShowEmailPanel] = useState(false);
   const [showSuiteNav, setShowSuiteNav] = useState(true);
   const [suiteView, setSuiteView] = useState<SuiteEditorView>("template");
   const [emailPreviewTab, setEmailPreviewTab] = useState<"signed" | "acceptance">("signed");
+  const afsBundledSyncLock = useRef(false);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [ranLegacyAfsRepair, setRanLegacyAfsRepair] = useState(false);
+
+  /** Patches DB rows that still have old bare-line (a)(b)(c) AFS layout; refetches version via Convex. */
+  useEffect(() => {
+    if (!userId || ranLegacyAfsRepair) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await repairLegacyAfsBodies({ userId });
+      } catch {
+        /* non-fatal */
+      } finally {
+        if (!cancelled) setRanLegacyAfsRepair(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, ranLegacyAfsRepair, repairLegacyAfsBodies]);
+
+  useEffect(() => {
+    afsBundledSyncLock.current = false;
+  }, [versionId]);
 
   useEffect(() => {
     if (!version) return;
     setName(version.name);
-    setIntroduction(version.introduction ?? "");
-    setScope(version.scope ?? "");
+    const body = normalizeLetterWhitespace(mergeLetterBody(version.introduction, version.scope));
+    setLetterBody(body);
+    if (editorRef.current) editorRef.current.innerText = body;
   }, [version]);
+
+  useEffect(() => {
+    if (!version || !userId || version._id !== AFS_BUNDLED_SYNC_VERSION_ID) return;
+    const combined = `${version.introduction ?? ""}\n${version.scope ?? ""}`;
+    if (combined.includes("Protection of Personal Information Act, 2013")) return;
+    if (afsBundledSyncLock.current) return;
+    afsBundledSyncLock.current = true;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await applyBundledAfsCompilationLetter({ userId, versionId: version._id });
+        if (!cancelled) toast.success("Loaded the bundled AFS compilation letter");
+      } catch {
+        afsBundledSyncLock.current = false;
+        if (!cancelled) toast.error("Could not load the bundled letter");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [version, userId, applyBundledAfsCompilationLetter]);
 
   async function handleSave() {
     const trimmed = name.trim();
@@ -212,8 +272,8 @@ export default function EditLetterVersionPage() {
         userId,
         versionId: version._id,
         name: trimmed,
-        introduction: introduction.trim() || undefined,
-        scope: scope.trim() || undefined,
+        introduction: "",
+        scope: normalizeScopeForStorage(letterBody),
       });
       toast.success("Template saved");
     } catch {
@@ -373,56 +433,24 @@ export default function EditLetterVersionPage() {
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
             ) : suiteView === "template" ? (
-              <div className="w-full max-w-full space-y-10 px-4 py-8 sm:px-6 sm:py-10">
-                <div className="w-full border-b border-slate-200/90 pb-6">
-                  <Label htmlFor="ev-name" className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Template name <span className="text-red-500">*</span>
-                  </Label>
-                  <input
-                    id="ev-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className={cn(
-                      "mt-2 w-full border-0 border-b border-transparent bg-transparent pb-2 text-[20px] font-semibold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-[#C8A96E]"
-                    )}
-                    maxLength={120}
-                    placeholder="Untitled template"
-                  />
-                </div>
-
-                <div className="w-full space-y-3">
-                  <Label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Introduction
-                  </Label>
-                  <textarea
-                    value={introduction}
-                    onChange={(e) => setIntroduction(e.target.value)}
-                    rows={8}
-                    placeholder="Letter introduction…"
-                    className="w-full min-h-[140px] resize-y border-0 bg-transparent px-0 py-1 text-[15px] leading-[1.75] text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-0 focus-visible:ring-0"
-                  />
-                </div>
-
-                <div className="w-full space-y-3">
-                  <Label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Scope
-                  </Label>
-                  <textarea
-                    value={scope}
-                    onChange={(e) => setScope(e.target.value)}
-                    rows={12}
-                    placeholder="Scope of engagement text…"
-                    className="w-full min-h-[220px] resize-y border-0 bg-transparent px-0 py-1 text-[15px] leading-[1.75] text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-0 focus-visible:ring-0"
-                  />
-                </div>
-
-                <p className="w-full border-t border-slate-100 pt-8 text-[12px] text-slate-500">
-                  Firm-wide letterhead, key dates, principals, and email templates are managed in{" "}
-                  <Link href="/engagement-letters/settings" className="font-medium underline" style={{ color: ACCENT }}>
-                    Suite settings
-                  </Link>
-                  .
-                </p>
+              <div className="relative w-full px-4 py-10 sm:px-6 sm:py-12">
+                <button
+                  type="button"
+                  aria-label="Edit letter"
+                  title="Edit letter"
+                  className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/90 bg-white text-slate-500 shadow-sm transition-colors hover:border-[#C8A96E]/40 hover:bg-[#C8A96E]/8 hover:text-[#C8A96E] sm:right-6 sm:top-6"
+                  onClick={() => editorRef.current?.focus()}
+                >
+                  <Pencil className="h-4 w-4" strokeWidth={2} />
+                </button>
+                <div
+                  ref={editorRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  spellCheck
+                  onInput={(e) => setLetterBody(e.currentTarget.innerText)}
+                  className="w-full min-h-[min(80vh,64rem)] whitespace-pre-wrap pr-11 text-left font-serif text-[15px] leading-[1.85] text-slate-900 [text-wrap:pretty] focus:outline-none empty:before:content-['Start_typing_your_engagement_letter…'] empty:before:text-slate-300 sm:pr-12"
+                />
               </div>
             ) : (
               userId && (

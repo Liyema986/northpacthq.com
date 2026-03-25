@@ -2,8 +2,30 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { requirePermission, getUserFirmIdSafe } from "./lib/permissions";
+import { normalizeScopeForStorage } from "./lib/letterText";
+import { hasLegacyAfsBrokenLists } from "./lib/afsLetterLegacy";
+import {
+  AFS_COMPILATION_ENGAGEMENT_LETTER_BODY,
+  AFS_COMPILATION_TEMPLATE_NAME,
+} from "./content/afsCompilationEngagementLetterBody";
+import {
+  PROPERTY_PRACTITIONERS_ENGAGEMENT_LETTER_BODY,
+  PROPERTY_PRACTITIONERS_TEMPLATE_NAME,
+} from "./content/propertyPractitionersEngagementLetterBody";
+import {
+  LEGAL_PRACTITIONERS_ENGAGEMENT_LETTER_BODY,
+  LEGAL_PRACTITIONERS_TEMPLATE_NAME,
+} from "./content/legalPractitionersEngagementLetterBody";
+import {
+  REVIEW_ENGAGEMENT_LETTER_BODY,
+  REVIEW_ENGAGEMENT_TEMPLATE_NAME,
+} from "./content/reviewEngagementLetterBody";
+import {
+  AUDIT_ENGAGEMENT_LETTER_BODY,
+  AUDIT_ENGAGEMENT_TEMPLATE_NAME,
+} from "./content/auditEngagementLetterBody";
 
 function escapeHtmlAttr(s: string): string {
   return s
@@ -675,7 +697,7 @@ export const createLetterVersion = mutation({
       firmId,
       name: args.name.trim(),
       introduction: args.introduction?.trim() || undefined,
-      scope: args.scope?.trim() || undefined,
+      scope: normalizeScopeForStorage(args.scope),
       sortOrder: maxSort + 1,
       createdAt: now,
       updatedAt: now,
@@ -705,7 +727,7 @@ export const updateLetterVersion = mutation({
     await ctx.db.patch(args.versionId, {
       name: args.name.trim(),
       introduction: args.introduction?.trim() || undefined,
-      scope: args.scope?.trim() || undefined,
+      scope: normalizeScopeForStorage(args.scope),
       updatedAt: Date.now(),
     });
     return null;
@@ -739,7 +761,7 @@ export const duplicateLetterVersion = mutation({
       firmId,
       name: `${source.name} (Copy)`,
       introduction: source.introduction,
-      scope: source.scope,
+      scope: normalizeScopeForStorage(source.scope),
       sortOrder: maxSort + 1,
       createdAt: now,
       updatedAt: now,
@@ -768,8 +790,98 @@ export const deleteLetterVersion = mutation({
   },
 });
 
+const BUNDLED_LETTER_DEFAULTS: readonly {
+  name: string;
+  scope: string;
+}[] = [
+  { name: AFS_COMPILATION_TEMPLATE_NAME, scope: AFS_COMPILATION_ENGAGEMENT_LETTER_BODY },
+  { name: PROPERTY_PRACTITIONERS_TEMPLATE_NAME, scope: PROPERTY_PRACTITIONERS_ENGAGEMENT_LETTER_BODY },
+  { name: LEGAL_PRACTITIONERS_TEMPLATE_NAME, scope: LEGAL_PRACTITIONERS_ENGAGEMENT_LETTER_BODY },
+  { name: REVIEW_ENGAGEMENT_TEMPLATE_NAME, scope: REVIEW_ENGAGEMENT_LETTER_BODY },
+  { name: AUDIT_ENGAGEMENT_TEMPLATE_NAME, scope: AUDIT_ENGAGEMENT_LETTER_BODY },
+];
+
+/** Maps historical / alternate starter names to current canonical `*_TEMPLATE_NAME` values. */
+function legacyBundledNameMap(): Record<string, string> {
+  return {
+    "1. AFS Compilation engagement letter": AFS_COMPILATION_TEMPLATE_NAME,
+    "2. Property Practitioners engagement letter": PROPERTY_PRACTITIONERS_TEMPLATE_NAME,
+    "3. Legal Practitioners engagement letter": LEGAL_PRACTITIONERS_TEMPLATE_NAME,
+    "4. Review engagement letter": REVIEW_ENGAGEMENT_TEMPLATE_NAME,
+    "5. Audit engagement letter": AUDIT_ENGAGEMENT_TEMPLATE_NAME,
+    "Audit engagement letter": AUDIT_ENGAGEMENT_TEMPLATE_NAME,
+    // Older seeds used alternate titles — those names blocked `ensureDefaultLetterVersions`
+    // from inserting Review / Audit / updated Property & Legal rows.
+    "Property Practitioners engagement letter": PROPERTY_PRACTITIONERS_TEMPLATE_NAME,
+    "Legal Practitioners engagement letter": LEGAL_PRACTITIONERS_TEMPLATE_NAME,
+    "Review engagement letter": REVIEW_ENGAGEMENT_TEMPLATE_NAME,
+  };
+}
+
 /**
- * Seed four default scope-library templates when a firm has none (idempotent).
+ * Renames rows that still use legacy starter names so they match bundled template keys.
+ * Skips a rename if another row already owns the canonical name (avoids duplicates).
+ */
+async function renameLegacyBundledLetterRowsForFirm(
+  ctx: MutationCtx,
+  firmId: Id<"firms">
+): Promise<number> {
+  const map = legacyBundledNameMap();
+  const rows = await ctx.db
+    .query("engagementLetterVersions")
+    .withIndex("by_firm", (q) => q.eq("firmId", firmId))
+    .collect();
+
+  const usedNames = new Set(rows.map((r) => r.name));
+  let renamed = 0;
+  const now = Date.now();
+
+  for (const row of rows) {
+    const canonical = map[row.name];
+    if (!canonical || canonical === row.name) continue;
+    if (usedNames.has(canonical)) continue;
+    await ctx.db.patch(row._id, { name: canonical, updatedAt: now });
+    usedNames.delete(row.name);
+    usedNames.add(canonical);
+    renamed++;
+  }
+  return renamed;
+}
+
+/**
+ * Old demo scope-library rows (generic copy, not the SA bundled engagement letters).
+ * If left in place, their names are not in `BUNDLED_LETTER_DEFAULTS` and block seeding the real starters.
+ */
+const OBSOLETE_DEMO_SCOPE_LIBRARY_NAMES = new Set([
+  "Standard professional services",
+  "Trust & estate focus",
+  "Small business & corporate",
+]);
+
+async function deleteObsoleteDemoScopeLibraryTemplatesForFirm(
+  ctx: MutationCtx,
+  firmId: Id<"firms">
+): Promise<number> {
+  const rows = await ctx.db
+    .query("engagementLetterVersions")
+    .withIndex("by_firm", (q) => q.eq("firmId", firmId))
+    .collect();
+  let deleted = 0;
+  for (const row of rows) {
+    if (OBSOLETE_DEMO_SCOPE_LIBRARY_NAMES.has(row.name)) {
+      await ctx.db.delete(row._id);
+      deleted++;
+    }
+  }
+  return deleted;
+}
+
+/**
+ * Seed bundled default engagement letters (idempotent).
+ * - Empty library: inserts all five.
+ * - Library contains only bundled templates but some are missing (e.g. after new letters shipped): inserts the missing ones.
+ * - Any custom template name (not in the bundled set): does nothing, so we do not overwrite a tailored library.
+ * - Removes obsolete demo starters, then applies legacy name renames so older rows do not block seeding.
  */
 export const ensureDefaultLetterVersions = mutation({
   args: { userId: v.id("users") },
@@ -778,60 +890,241 @@ export const ensureDefaultLetterVersions = mutation({
     const firmId = await getUserFirmIdSafe(ctx, args.userId);
     if (!firmId) return { created: 0 };
 
+    await deleteObsoleteDemoScopeLibraryTemplatesForFirm(ctx, firmId);
+    await renameLegacyBundledLetterRowsForFirm(ctx, firmId);
+
     const existing = await ctx.db
       .query("engagementLetterVersions")
       .withIndex("by_firm", (q) => q.eq("firmId", firmId))
       .collect();
-    if (existing.length > 0) {
+
+    const bundledNames = new Set(BUNDLED_LETTER_DEFAULTS.map((d) => d.name));
+    if (existing.length > 0 && existing.some((v) => !bundledNames.has(v.name))) {
       return { created: 0 };
     }
 
-    const defaults: { name: string; introduction: string; scope: string }[] = [
-      {
-        name: "Standard professional services",
-        introduction:
-          "This letter sets out the terms on which we agree to provide professional services to you. Please read it together with our schedule of services and any engagement-specific documents.",
-        scope:
-          "Our services will be performed with reasonable skill and care in accordance with applicable professional standards. The detailed scope for this engagement is described in the schedule of services and supporting documentation.",
-      },
-      {
-        name: "Trust & estate focus",
-        introduction:
-          "We are pleased to confirm our engagement to provide trust, estate, and related advisory services. This letter should be read with the trust deed, will, and any letters of instruction you have provided.",
-        scope:
-          "Services may include trust administration, estate planning coordination, tax compliance support, and liaison with third parties as agreed. Specific deliverables and timelines are set out in the schedule of services.",
-      },
-      {
-        name: "Small business & corporate",
-        introduction:
-          "This engagement letter confirms the basis on which we will provide accounting, tax, and business advisory services to your organisation for the period described below.",
-        scope:
-          "Our work typically includes statutory and management reporting, tax compliance, payroll support where applicable, and ad hoc advisory as requested. The exact scope is defined in the schedule of services attached.",
-      },
-      {
-        name: "Audit & assurance",
-        introduction:
-          "This letter outlines the terms of our engagement to perform audit, independent review, or assurance services as applicable, in line with International Standards on Auditing (or equivalent) and regulatory requirements.",
-        scope:
-          "The objective, responsibilities of management and those charged with governance, and the nature and limitations of our work are described in the detailed engagement plan and schedule of services.",
-      },
-    ];
-
+    const existingByName = new Set(existing.map((v) => v.name));
     const now = Date.now();
-    let sortOrder = 0;
-    for (const d of defaults) {
+    let maxSort = existing.reduce((m, v) => Math.max(m, v.sortOrder), -1);
+    let created = 0;
+
+    for (const d of BUNDLED_LETTER_DEFAULTS) {
+      if (existingByName.has(d.name)) continue;
+      maxSort += 1;
       await ctx.db.insert("engagementLetterVersions", {
         firmId,
         name: d.name,
-        introduction: d.introduction,
-        scope: d.scope,
-        sortOrder: sortOrder++,
+        introduction: undefined,
+        scope: normalizeScopeForStorage(d.scope)!,
+        sortOrder: maxSort,
         createdAt: now,
         updatedAt: now,
       });
+      created++;
     }
 
-    return { created: defaults.length };
+    const allRows = await ctx.db
+      .query("engagementLetterVersions")
+      .withIndex("by_firm", (q) => q.eq("firmId", firmId))
+      .collect();
+    const patchTs = Date.now();
+    for (const d of BUNDLED_LETTER_DEFAULTS) {
+      const row = allRows.find((r) => r.name === d.name);
+      if (!row || (row.scope ?? "").trim().length > 0) continue;
+      await ctx.db.patch(row._id, {
+        introduction: undefined,
+        scope: normalizeScopeForStorage(d.scope)!,
+        updatedAt: patchTs,
+      });
+    }
+
+    return { created };
+  },
+});
+
+/**
+ * Replaces stored AFS compilation letter bodies that still have the old broken (a)/(b)/(c)
+ * layout with the current bundled text. Idempotent — safe to call on every load.
+ */
+export const repairLegacyAfsBundledLetterBodies = mutation({
+  args: { userId: v.id("users") },
+  returns: v.object({ repaired: v.number() }),
+  handler: async (ctx, args) => {
+    const firmId = await getUserFirmIdSafe(ctx, args.userId);
+    if (!firmId) return { repaired: 0 };
+
+    const rows = await ctx.db
+      .query("engagementLetterVersions")
+      .withIndex("by_firm", (q) => q.eq("firmId", firmId))
+      .collect();
+
+    const fixedBody = normalizeScopeForStorage(AFS_COMPILATION_ENGAGEMENT_LETTER_BODY)!;
+    const legacyName = "1. AFS Compilation engagement letter";
+    let repaired = 0;
+    const now = Date.now();
+
+    for (const row of rows) {
+      const isAfsName =
+        row.name === AFS_COMPILATION_TEMPLATE_NAME || row.name === legacyName;
+      if (!isAfsName) continue;
+
+      const combined = `${row.introduction ?? ""}\n${row.scope ?? ""}`;
+      if (!hasLegacyAfsBrokenLists(combined)) continue;
+
+      await ctx.db.patch(row._id, {
+        introduction: undefined,
+        scope: fixedBody,
+        updatedAt: now,
+      });
+      repaired++;
+    }
+
+    return { repaired };
+  },
+});
+
+/**
+ * One-time rename: strips legacy numeric prefixes (e.g. "1. AFS …" → "AFS …") from
+ * any bundled template rows that still carry the old names. Safe to call repeatedly.
+ */
+export const fixLegacyBundledTemplateNames = mutation({
+  args: { userId: v.id("users") },
+  returns: v.object({ renamed: v.number() }),
+  handler: async (ctx, args) => {
+    const firmId = await getUserFirmIdSafe(ctx, args.userId);
+    if (!firmId) return { renamed: 0 };
+    const renamed = await renameLegacyBundledLetterRowsForFirm(ctx, firmId);
+    return { renamed };
+  },
+});
+
+/**
+ * Replace a template's name and body with the bundled AFS compilation letter (full text in `scope`).
+ */
+export const applyBundledAfsCompilationLetter = mutation({
+  args: {
+    userId: v.id("users"),
+    versionId: v.id("engagementLetterVersions"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requirePermission(ctx, args.userId, "canManageTemplates");
+    const firmId = user.firmId;
+
+    const version = await ctx.db.get(args.versionId);
+    if (!version || version.firmId !== firmId) throw new Error("Version not found");
+
+    await ctx.db.patch(args.versionId, {
+      name: AFS_COMPILATION_TEMPLATE_NAME,
+      introduction: undefined,
+      scope: normalizeScopeForStorage(AFS_COMPILATION_ENGAGEMENT_LETTER_BODY)!,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+/**
+ * Replace a template's name and body with the bundled Property Practitioners engagement letter (full text in `scope`).
+ */
+export const applyBundledPropertyPractitionersLetter = mutation({
+  args: {
+    userId: v.id("users"),
+    versionId: v.id("engagementLetterVersions"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requirePermission(ctx, args.userId, "canManageTemplates");
+    const firmId = user.firmId;
+
+    const version = await ctx.db.get(args.versionId);
+    if (!version || version.firmId !== firmId) throw new Error("Version not found");
+
+    await ctx.db.patch(args.versionId, {
+      name: PROPERTY_PRACTITIONERS_TEMPLATE_NAME,
+      introduction: undefined,
+      scope: normalizeScopeForStorage(PROPERTY_PRACTITIONERS_ENGAGEMENT_LETTER_BODY)!,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+/**
+ * Replace a template's name and body with the bundled Legal Practitioners engagement letter (full text in `scope`).
+ */
+export const applyBundledLegalPractitionersLetter = mutation({
+  args: {
+    userId: v.id("users"),
+    versionId: v.id("engagementLetterVersions"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requirePermission(ctx, args.userId, "canManageTemplates");
+    const firmId = user.firmId;
+
+    const version = await ctx.db.get(args.versionId);
+    if (!version || version.firmId !== firmId) throw new Error("Version not found");
+
+    await ctx.db.patch(args.versionId, {
+      name: LEGAL_PRACTITIONERS_TEMPLATE_NAME,
+      introduction: undefined,
+      scope: normalizeScopeForStorage(LEGAL_PRACTITIONERS_ENGAGEMENT_LETTER_BODY)!,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+/**
+ * Replace a template's name and body with the bundled Review engagement letter (full text in `scope`).
+ */
+export const applyBundledReviewEngagementLetter = mutation({
+  args: {
+    userId: v.id("users"),
+    versionId: v.id("engagementLetterVersions"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requirePermission(ctx, args.userId, "canManageTemplates");
+    const firmId = user.firmId;
+
+    const version = await ctx.db.get(args.versionId);
+    if (!version || version.firmId !== firmId) throw new Error("Version not found");
+
+    await ctx.db.patch(args.versionId, {
+      name: REVIEW_ENGAGEMENT_TEMPLATE_NAME,
+      introduction: undefined,
+      scope: normalizeScopeForStorage(REVIEW_ENGAGEMENT_LETTER_BODY)!,
+      updatedAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+/**
+ * Replace a template's name and body with the bundled Audit engagement letter (full text in `scope`).
+ */
+export const applyBundledAuditEngagementLetter = mutation({
+  args: {
+    userId: v.id("users"),
+    versionId: v.id("engagementLetterVersions"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requirePermission(ctx, args.userId, "canManageTemplates");
+    const firmId = user.firmId;
+
+    const version = await ctx.db.get(args.versionId);
+    if (!version || version.firmId !== firmId) throw new Error("Version not found");
+
+    await ctx.db.patch(args.versionId, {
+      name: AUDIT_ENGAGEMENT_TEMPLATE_NAME,
+      introduction: undefined,
+      scope: normalizeScopeForStorage(AUDIT_ENGAGEMENT_LETTER_BODY)!,
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });
 

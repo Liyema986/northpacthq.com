@@ -31,7 +31,6 @@ import {
   ScrollText,
   Plus,
   Search,
-  Settings2,
   MoreHorizontal,
   Pencil,
   Copy,
@@ -41,9 +40,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn, formatDate } from "@/lib/utils";
+import { ScopeLibraryStarterTooltip } from "@/components/engagement/ScopeLibraryStarterTooltip";
 
 const ACCENT = "#C8A96E";
-const GRID = "grid-cols-[40px_minmax(0,1fr)_140px_44px]";
+/** # · template fills remaining space · last updated · actions pinned right */
+const GRID = "grid-cols-[1.75rem_1fr_minmax(7.5rem,9rem)_2.5rem] gap-x-4";
 
 export default function EngagementLettersPage() {
   const { user } = useNorthPactAuth();
@@ -51,6 +52,8 @@ export default function EngagementLettersPage() {
 
   const convexVersions = useQuery(api.engagementLetters.listLetterVersions, userId ? { userId } : "skip");
   const ensureDefaults = useMutation(api.engagementLetters.ensureDefaultLetterVersions);
+  const fixLegacyNames = useMutation(api.engagementLetters.fixLegacyBundledTemplateNames);
+  const repairLegacyAfsBodies = useMutation(api.engagementLetters.repairLegacyAfsBundledLetterBodies);
   const duplicateVersionMutation = useMutation(api.engagementLetters.duplicateLetterVersion);
   const deleteVersionMutation = useMutation(api.engagementLetters.deleteLetterVersion);
 
@@ -67,9 +70,18 @@ export default function EngagementLettersPage() {
     let cancelled = false;
     (async () => {
       try {
+        await fixLegacyNames({ userId });
+        await repairLegacyAfsBodies({ userId });
         const { created } = await ensureDefaults({ userId });
         if (!cancelled && created > 0) {
-          toast.success(`Added ${created} starter templates to your library`);
+          const byCount: Record<number, string> = {
+            1: "Added 1 starter template to your library",
+            2: "Added 2 starter templates to your library",
+            3: "Added 3 starter templates to your library",
+            4: "Added all four starter templates (AFS, Property Practitioners, Legal Practitioners, Review) to your library",
+            5: "Added all five starter templates (AFS, Property Practitioners, Legal Practitioners, Review, Audit) to your library",
+          };
+          toast.success(byCount[created] ?? `Added ${created} starter templates to your library`);
         }
       } catch {
         /* non-fatal */
@@ -80,7 +92,7 @@ export default function EngagementLettersPage() {
     return () => {
       cancelled = true;
     };
-  }, [userId, defaultsSeeded, ensureDefaults]);
+  }, [userId, defaultsSeeded, ensureDefaults, fixLegacyNames, repairLegacyAfsBodies]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -121,7 +133,7 @@ export default function EngagementLettersPage() {
       <Header />
       <div className="px-6 py-6 space-y-5 max-w-[1600px]">
         {/* Stat tiles — same visual language as /proposals */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="bg-white border border-slate-100 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 leading-none">
@@ -139,24 +151,6 @@ export default function EngagementLettersPage() {
             <p className="text-[11px] text-slate-400 mt-1 leading-tight">In your library</p>
           </div>
           <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 leading-none">
-                Suite settings
-              </span>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-slate-100">
-                <Settings2 className="h-3.5 w-3.5 text-slate-500" />
-              </div>
-            </div>
-            <p className="text-[13px] font-medium text-slate-700 leading-snug">Letterhead, dates, people &amp; emails</p>
-            <Link
-              href="/engagement-letters/settings"
-              className="inline-flex mt-2 text-[12px] font-semibold hover:underline"
-              style={{ color: ACCENT }}
-            >
-              Open settings →
-            </Link>
-          </div>
-          <div className="bg-white border border-slate-100 rounded-xl p-4 sm:col-span-1 col-span-2">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 leading-none">
                 Tip
@@ -164,8 +158,8 @@ export default function EngagementLettersPage() {
               <FileText className="h-3.5 w-3.5 text-slate-400" />
             </div>
             <p className="text-[12px] text-slate-600 leading-relaxed">
-              Edit a template to work on introduction &amp; scope. Use{" "}
-              <span className="font-medium text-slate-800">Suite settings</span> for firm-wide letterhead and emails.
+              Edit a template to work on the full letter text. Letterhead, emails, and other suite options are available from the
+              editor side panels.
             </p>
           </div>
         </div>
@@ -182,12 +176,6 @@ export default function EngagementLettersPage() {
             />
           </div>
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            <Button variant="outline" size="sm" className="h-9 text-[13px]" asChild>
-              <Link href="/engagement-letters/settings">
-                <Settings2 className="h-3.5 w-3.5 mr-1.5" />
-                Suite settings
-              </Link>
-            </Button>
             <Button
               type="button"
               size="sm"
@@ -203,28 +191,28 @@ export default function EngagementLettersPage() {
 
         {/* Table */}
         <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <div>
+          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
+            <div className="flex min-w-0 items-center gap-1.5">
               <span className="text-[14px] font-semibold text-slate-900">Scope library</span>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Starter templates are added automatically — duplicate or customise anytime
-              </p>
+              <ScopeLibraryStarterTooltip />
             </div>
             {!loading && (
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-slate-400 shrink-0">
                 {filtered.length} template{filtered.length !== 1 ? "s" : ""}
               </span>
             )}
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[520px]">
-              <div className={cn("grid px-4 py-2.5 border-b border-slate-50 gap-3 bg-slate-50/60", GRID)}>
+            <div className="w-full min-w-0">
+              <div className={cn("grid pl-2 pr-4 py-2.5 border-b border-slate-50 items-center bg-slate-50/60", GRID)}>
                 {["#", "Template", "Last updated", ""].map((h, i) => (
                   <span
                     key={h}
                     className={cn(
                       "text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap",
+                      i === 0 && "text-center tabular-nums",
+                      i === 2 && "text-left",
                       i === 3 && "text-right"
                     )}
                   >
@@ -236,11 +224,11 @@ export default function EngagementLettersPage() {
               {loading ? (
                 <div className="divide-y divide-slate-50">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className={cn("grid px-4 py-4 gap-3 items-center", GRID)}>
-                      <Skeleton className="h-3 w-4 mx-auto" />
-                      <Skeleton className="h-4 w-full max-w-md" />
+                    <div key={i} className={cn("grid pl-2 pr-4 py-4 items-start", GRID)}>
+                      <Skeleton className="h-3 w-5 justify-self-end" />
+                      <Skeleton className="h-4 w-full max-w-[20rem]" />
                       <Skeleton className="h-3 w-24" />
-                      <Skeleton className="h-6 w-6 rounded mx-auto" />
+                      <Skeleton className="h-6 w-6 shrink-0 justify-self-end rounded" />
                     </div>
                   ))}
                 </div>
@@ -269,27 +257,36 @@ export default function EngagementLettersPage() {
                   {filtered.map((v, idx) => (
                     <div
                       key={v._id}
-                      className={cn("grid px-4 py-3.5 gap-3 items-center hover:bg-slate-50/60 transition-colors", GRID)}
+                      className={cn("grid pl-2 pr-4 py-3.5 items-start hover:bg-slate-50/60 transition-colors", GRID)}
                     >
-                      <span className="text-[11px] font-medium text-slate-300 text-center tabular-nums">{idx + 1}</span>
+                      <span className="block w-full pt-0.5 text-center text-[11px] font-medium tabular-nums text-slate-400">
+                        {idx + 1}
+                      </span>
                       <div className="min-w-0">
                         <Link
                           href={`/engagement-letters/${v._id}`}
-                          className="text-[13px] font-semibold text-slate-900 truncate hover:underline block"
+                          className="text-[13px] font-semibold text-slate-900 hover:underline block break-words"
                           style={{ color: ACCENT }}
                         >
                           {v.name}
                         </Link>
-                        <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                          {(v.introduction ?? "").slice(0, 90)}
-                          {(v.introduction ?? "").length > 90 ? "…" : ""}
+                        <p className="text-[11px] text-slate-500 mt-1 line-clamp-3 whitespace-normal break-words leading-snug">
+                          {(() => {
+                            const snippet = [v.introduction, v.scope]
+                              .filter(Boolean)
+                              .join(" ")
+                              .replace(/\s+/g, " ")
+                              .trim();
+                            if (!snippet) return "—";
+                            return snippet.length > 280 ? `${snippet.slice(0, 280)}…` : snippet;
+                          })()}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                      <div className="flex items-center gap-1 text-[11px] text-slate-500 pt-0.5">
                         <Clock className="h-3 w-3 shrink-0 opacity-60" />
                         {formatDate(v.updatedAt)}
                       </div>
-                      <div className="flex justify-end">
+                      <div className="flex justify-end pt-0.5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button

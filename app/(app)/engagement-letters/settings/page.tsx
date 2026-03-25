@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ScopeLibraryStarterTooltip } from "@/components/engagement/ScopeLibraryStarterTooltip";
 import { ServiceCatalogueClauses } from "@/components/engagement/ServiceCatalogueClauses";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -438,14 +439,16 @@ export default function EngagementLettersSettingsPage() {
             <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
               <Collapsible open={suiteOpen} onOpenChange={setSuiteOpen}>
                 <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-                  <CollapsibleTrigger className="flex items-center gap-2 font-semibold text-[13px] text-slate-900">
-                    {suiteOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    Scope Library
-                  </CollapsibleTrigger>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <CollapsibleTrigger className="flex items-center gap-2 font-semibold text-[13px] text-slate-900">
+                      {suiteOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      Scope Library
+                    </CollapsibleTrigger>
+                    <ScopeLibraryStarterTooltip />
+                  </div>
                 </div>
                 <CollapsibleContent>
                   <div className="p-4 space-y-3">
-                    <p className="text-[11px] text-slate-500">Build out your library of Scopes for the different entities you serve</p>
                     {loadingVersions ? (
                       <div className="space-y-2">{[1,2,3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
                     ) : versions.length === 0 ? (
@@ -459,8 +462,8 @@ export default function EngagementLettersSettingsPage() {
                       <>
                         <div className="divide-y divide-slate-200">
                           {versions.map((v, i) => (
-                            <div key={`ver-${v._id}-${i}`} className="flex items-center gap-3 py-3 px-3">
-                              <div className="flex items-center gap-1 shrink-0">
+                            <div key={`ver-${v._id}-${i}`} className="flex items-start gap-3 py-3 px-3">
+                              <div className="flex items-center gap-1 shrink-0 pt-0.5">
                                 <button className="p-1 rounded text-slate-400 hover:text-slate-600 disabled:opacity-30" onClick={() => moveVersion(i, "up")} disabled={i === 0}>
                                   <ArrowUp className="h-3.5 w-3.5" />
                                 </button>
@@ -468,8 +471,8 @@ export default function EngagementLettersSettingsPage() {
                                   <ArrowDown className="h-3.5 w-3.5" />
                                 </button>
                               </div>
-                              <GripVertical className="h-4 w-4 text-slate-400 shrink-0" />
-                              <span className="flex-1 min-w-0 text-[13px] font-medium text-slate-900 truncate">{v.name}</span>
+                              <GripVertical className="h-4 w-4 text-slate-400 shrink-0 mt-1" />
+                              <span className="flex-1 min-w-0 text-[13px] font-medium text-slate-900 break-words">{v.name}</span>
                               <div className="flex items-center gap-1 shrink-0">
                                 <Button variant="outline" size="sm" className="h-8 px-2.5 text-[11px] border-slate-200" asChild>
                                   <Link href={`/engagement-letters/${v._id}`}>

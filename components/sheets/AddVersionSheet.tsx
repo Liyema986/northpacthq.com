@@ -23,12 +23,11 @@ export function AddVersionSheet({ open, onOpenChange, onSuccess, userId }: AddVe
   const createLetterVersion = useMutation(api.engagementLetters.createLetterVersion);
 
   const [name, setName] = useState("");
-  const [introduction, setIntroduction] = useState("");
-  const [scope, setScope] = useState("");
+  const [letterBody, setLetterBody] = useState("");
   const [nameError, setNameError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  function reset() { setName(""); setIntroduction(""); setScope(""); setNameError(""); }
+  function reset() { setName(""); setLetterBody(""); setNameError(""); }
   function handleClose() { onOpenChange(false); reset(); }
 
   async function handleSave() {
@@ -41,8 +40,7 @@ export function AddVersionSheet({ open, onOpenChange, onSuccess, userId }: AddVe
       await createLetterVersion({
         userId,
         name: trimmed,
-        introduction: introduction.trim() || undefined,
-        scope: scope.trim() || undefined,
+        scope: letterBody.trim() || undefined,
       });
       toast.success(`Version "${trimmed}" added`);
       handleClose();
@@ -72,7 +70,7 @@ export function AddVersionSheet({ open, onOpenChange, onSuccess, userId }: AddVe
                       <HelpCircle className="h-3.5 w-3.5" />
                     </span>
                   </h2>
-                  <p className="text-sm text-slate-500 mt-0.5">Configure version name, introduction and scope</p>
+                  <p className="text-sm text-slate-500 mt-0.5">Name and full letter text</p>
                 </div>
               </div>
               <button onClick={handleClose} className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0">
@@ -97,47 +95,19 @@ export function AddVersionSheet({ open, onOpenChange, onSuccess, userId }: AddVe
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[13px] flex items-center gap-1.5">
-                Introduction
+              <Label htmlFor="version-letter" className="text-[13px] flex items-center gap-1.5">
+                Letter
                 <span className="p-0.5 rounded-full text-blue-600 bg-blue-50"><HelpCircle className="h-3.5 w-3.5" /></span>
               </Label>
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-3 py-1.5 flex items-center gap-1">
-                  {["B", "I", "U"].map((f) => (
-                    <button key={f} className="h-6 w-6 rounded text-[11px] font-medium text-slate-600 hover:bg-slate-200 transition-colors">{f}</button>
-                  ))}
-                </div>
-                <textarea
-                  value={introduction}
-                  onChange={(e) => setIntroduction(e.target.value)}
-                  placeholder="Introduction text..."
-                  rows={4}
-                  disabled={saving}
-                  className="w-full px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none bg-white resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-[13px] flex items-center gap-1.5">
-                Scope
-                <span className="p-0.5 rounded-full text-blue-600 bg-blue-50"><HelpCircle className="h-3.5 w-3.5" /></span>
-              </Label>
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-3 py-1.5 flex items-center gap-1">
-                  {["B", "I", "U"].map((f) => (
-                    <button key={f} className="h-6 w-6 rounded text-[11px] font-medium text-slate-600 hover:bg-slate-200 transition-colors">{f}</button>
-                  ))}
-                </div>
-                <textarea
-                  value={scope}
-                  onChange={(e) => setScope(e.target.value)}
-                  placeholder="Scope text..."
-                  rows={4}
-                  disabled={saving}
-                  className="w-full px-3 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none bg-white resize-none"
-                />
-              </div>
+              <textarea
+                id="version-letter"
+                value={letterBody}
+                onChange={(e) => setLetterBody(e.target.value)}
+                placeholder="Full engagement letter (optional)…"
+                rows={12}
+                disabled={saving}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 font-serif text-[13px] leading-relaxed text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] bg-white resize-y min-h-[200px]"
+              />
             </div>
           </div>
 
