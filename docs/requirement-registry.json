@@ -1,0 +1,6307 @@
+{
+  "$schema": "build-enforcement-registry-v6.0",
+  "project": "TPP Platform",
+  "generated": "2026-03-23T13:35:17.687Z",
+  "sdlc_doc_count": 85,
+  "summary": {
+    "total_atoms": 482,
+    "by_category": {
+      "screen": 66,
+      "wiring": 182,
+      "error": 52,
+      "requirement": 182
+    },
+    "verified": 35,
+    "pending": 447
+  },
+  "atoms": [
+    {
+      "id": "SCR-001.page-exists",
+      "parent_id": "SCR-001",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Administrator (/(admin)/administrator)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(admin)\\administrator\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-001.skeleton",
+      "parent_id": "SCR-001",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Administrator",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-001.error-boundary",
+      "parent_id": "SCR-001",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Administrator",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-002.page-exists",
+      "parent_id": "SCR-002",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Appsmap (/(app)/appsmap)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\appsmap\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-002.skeleton",
+      "parent_id": "SCR-002",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Appsmap",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-002.error-boundary",
+      "parent_id": "SCR-002",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Appsmap",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-003.page-exists",
+      "parent_id": "SCR-003",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Cash Flow (/(app)/cash-flow)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\cash-flow\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-003.skeleton",
+      "parent_id": "SCR-003",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Cash Flow",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-003.error-boundary",
+      "parent_id": "SCR-003",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Cash Flow",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-004.page-exists",
+      "parent_id": "SCR-004",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Clients (/(app)/clients)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\clients\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-004.skeleton",
+      "parent_id": "SCR-004",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Clients",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-004.error-boundary",
+      "parent_id": "SCR-004",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Clients",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-005.page-exists",
+      "parent_id": "SCR-005",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for [Id] (/(app)/clients/[id])",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\clients\\[id]\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-005.skeleton",
+      "parent_id": "SCR-005",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for [Id]",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-005.error-boundary",
+      "parent_id": "SCR-005",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for [Id]",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-006.page-exists",
+      "parent_id": "SCR-006",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Contacts (/(app)/contacts)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\contacts\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-006.skeleton",
+      "parent_id": "SCR-006",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Contacts",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-006.error-boundary",
+      "parent_id": "SCR-006",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Contacts",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-007.page-exists",
+      "parent_id": "SCR-007",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Dashboard (/(app)/dashboard)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\dashboard\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-007.skeleton",
+      "parent_id": "SCR-007",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Dashboard",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-007.error-boundary",
+      "parent_id": "SCR-007",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Dashboard",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-008.page-exists",
+      "parent_id": "SCR-008",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Engagement Letters (/(app)/engagement-letters)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\engagement-letters\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-008.skeleton",
+      "parent_id": "SCR-008",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Engagement Letters",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-008.error-boundary",
+      "parent_id": "SCR-008",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Engagement Letters",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-009.page-exists",
+      "parent_id": "SCR-009",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Packages (/(app)/packages)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\packages\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-009.skeleton",
+      "parent_id": "SCR-009",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Packages",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-009.error-boundary",
+      "parent_id": "SCR-009",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Packages",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-010.page-exists",
+      "parent_id": "SCR-010",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for New (/(app)/proposals/new)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\proposals\\new\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-010.skeleton",
+      "parent_id": "SCR-010",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for New",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-010.error-boundary",
+      "parent_id": "SCR-010",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for New",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-011.page-exists",
+      "parent_id": "SCR-011",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Proposals (/(app)/proposals)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\proposals\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-011.skeleton",
+      "parent_id": "SCR-011",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Proposals",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-011.error-boundary",
+      "parent_id": "SCR-011",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Proposals",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-012.page-exists",
+      "parent_id": "SCR-012",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for [Id] (/(app)/proposals/[id])",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\proposals\\[id]\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-012.skeleton",
+      "parent_id": "SCR-012",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for [Id]",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-012.error-boundary",
+      "parent_id": "SCR-012",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for [Id]",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-013.page-exists",
+      "parent_id": "SCR-013",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Services (/(app)/services)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\services\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-013.skeleton",
+      "parent_id": "SCR-013",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Services",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-013.error-boundary",
+      "parent_id": "SCR-013",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Services",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-014.page-exists",
+      "parent_id": "SCR-014",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Pricing Tool (/(app)/services/pricing-tool)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\services\\pricing-tool\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-014.skeleton",
+      "parent_id": "SCR-014",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Pricing Tool",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-014.error-boundary",
+      "parent_id": "SCR-014",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Pricing Tool",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-015.page-exists",
+      "parent_id": "SCR-015",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Settings (/(app)/settings)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\settings\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-015.skeleton",
+      "parent_id": "SCR-015",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Settings",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-015.error-boundary",
+      "parent_id": "SCR-015",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Settings",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-016.page-exists",
+      "parent_id": "SCR-016",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Templates (/(app)/templates)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\templates\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-016.skeleton",
+      "parent_id": "SCR-016",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Templates",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-016.error-boundary",
+      "parent_id": "SCR-016",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Templates",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-017.page-exists",
+      "parent_id": "SCR-017",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Work Planning (/(app)/work-planning)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(app)\\work-planning\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-017.skeleton",
+      "parent_id": "SCR-017",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Work Planning",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-017.error-boundary",
+      "parent_id": "SCR-017",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Work Planning",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-018.page-exists",
+      "parent_id": "SCR-018",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Auth (/(auth)/auth)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(auth)\\auth\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-018.skeleton",
+      "parent_id": "SCR-018",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Auth",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-018.error-boundary",
+      "parent_id": "SCR-018",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Auth",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-019.page-exists",
+      "parent_id": "SCR-019",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Redirect (/(auth)/auth/redirect)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(auth)\\auth\\redirect\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-019.skeleton",
+      "parent_id": "SCR-019",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Redirect",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-019.error-boundary",
+      "parent_id": "SCR-019",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Redirect",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-020.page-exists",
+      "parent_id": "SCR-020",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Sso Callback (/(auth)/auth/sso-callback)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(auth)\\auth\\sso-callback\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-020.skeleton",
+      "parent_id": "SCR-020",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Sso Callback",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-020.error-boundary",
+      "parent_id": "SCR-020",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Sso Callback",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-021.page-exists",
+      "parent_id": "SCR-021",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for [Token] (/(portal)/portal/[token])",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\(portal)\\portal\\[token]\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-021.skeleton",
+      "parent_id": "SCR-021",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for [Token]",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-021.error-boundary",
+      "parent_id": "SCR-021",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for [Token]",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-022.page-exists",
+      "parent_id": "SCR-022",
+      "category": "screen",
+      "type": "page-exists",
+      "session": 1,
+      "description": "Page file exists for Landing (/)",
+      "verification": {
+        "method": "file-check",
+        "file_pattern": "app\\page.tsx",
+        "check": "File exists"
+      },
+      "status": "verified"
+    },
+    {
+      "id": "SCR-022.skeleton",
+      "parent_id": "SCR-022",
+      "category": "screen",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton loading state for Landing",
+      "verification": {
+        "method": "code-check",
+        "check": "Component has loading/skeleton state"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "SCR-022.error-boundary",
+      "parent_id": "SCR-022",
+      "category": "screen",
+      "type": "error-boundary",
+      "session": 3,
+      "description": "Error handling for Landing",
+      "verification": {
+        "method": "code-check",
+        "check": "Has error boundary or catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.query",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries mockusers via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.mockusers.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.mutation",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls mockusers mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.mockusers.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.permission",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "mockusers mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.toast-success",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after mockusers CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.toast-error",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed mockusers operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.skeleton",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading mockusers data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-mockusers.status",
+      "parent_id": "ENT-MockUser",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "mockusers list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-mockusers.auth-error",
+      "parent_id": "ENT-MockUser",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for mockusers",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-mockusers.permission-error",
+      "parent_id": "ENT-MockUser",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for mockusers",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.query",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries authsessions via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.authsessions.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.mutation",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls authsessions mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.authsessions.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.permission",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "authsessions mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.toast-success",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after authsessions CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.toast-error",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed authsessions operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.skeleton",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading authsessions data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-authsessions.status",
+      "parent_id": "ENT-AuthSession",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "authsessions list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-authsessions.auth-error",
+      "parent_id": "ENT-AuthSession",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for authsessions",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-authsessions.permission-error",
+      "parent_id": "ENT-AuthSession",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for authsessions",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.query",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries firms via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.firms.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.mutation",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls firms mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.firms.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.permission",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "firms mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.toast-success",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after firms CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.toast-error",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed firms operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.skeleton",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading firms data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firms.status",
+      "parent_id": "ENT-Firm",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "firms list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-firms.auth-error",
+      "parent_id": "ENT-Firm",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for firms",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-firms.permission-error",
+      "parent_id": "ENT-Firm",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for firms",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.query",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries clientgroups via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.clientgroups.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.mutation",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls clientgroups mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.clientgroups.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.permission",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "clientgroups mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.toast-success",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after clientgroups CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.toast-error",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed clientgroups operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.skeleton",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading clientgroups data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroups.status",
+      "parent_id": "ENT-ClientGroup",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "clientgroups list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-clientgroups.auth-error",
+      "parent_id": "ENT-ClientGroup",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for clientgroups",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-clientgroups.permission-error",
+      "parent_id": "ENT-ClientGroup",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for clientgroups",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.query",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries entitys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.entitys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.mutation",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls entitys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.entitys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.permission",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "entitys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.toast-success",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after entitys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.toast-error",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed entitys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.skeleton",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading entitys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-entitys.status",
+      "parent_id": "ENT-Entity",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "entitys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-entitys.auth-error",
+      "parent_id": "ENT-Entity",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for entitys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-entitys.permission-error",
+      "parent_id": "ENT-Entity",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for entitys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.query",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries contactpersons via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.contactpersons.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.mutation",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls contactpersons mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.contactpersons.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.permission",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "contactpersons mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.toast-success",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after contactpersons CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.toast-error",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed contactpersons operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.skeleton",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading contactpersons data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-contactpersons.status",
+      "parent_id": "ENT-ContactPerson",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "contactpersons list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-contactpersons.auth-error",
+      "parent_id": "ENT-ContactPerson",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for contactpersons",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-contactpersons.permission-error",
+      "parent_id": "ENT-ContactPerson",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for contactpersons",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.query",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries clientgroupwithdetails via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.clientgroupwithdetails.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.mutation",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls clientgroupwithdetails mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.clientgroupwithdetails.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.permission",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "clientgroupwithdetails mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.toast-success",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after clientgroupwithdetails CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.toast-error",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed clientgroupwithdetails operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.skeleton",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading clientgroupwithdetails data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-clientgroupwithdetails.status",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "clientgroupwithdetails list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-clientgroupwithdetails.auth-error",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for clientgroupwithdetails",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-clientgroupwithdetails.permission-error",
+      "parent_id": "ENT-ClientGroupWithDetails",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for clientgroupwithdetails",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.query",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries servicecategorys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.servicecategorys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.mutation",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls servicecategorys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.servicecategorys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.permission",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "servicecategorys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.toast-success",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after servicecategorys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.toast-error",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed servicecategorys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.skeleton",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading servicecategorys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicecategorys.status",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "servicecategorys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-servicecategorys.auth-error",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for servicecategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-servicecategorys.permission-error",
+      "parent_id": "ENT-ServiceCategory",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for servicecategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.query",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries tierlevels via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.tierlevels.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.mutation",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls tierlevels mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.tierlevels.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.permission",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "tierlevels mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.toast-success",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after tierlevels CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.toast-error",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed tierlevels operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.skeleton",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading tierlevels data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-tierlevels.status",
+      "parent_id": "ENT-TierLevel",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "tierlevels list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-tierlevels.auth-error",
+      "parent_id": "ENT-TierLevel",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for tierlevels",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-tierlevels.permission-error",
+      "parent_id": "ENT-TierLevel",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for tierlevels",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.query",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries servicetemplates via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.servicetemplates.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.mutation",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls servicetemplates mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.servicetemplates.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.permission",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "servicetemplates mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.toast-success",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after servicetemplates CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.toast-error",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed servicetemplates operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.skeleton",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading servicetemplates data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplates.status",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "servicetemplates list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-servicetemplates.auth-error",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for servicetemplates",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-servicetemplates.permission-error",
+      "parent_id": "ENT-ServiceTemplate",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for servicetemplates",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.query",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries servicetemplatewithcategorys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.servicetemplatewithcategorys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.mutation",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls servicetemplatewithcategorys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.servicetemplatewithcategorys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.permission",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "servicetemplatewithcategorys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.toast-success",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after servicetemplatewithcategorys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.toast-error",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed servicetemplatewithcategorys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.skeleton",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading servicetemplatewithcategorys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-servicetemplatewithcategorys.status",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "servicetemplatewithcategorys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-servicetemplatewithcategorys.auth-error",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for servicetemplatewithcategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-servicetemplatewithcategorys.permission-error",
+      "parent_id": "ENT-ServiceTemplateWithCategory",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for servicetemplatewithcategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.query",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalitems via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalitems.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.mutation",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalitems mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalitems.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.permission",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalitems mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.toast-success",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalitems CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.toast-error",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalitems operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.skeleton",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalitems data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalitems.status",
+      "parent_id": "ENT-ProposalItem",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalitems list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalitems.auth-error",
+      "parent_id": "ENT-ProposalItem",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalitems",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalitems.permission-error",
+      "parent_id": "ENT-ProposalItem",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalitems",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.query",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposals via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposals.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.mutation",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposals mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposals.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.permission",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposals mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.toast-success",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposals CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.toast-error",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposals operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.skeleton",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposals data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposals.status",
+      "parent_id": "ENT-Proposal",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposals list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposals.auth-error",
+      "parent_id": "ENT-Proposal",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposals",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposals.permission-error",
+      "parent_id": "ENT-Proposal",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposals",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.query",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalwithdetails via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalwithdetails.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.mutation",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalwithdetails mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalwithdetails.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.permission",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalwithdetails mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.toast-success",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalwithdetails CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.toast-error",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalwithdetails operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.skeleton",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalwithdetails data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalwithdetails.status",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalwithdetails list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalwithdetails.auth-error",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalwithdetails",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalwithdetails.permission-error",
+      "parent_id": "ENT-ProposalWithDetails",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalwithdetails",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.query",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalsummarys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalsummarys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.mutation",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalsummarys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalsummarys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.permission",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalsummarys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.toast-success",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalsummarys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.toast-error",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalsummarys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.skeleton",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalsummarys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalsummarys.status",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalsummarys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalsummarys.auth-error",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalsummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalsummarys.permission-error",
+      "parent_id": "ENT-ProposalSummary",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalsummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.query",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries cashflowmonths via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.cashflowmonths.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.mutation",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls cashflowmonths mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.cashflowmonths.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.permission",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "cashflowmonths mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.toast-success",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after cashflowmonths CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.toast-error",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed cashflowmonths operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.skeleton",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading cashflowmonths data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-cashflowmonths.status",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "cashflowmonths list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-cashflowmonths.auth-error",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for cashflowmonths",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-cashflowmonths.permission-error",
+      "parent_id": "ENT-CashFlowMonth",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for cashflowmonths",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.query",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries workplanentrys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.workplanentrys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.mutation",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls workplanentrys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.workplanentrys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.permission",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "workplanentrys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.toast-success",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after workplanentrys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.toast-error",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed workplanentrys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.skeleton",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading workplanentrys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-workplanentrys.status",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "workplanentrys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-workplanentrys.auth-error",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for workplanentrys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-workplanentrys.permission-error",
+      "parent_id": "ENT-WorkPlanEntry",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for workplanentrys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.query",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries engagementparagraphs via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.engagementparagraphs.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.mutation",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls engagementparagraphs mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.engagementparagraphs.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.permission",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "engagementparagraphs mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.toast-success",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after engagementparagraphs CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.toast-error",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed engagementparagraphs operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.skeleton",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading engagementparagraphs data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementparagraphs.status",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "engagementparagraphs list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-engagementparagraphs.auth-error",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for engagementparagraphs",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-engagementparagraphs.permission-error",
+      "parent_id": "ENT-EngagementParagraph",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for engagementparagraphs",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.query",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries engagementletters via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.engagementletters.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.mutation",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls engagementletters mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.engagementletters.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.permission",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "engagementletters mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.toast-success",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after engagementletters CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.toast-error",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed engagementletters operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.skeleton",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading engagementletters data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-engagementletters.status",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "engagementletters list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-engagementletters.auth-error",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for engagementletters",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-engagementletters.permission-error",
+      "parent_id": "ENT-EngagementLetter",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for engagementletters",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.query",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries principals via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.principals.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.mutation",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls principals mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.principals.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.permission",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "principals mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.toast-success",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after principals CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.toast-error",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed principals operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.skeleton",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading principals data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-principals.status",
+      "parent_id": "ENT-Principal",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "principals list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-principals.auth-error",
+      "parent_id": "ENT-Principal",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for principals",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-principals.permission-error",
+      "parent_id": "ENT-Principal",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for principals",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.query",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries firmsettings via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.firmsettings.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.mutation",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls firmsettings mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.firmsettings.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.permission",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "firmsettings mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.toast-success",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after firmsettings CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.toast-error",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed firmsettings operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.skeleton",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading firmsettings data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-firmsettings.status",
+      "parent_id": "ENT-FirmSettings",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "firmsettings list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-firmsettings.auth-error",
+      "parent_id": "ENT-FirmSettings",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for firmsettings",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-firmsettings.permission-error",
+      "parent_id": "ENT-FirmSettings",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for firmsettings",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.query",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries activityitems via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.activityitems.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.mutation",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls activityitems mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.activityitems.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.permission",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "activityitems mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.toast-success",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after activityitems CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.toast-error",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed activityitems operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.skeleton",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading activityitems data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-activityitems.status",
+      "parent_id": "ENT-ActivityItem",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "activityitems list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-activityitems.auth-error",
+      "parent_id": "ENT-ActivityItem",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for activityitems",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-activityitems.permission-error",
+      "parent_id": "ENT-ActivityItem",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for activityitems",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.query",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalbuilderentitys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalbuilderentitys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.mutation",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalbuilderentitys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalbuilderentitys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.permission",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalbuilderentitys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.toast-success",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalbuilderentitys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.toast-error",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalbuilderentitys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.skeleton",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalbuilderentitys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderentitys.status",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalbuilderentitys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalbuilderentitys.auth-error",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalbuilderentitys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalbuilderentitys.permission-error",
+      "parent_id": "ENT-ProposalBuilderEntity",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalbuilderentitys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.query",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalbuilderclientgroups via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalbuilderclientgroups.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.mutation",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalbuilderclientgroups mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalbuilderclientgroups.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.permission",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalbuilderclientgroups mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.toast-success",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalbuilderclientgroups CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.toast-error",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalbuilderclientgroups operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.skeleton",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalbuilderclientgroups data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuilderclientgroups.status",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalbuilderclientgroups list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalbuilderclientgroups.auth-error",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalbuilderclientgroups",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalbuilderclientgroups.permission-error",
+      "parent_id": "ENT-ProposalBuilderClientGroup",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalbuilderclientgroups",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.query",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalentitysummarys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalentitysummarys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.mutation",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalentitysummarys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalentitysummarys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.permission",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalentitysummarys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.toast-success",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalentitysummarys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.toast-error",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalentitysummarys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.skeleton",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalentitysummarys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalentitysummarys.status",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalentitysummarys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalentitysummarys.auth-error",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalentitysummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalentitysummarys.permission-error",
+      "parent_id": "ENT-ProposalEntitySummary",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalentitysummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.query",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "wire-query",
+      "session": 4,
+      "description": "Frontend queries proposalbuildersummarys via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalbuildersummarys.getAll referenced in frontend"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.mutation",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "wire-mutation",
+      "session": 4,
+      "description": "Frontend calls proposalbuildersummarys mutations via Convex",
+      "verification": {
+        "method": "code-check",
+        "check": "api.proposalbuildersummarys.create/update referenced"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.permission",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "wire-permission",
+      "session": 2,
+      "description": "proposalbuildersummarys mutations enforce RBAC permissions",
+      "verification": {
+        "method": "code-check",
+        "check": "hasPermission() called in mutation handlers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.toast-success",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "toast-success",
+      "session": 5,
+      "description": "Success toast after proposalbuildersummarys CRUD operations",
+      "verification": {
+        "method": "code-check",
+        "check": "toast.success called after mutation"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.toast-error",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "toast-error",
+      "session": 5,
+      "description": "Error toast for failed proposalbuildersummarys operations",
+      "verification": {
+        "method": "code-check",
+        "check": "handleConvexError or toast.error on catch"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.skeleton",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "skeleton",
+      "session": 3,
+      "description": "Skeleton state while loading proposalbuildersummarys data",
+      "verification": {
+        "method": "code-check",
+        "check": "Skeleton or isLoading check before render"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "WIRE-proposalbuildersummarys.status",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "wiring",
+      "type": "wire-status",
+      "session": 5,
+      "description": "proposalbuildersummarys list shows status badges/indicators",
+      "verification": {
+        "method": "code-check",
+        "check": "Status badge or indicator rendered"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalbuildersummarys.auth-error",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-001 thrown when unauthenticated for proposalbuildersummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-001 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "ERR-proposalbuildersummarys.permission-error",
+      "parent_id": "ENT-ProposalBuilderSummary",
+      "category": "error",
+      "type": "error-catch",
+      "session": 4,
+      "description": "ERR-002 thrown when unauthorized for proposalbuildersummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "ERR-002 thrown in handler"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-001",
+      "parent_id": "FR-001",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "View list of all MockUsers",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all MockUsers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-002",
+      "parent_id": "FR-002",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "View detailed MockUser information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed MockUser information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-003",
+      "parent_id": "FR-003",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Search and filter MockUsers",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter MockUsers"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-004",
+      "parent_id": "FR-004",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Create new MockUser",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new MockUser"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-005",
+      "parent_id": "FR-005",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Update existing MockUser",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing MockUser"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-006",
+      "parent_id": "FR-006",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Delete/archive MockUser",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive MockUser"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-007",
+      "parent_id": "FR-007",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Export MockUser data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export MockUser data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-008",
+      "parent_id": "FR-008",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "View list of all AuthSessions",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all AuthSessions"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-009",
+      "parent_id": "FR-009",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "View detailed AuthSession information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed AuthSession information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-010",
+      "parent_id": "FR-010",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Search and filter AuthSessions",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter AuthSessions"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-011",
+      "parent_id": "FR-011",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Create new AuthSession",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new AuthSession"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-012",
+      "parent_id": "FR-012",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Update existing AuthSession",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing AuthSession"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-013",
+      "parent_id": "FR-013",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Delete/archive AuthSession",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive AuthSession"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-014",
+      "parent_id": "FR-014",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Export AuthSession data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export AuthSession data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-015",
+      "parent_id": "FR-015",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "View list of all Firms",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all Firms"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-016",
+      "parent_id": "FR-016",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "View detailed Firm information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed Firm information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-017",
+      "parent_id": "FR-017",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Search and filter Firms",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter Firms"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-018",
+      "parent_id": "FR-018",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Create new Firm",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new Firm"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-019",
+      "parent_id": "FR-019",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Update existing Firm",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing Firm"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-020",
+      "parent_id": "FR-020",
+      "category": "requirement",
+      "type": "feature",
+      "session": 2,
+      "description": "Delete/archive Firm",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive Firm"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-021",
+      "parent_id": "FR-021",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Export Firm data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export Firm data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-022",
+      "parent_id": "FR-022",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "View list of all ClientGroups",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ClientGroups"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-023",
+      "parent_id": "FR-023",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "View detailed ClientGroup information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ClientGroup information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-024",
+      "parent_id": "FR-024",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Search and filter ClientGroups",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ClientGroups"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-025",
+      "parent_id": "FR-025",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Create new ClientGroup",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ClientGroup"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-026",
+      "parent_id": "FR-026",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Update existing ClientGroup",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ClientGroup"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-027",
+      "parent_id": "FR-027",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Delete/archive ClientGroup",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ClientGroup"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-028",
+      "parent_id": "FR-028",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Export ClientGroup data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ClientGroup data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-029",
+      "parent_id": "FR-029",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "View list of all Entitys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all Entitys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-030",
+      "parent_id": "FR-030",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "View detailed Entity information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed Entity information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-031",
+      "parent_id": "FR-031",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Search and filter Entitys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter Entitys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-032",
+      "parent_id": "FR-032",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Create new Entity",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new Entity"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-033",
+      "parent_id": "FR-033",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Update existing Entity",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing Entity"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-034",
+      "parent_id": "FR-034",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Delete/archive Entity",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive Entity"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-035",
+      "parent_id": "FR-035",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Export Entity data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export Entity data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-036",
+      "parent_id": "FR-036",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "View list of all ContactPersons",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ContactPersons"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-037",
+      "parent_id": "FR-037",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "View detailed ContactPerson information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ContactPerson information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-038",
+      "parent_id": "FR-038",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Search and filter ContactPersons",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ContactPersons"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-039",
+      "parent_id": "FR-039",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Create new ContactPerson",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ContactPerson"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-040",
+      "parent_id": "FR-040",
+      "category": "requirement",
+      "type": "feature",
+      "session": 3,
+      "description": "Update existing ContactPerson",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ContactPerson"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-041",
+      "parent_id": "FR-041",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Delete/archive ContactPerson",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ContactPerson"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-042",
+      "parent_id": "FR-042",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Export ContactPerson data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ContactPerson data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-043",
+      "parent_id": "FR-043",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "View list of all ClientGroupWithDetailss",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ClientGroupWithDetailss"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-044",
+      "parent_id": "FR-044",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "View detailed ClientGroupWithDetails information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ClientGroupWithDetails information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-045",
+      "parent_id": "FR-045",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Search and filter ClientGroupWithDetailss",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ClientGroupWithDetailss"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-046",
+      "parent_id": "FR-046",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Create new ClientGroupWithDetails",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ClientGroupWithDetails"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-047",
+      "parent_id": "FR-047",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Update existing ClientGroupWithDetails",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ClientGroupWithDetails"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-048",
+      "parent_id": "FR-048",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Delete/archive ClientGroupWithDetails",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ClientGroupWithDetails"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-049",
+      "parent_id": "FR-049",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Export ClientGroupWithDetails data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ClientGroupWithDetails data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-050",
+      "parent_id": "FR-050",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "View list of all ServiceCategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ServiceCategorys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-051",
+      "parent_id": "FR-051",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "View detailed ServiceCategory information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ServiceCategory information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-052",
+      "parent_id": "FR-052",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Search and filter ServiceCategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ServiceCategorys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-053",
+      "parent_id": "FR-053",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Create new ServiceCategory",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ServiceCategory"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-054",
+      "parent_id": "FR-054",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Update existing ServiceCategory",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ServiceCategory"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-055",
+      "parent_id": "FR-055",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Delete/archive ServiceCategory",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ServiceCategory"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-056",
+      "parent_id": "FR-056",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Export ServiceCategory data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ServiceCategory data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-057",
+      "parent_id": "FR-057",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "View list of all TierLevels",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all TierLevels"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-058",
+      "parent_id": "FR-058",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "View detailed TierLevel information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed TierLevel information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-059",
+      "parent_id": "FR-059",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Search and filter TierLevels",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter TierLevels"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-060",
+      "parent_id": "FR-060",
+      "category": "requirement",
+      "type": "feature",
+      "session": 4,
+      "description": "Create new TierLevel",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new TierLevel"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-061",
+      "parent_id": "FR-061",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Update existing TierLevel",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing TierLevel"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-062",
+      "parent_id": "FR-062",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Delete/archive TierLevel",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive TierLevel"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-063",
+      "parent_id": "FR-063",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Export TierLevel data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export TierLevel data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-064",
+      "parent_id": "FR-064",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "View list of all ServiceTemplates",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ServiceTemplates"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-065",
+      "parent_id": "FR-065",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "View detailed ServiceTemplate information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ServiceTemplate information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-066",
+      "parent_id": "FR-066",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Search and filter ServiceTemplates",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ServiceTemplates"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-067",
+      "parent_id": "FR-067",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Create new ServiceTemplate",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ServiceTemplate"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-068",
+      "parent_id": "FR-068",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Update existing ServiceTemplate",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ServiceTemplate"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-069",
+      "parent_id": "FR-069",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Delete/archive ServiceTemplate",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ServiceTemplate"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-070",
+      "parent_id": "FR-070",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Export ServiceTemplate data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ServiceTemplate data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-071",
+      "parent_id": "FR-071",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "View list of all ServiceTemplateWithCategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ServiceTemplateWithCategorys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-072",
+      "parent_id": "FR-072",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "View detailed ServiceTemplateWithCategory information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ServiceTemplateWithCategory information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-073",
+      "parent_id": "FR-073",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Search and filter ServiceTemplateWithCategorys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ServiceTemplateWithCategorys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-074",
+      "parent_id": "FR-074",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Create new ServiceTemplateWithCategory",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ServiceTemplateWithCategory"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-075",
+      "parent_id": "FR-075",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Update existing ServiceTemplateWithCategory",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ServiceTemplateWithCategory"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-076",
+      "parent_id": "FR-076",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Delete/archive ServiceTemplateWithCategory",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ServiceTemplateWithCategory"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-077",
+      "parent_id": "FR-077",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Export ServiceTemplateWithCategory data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ServiceTemplateWithCategory data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-078",
+      "parent_id": "FR-078",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "View list of all ProposalItems",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalItems"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-079",
+      "parent_id": "FR-079",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "View detailed ProposalItem information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalItem information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-080",
+      "parent_id": "FR-080",
+      "category": "requirement",
+      "type": "feature",
+      "session": 5,
+      "description": "Search and filter ProposalItems",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalItems"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-081",
+      "parent_id": "FR-081",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Create new ProposalItem",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalItem"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-082",
+      "parent_id": "FR-082",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Update existing ProposalItem",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalItem"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-083",
+      "parent_id": "FR-083",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Delete/archive ProposalItem",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalItem"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-084",
+      "parent_id": "FR-084",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Export ProposalItem data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalItem data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-085",
+      "parent_id": "FR-085",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "View list of all Proposals",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all Proposals"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-086",
+      "parent_id": "FR-086",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "View detailed Proposal information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed Proposal information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-087",
+      "parent_id": "FR-087",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Search and filter Proposals",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter Proposals"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-088",
+      "parent_id": "FR-088",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Create new Proposal",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new Proposal"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-089",
+      "parent_id": "FR-089",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Update existing Proposal",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing Proposal"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-090",
+      "parent_id": "FR-090",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Delete/archive Proposal",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive Proposal"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-091",
+      "parent_id": "FR-091",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Export Proposal data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export Proposal data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-092",
+      "parent_id": "FR-092",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "View list of all ProposalWithDetailss",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalWithDetailss"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-093",
+      "parent_id": "FR-093",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "View detailed ProposalWithDetails information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalWithDetails information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-094",
+      "parent_id": "FR-094",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Search and filter ProposalWithDetailss",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalWithDetailss"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-095",
+      "parent_id": "FR-095",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Create new ProposalWithDetails",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalWithDetails"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-096",
+      "parent_id": "FR-096",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Update existing ProposalWithDetails",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalWithDetails"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-097",
+      "parent_id": "FR-097",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Delete/archive ProposalWithDetails",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalWithDetails"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-098",
+      "parent_id": "FR-098",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "Export ProposalWithDetails data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalWithDetails data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-099",
+      "parent_id": "FR-099",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "View list of all ProposalSummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalSummarys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-100",
+      "parent_id": "FR-100",
+      "category": "requirement",
+      "type": "feature",
+      "session": 6,
+      "description": "View detailed ProposalSummary information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalSummary information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-101",
+      "parent_id": "FR-101",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Search and filter ProposalSummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalSummarys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-102",
+      "parent_id": "FR-102",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Create new ProposalSummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalSummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-103",
+      "parent_id": "FR-103",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Update existing ProposalSummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalSummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-104",
+      "parent_id": "FR-104",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Delete/archive ProposalSummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalSummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-105",
+      "parent_id": "FR-105",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Export ProposalSummary data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalSummary data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-106",
+      "parent_id": "FR-106",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "View list of all CashFlowMonths",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all CashFlowMonths"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-107",
+      "parent_id": "FR-107",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "View detailed CashFlowMonth information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed CashFlowMonth information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-108",
+      "parent_id": "FR-108",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Search and filter CashFlowMonths",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter CashFlowMonths"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-109",
+      "parent_id": "FR-109",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Create new CashFlowMonth",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new CashFlowMonth"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-110",
+      "parent_id": "FR-110",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Update existing CashFlowMonth",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing CashFlowMonth"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-111",
+      "parent_id": "FR-111",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Delete/archive CashFlowMonth",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive CashFlowMonth"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-112",
+      "parent_id": "FR-112",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Export CashFlowMonth data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export CashFlowMonth data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-113",
+      "parent_id": "FR-113",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "View list of all WorkPlanEntrys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all WorkPlanEntrys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-114",
+      "parent_id": "FR-114",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "View detailed WorkPlanEntry information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed WorkPlanEntry information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-115",
+      "parent_id": "FR-115",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Search and filter WorkPlanEntrys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter WorkPlanEntrys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-116",
+      "parent_id": "FR-116",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Create new WorkPlanEntry",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new WorkPlanEntry"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-117",
+      "parent_id": "FR-117",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Update existing WorkPlanEntry",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing WorkPlanEntry"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-118",
+      "parent_id": "FR-118",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Delete/archive WorkPlanEntry",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive WorkPlanEntry"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-119",
+      "parent_id": "FR-119",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "Export WorkPlanEntry data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export WorkPlanEntry data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-120",
+      "parent_id": "FR-120",
+      "category": "requirement",
+      "type": "feature",
+      "session": 7,
+      "description": "View list of all EngagementParagraphs",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all EngagementParagraphs"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-121",
+      "parent_id": "FR-121",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "View detailed EngagementParagraph information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed EngagementParagraph information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-122",
+      "parent_id": "FR-122",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Search and filter EngagementParagraphs",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter EngagementParagraphs"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-123",
+      "parent_id": "FR-123",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Create new EngagementParagraph",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new EngagementParagraph"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-124",
+      "parent_id": "FR-124",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Update existing EngagementParagraph",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing EngagementParagraph"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-125",
+      "parent_id": "FR-125",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Delete/archive EngagementParagraph",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive EngagementParagraph"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-126",
+      "parent_id": "FR-126",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Export EngagementParagraph data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export EngagementParagraph data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-127",
+      "parent_id": "FR-127",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "View list of all EngagementLetters",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all EngagementLetters"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-128",
+      "parent_id": "FR-128",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "View detailed EngagementLetter information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed EngagementLetter information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-129",
+      "parent_id": "FR-129",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Search and filter EngagementLetters",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter EngagementLetters"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-130",
+      "parent_id": "FR-130",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Create new EngagementLetter",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new EngagementLetter"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-131",
+      "parent_id": "FR-131",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Update existing EngagementLetter",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing EngagementLetter"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-132",
+      "parent_id": "FR-132",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Delete/archive EngagementLetter",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive EngagementLetter"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-133",
+      "parent_id": "FR-133",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Export EngagementLetter data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export EngagementLetter data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-134",
+      "parent_id": "FR-134",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "View list of all Principals",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all Principals"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-135",
+      "parent_id": "FR-135",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "View detailed Principal information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed Principal information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-136",
+      "parent_id": "FR-136",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Search and filter Principals",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter Principals"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-137",
+      "parent_id": "FR-137",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Create new Principal",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new Principal"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-138",
+      "parent_id": "FR-138",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Update existing Principal",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing Principal"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-139",
+      "parent_id": "FR-139",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Delete/archive Principal",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive Principal"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-140",
+      "parent_id": "FR-140",
+      "category": "requirement",
+      "type": "feature",
+      "session": 8,
+      "description": "Export Principal data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export Principal data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-141",
+      "parent_id": "FR-141",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "View list of all FirmSettingss",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all FirmSettingss"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-142",
+      "parent_id": "FR-142",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "View detailed FirmSettings information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed FirmSettings information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-143",
+      "parent_id": "FR-143",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Search and filter FirmSettingss",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter FirmSettingss"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-144",
+      "parent_id": "FR-144",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Create new FirmSettings",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new FirmSettings"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-145",
+      "parent_id": "FR-145",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Update existing FirmSettings",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing FirmSettings"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-146",
+      "parent_id": "FR-146",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Delete/archive FirmSettings",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive FirmSettings"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-147",
+      "parent_id": "FR-147",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Export FirmSettings data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export FirmSettings data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-148",
+      "parent_id": "FR-148",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "View list of all ActivityItems",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ActivityItems"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-149",
+      "parent_id": "FR-149",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "View detailed ActivityItem information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ActivityItem information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-150",
+      "parent_id": "FR-150",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Search and filter ActivityItems",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ActivityItems"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-151",
+      "parent_id": "FR-151",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Create new ActivityItem",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ActivityItem"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-152",
+      "parent_id": "FR-152",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Update existing ActivityItem",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ActivityItem"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-153",
+      "parent_id": "FR-153",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Delete/archive ActivityItem",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ActivityItem"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-154",
+      "parent_id": "FR-154",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Export ActivityItem data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ActivityItem data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-155",
+      "parent_id": "FR-155",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "View list of all ProposalBuilderEntitys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalBuilderEntitys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-156",
+      "parent_id": "FR-156",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "View detailed ProposalBuilderEntity information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalBuilderEntity information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-157",
+      "parent_id": "FR-157",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Search and filter ProposalBuilderEntitys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalBuilderEntitys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-158",
+      "parent_id": "FR-158",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Create new ProposalBuilderEntity",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalBuilderEntity"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-159",
+      "parent_id": "FR-159",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Update existing ProposalBuilderEntity",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalBuilderEntity"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-160",
+      "parent_id": "FR-160",
+      "category": "requirement",
+      "type": "feature",
+      "session": 9,
+      "description": "Delete/archive ProposalBuilderEntity",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalBuilderEntity"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-161",
+      "parent_id": "FR-161",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Export ProposalBuilderEntity data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalBuilderEntity data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-162",
+      "parent_id": "FR-162",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "View list of all ProposalBuilderClientGroups",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalBuilderClientGroups"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-163",
+      "parent_id": "FR-163",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "View detailed ProposalBuilderClientGroup information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalBuilderClientGroup information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-164",
+      "parent_id": "FR-164",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Search and filter ProposalBuilderClientGroups",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalBuilderClientGroups"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-165",
+      "parent_id": "FR-165",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Create new ProposalBuilderClientGroup",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalBuilderClientGroup"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-166",
+      "parent_id": "FR-166",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Update existing ProposalBuilderClientGroup",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalBuilderClientGroup"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-167",
+      "parent_id": "FR-167",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Delete/archive ProposalBuilderClientGroup",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalBuilderClientGroup"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-168",
+      "parent_id": "FR-168",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Export ProposalBuilderClientGroup data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalBuilderClientGroup data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-169",
+      "parent_id": "FR-169",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "View list of all ProposalEntitySummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalEntitySummarys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-170",
+      "parent_id": "FR-170",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "View detailed ProposalEntitySummary information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalEntitySummary information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-171",
+      "parent_id": "FR-171",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Search and filter ProposalEntitySummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalEntitySummarys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-172",
+      "parent_id": "FR-172",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Create new ProposalEntitySummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalEntitySummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-173",
+      "parent_id": "FR-173",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Update existing ProposalEntitySummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalEntitySummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-174",
+      "parent_id": "FR-174",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Delete/archive ProposalEntitySummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalEntitySummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-175",
+      "parent_id": "FR-175",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Export ProposalEntitySummary data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalEntitySummary data"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-176",
+      "parent_id": "FR-176",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "View list of all ProposalBuilderSummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "View list of all ProposalBuilderSummarys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-177",
+      "parent_id": "FR-177",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "View detailed ProposalBuilderSummary information",
+      "verification": {
+        "method": "code-check",
+        "check": "View detailed ProposalBuilderSummary information"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-178",
+      "parent_id": "FR-178",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Search and filter ProposalBuilderSummarys",
+      "verification": {
+        "method": "code-check",
+        "check": "Search and filter ProposalBuilderSummarys"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-179",
+      "parent_id": "FR-179",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Create new ProposalBuilderSummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Create new ProposalBuilderSummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-180",
+      "parent_id": "FR-180",
+      "category": "requirement",
+      "type": "feature",
+      "session": 10,
+      "description": "Update existing ProposalBuilderSummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Update existing ProposalBuilderSummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-181",
+      "parent_id": "FR-181",
+      "category": "requirement",
+      "type": "feature",
+      "session": 11,
+      "description": "Delete/archive ProposalBuilderSummary",
+      "verification": {
+        "method": "code-check",
+        "check": "Delete/archive ProposalBuilderSummary"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "REQ-FR-182",
+      "parent_id": "FR-182",
+      "category": "requirement",
+      "type": "feature",
+      "session": 11,
+      "description": "Export ProposalBuilderSummary data",
+      "verification": {
+        "method": "code-check",
+        "check": "Export ProposalBuilderSummary data"
+      },
+      "status": "pending"
+    }
+  ]
+}

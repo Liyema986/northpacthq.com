@@ -1,0 +1,791 @@
+{
+  "timestamp": "2026-03-23T12:05:24.957Z",
+  "validations": [
+    {
+      "check": "Entity MockUser (mockusers) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity AuthSession (authsessions) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity Firm (firms) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ClientGroup (clientgroups) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity Entity (entitys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ContactPerson (contactpersons) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ClientGroupWithDetails (clientgroupwithdetails) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ServiceCategory (servicecategorys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity TierLevel (tierlevels) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ServiceTemplate (servicetemplates) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ServiceTemplateWithCategory (servicetemplatewithcategorys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalItem (proposalitems) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity Proposal (proposals) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalWithDetails (proposalwithdetails) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalSummary (proposalsummarys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity CashFlowMonth (cashflowmonths) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity WorkPlanEntry (workplanentrys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity EngagementParagraph (engagementparagraphs) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity EngagementLetter (engagementletters) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity Principal (principals) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity FirmSettings (firmsettings) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ActivityItem (activityitems) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalBuilderEntity (proposalbuilderentitys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalBuilderClientGroup (proposalbuilderclientgroups) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalEntitySummary (proposalentitysummarys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "Entity ProposalBuilderSummary (proposalbuildersummarys) exists in schema",
+      "status": "PASS",
+      "category": "schema-types"
+    },
+    {
+      "check": "ERR-001 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-002 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-003 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-004 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-005 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-006 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-007 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-008 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-009 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "ERR-010 defined in error handler",
+      "status": "PASS",
+      "category": "error-codes"
+    },
+    {
+      "check": "SCR-001 (/(admin)/administrator) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-002 (/(app)/appsmap) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-003 (/(app)/cash-flow) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-004 (/(app)/clients) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-005 (/(app)/clients/[id]) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-006 (/(app)/contacts) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-007 (/(app)/dashboard) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-008 (/(app)/engagement-letters) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-009 (/(app)/packages) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-010 (/(app)/proposals/new) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-011 (/(app)/proposals) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-012 (/(app)/proposals/[id]) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-013 (/(app)/services) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-014 (/(app)/services/pricing-tool) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-015 (/(app)/settings) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-016 (/(app)/templates) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-017 (/(app)/work-planning) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-018 (/(auth)/auth) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-019 (/(portal)/portal/[token]) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "SCR-020 (/) has page file",
+      "status": "PASS",
+      "category": "screens-routes"
+    },
+    {
+      "check": "convex\\activityitems.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\activityitems.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\activityitems.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\authsessions.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\authsessions.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\authsessions.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\cashflowmonths.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\cashflowmonths.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\cashflowmonths.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\clientgroups.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\clientgroups.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\clientgroups.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\clientgroupwithdetails.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\clientgroupwithdetails.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\clientgroupwithdetails.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\contactpersons.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\contactpersons.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\contactpersons.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\engagementletters.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\engagementletters.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\engagementletters.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\engagementparagraphs.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\engagementparagraphs.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\engagementparagraphs.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\entitys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\entitys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\entitys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\firms.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\firms.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\firms.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\firmsettings.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\firmsettings.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\firmsettings.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\mockusers.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\mockusers.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\mockusers.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\principals.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\principals.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\principals.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuilderclientgroups.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuilderclientgroups.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuilderclientgroups.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuilderentitys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuilderentitys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuilderentitys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuildersummarys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuildersummarys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalbuildersummarys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalentitysummarys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalentitysummarys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalentitysummarys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalitems.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalitems.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalitems.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposals.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposals.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposals.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalsummarys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalsummarys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalsummarys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalwithdetails.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalwithdetails.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\proposalwithdetails.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicecategorys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicecategorys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicecategorys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicetemplates.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicetemplates.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicetemplates.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicetemplatewithcategorys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicetemplatewithcategorys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\servicetemplatewithcategorys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\tierlevels.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\tierlevels.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\tierlevels.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\users.ts:ensureCurrentUser mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\users.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\users.ts:updateRole mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\users.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\workplanentrys.ts:create mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\workplanentrys.ts:update mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "convex\\workplanentrys.ts:remove mutation has auth check",
+      "status": "PASS",
+      "category": "auth-enforcement"
+    },
+    {
+      "check": "Role \"student\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Role \"parent\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Role \"tutor\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Role \"coordinator\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Role \"admin\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Role \"management\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Role \"funder\" defined in permissions",
+      "status": "PASS",
+      "category": "roles"
+    },
+    {
+      "check": "Design token CSS variables present in globals.css",
+      "status": "PASS",
+      "category": "design-tokens"
+    },
+    {
+      "check": "Middleware protects /dashboard",
+      "status": "PASS",
+      "category": "middleware"
+    },
+    {
+      "check": "Middleware protects /admin",
+      "status": "PASS",
+      "category": "middleware"
+    },
+    {
+      "check": "Middleware protects /profile",
+      "status": "PASS",
+      "category": "middleware"
+    },
+    {
+      "check": "Middleware protects /settings",
+      "status": "PASS",
+      "category": "middleware"
+    }
+  ],
+  "byCategory": {
+    "schema-types": {
+      "passed": 26,
+      "failed": 0
+    },
+    "error-codes": {
+      "passed": 10,
+      "failed": 0
+    },
+    "screens-routes": {
+      "passed": 20,
+      "failed": 0
+    },
+    "auth-enforcement": {
+      "passed": 82,
+      "failed": 0
+    },
+    "roles": {
+      "passed": 7,
+      "failed": 0
+    },
+    "design-tokens": {
+      "passed": 1,
+      "failed": 0
+    },
+    "middleware": {
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "summary": {
+    "total": 150,
+    "passed": 150,
+    "failed": 0,
+    "score": 100
+  }
+}

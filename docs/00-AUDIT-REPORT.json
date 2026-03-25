@@ -1,0 +1,7109 @@
+{
+  "timestamp": "2026-03-23T13:35:17.696Z",
+  "entities": [
+    [
+      "MockUser",
+      {
+        "id": "ENT-001",
+        "name": "MockUser",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "email",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "password",
+            "optional": false,
+            "type": "string; // mock only — plain text for prototype",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "role",
+            "optional": false,
+            "type": "UserRole",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isActive",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "avatarUrl",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "mockusers",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "AuthSession",
+      {
+        "id": "ENT-002",
+        "name": "AuthSession",
+        "fields": [
+          {
+            "name": "user",
+            "optional": false,
+            "type": "MockUser",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "token",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "authsessions",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "Firm",
+      {
+        "id": "ENT-003",
+        "name": "Firm",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "email",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "phone",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "physicalAddress",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "registrationNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "taxNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "vatNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "defaultTaxRate",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "currency",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "brandColors",
+            "optional": false,
+            "type": "{ primary: string; secondary: string",
+            "isArray": false,
+            "isObject": true,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "firms",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ClientGroup",
+      {
+        "id": "ENT-004",
+        "name": "ClientGroup",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "groupNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "industry",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "notes",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isArchived",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "clientgroups",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "Entity",
+      {
+        "id": "ENT-005",
+        "name": "Entity",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "clientGroupId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityType",
+            "optional": false,
+            "type": "EntityType",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "registrationNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "taxNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "vatNumber",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "tradingName",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "xeroContactId",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "financialYearEnd",
+            "optional": true,
+            "type": "string; // \"MM-DD\" format",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isActive",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "entitys",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "ClientGroup",
+            "field": "clientGroupId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "ContactPerson",
+      {
+        "id": "ENT-006",
+        "name": "ContactPerson",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "clientGroupId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "firstName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "lastName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "email",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "phone",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "position",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isPrimary",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "contactpersons",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "ClientGroup",
+            "field": "clientGroupId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "ClientGroupWithDetails",
+      {
+        "id": "ENT-007",
+        "name": "ClientGroupWithDetails",
+        "extendsFrom": "ClientGroup",
+        "fields": [
+          {
+            "name": "entities",
+            "optional": false,
+            "type": "Entity[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "contacts",
+            "optional": false,
+            "type": "ContactPerson[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalCount",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "clientgroupwithdetails",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ServiceCategory",
+      {
+        "id": "ENT-008",
+        "name": "ServiceCategory",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "icon",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "colour",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sortOrder",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isActive",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "servicecategorys",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "TierLevel",
+      {
+        "id": "ENT-009",
+        "name": "TierLevel",
+        "fields": [
+          {
+            "name": "from",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "to",
+            "optional": false,
+            "type": "number | null; // null = unlimited",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "price",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "tierlevels",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ServiceTemplate",
+      {
+        "id": "ENT-010",
+        "name": "ServiceTemplate",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "categoryId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "description",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "billingCategory",
+            "optional": false,
+            "type": "BillingCategory",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "pricingMethod",
+            "optional": false,
+            "type": "PricingMethod",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "unitPrice",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "quantity",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "discount",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "taxRate",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "frequency",
+            "optional": false,
+            "type": "Frequency",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityPricingMode",
+            "optional": false,
+            "type": "EntityPricingMode",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "transactionCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "employeeCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "payslipCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "invoiceCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "bankAccountCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "vatSubmissionCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeMethod",
+            "optional": false,
+            "type": "TimeMethod",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeInputHours",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeInputMinutes",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeQuantity",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "minutesPerUnit",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "tiers",
+            "optional": true,
+            "type": "TierLevel[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "manualPrice",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isActive",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isOptional",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sortOrder",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "servicetemplates",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "ServiceTemplateWithCategory",
+      {
+        "id": "ENT-011",
+        "name": "ServiceTemplateWithCategory",
+        "extendsFrom": "ServiceTemplate",
+        "fields": [
+          {
+            "name": "category",
+            "optional": false,
+            "type": "ServiceCategory",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "servicetemplatewithcategorys",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ProposalItem",
+      {
+        "id": "ENT-012",
+        "name": "ProposalItem",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "serviceTemplateId",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "description",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "billingCategory",
+            "optional": false,
+            "type": "BillingCategory",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "pricingMethod",
+            "optional": false,
+            "type": "PricingMethod",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "unitPrice",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "quantity",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "discount",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "taxRate",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "frequency",
+            "optional": false,
+            "type": "Frequency",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityPricingMode",
+            "optional": false,
+            "type": "EntityPricingMode",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "assignedEntityIds",
+            "optional": false,
+            "type": "string[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "customEntityPrices",
+            "optional": false,
+            "type": "Record<string, number>",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "transactionCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "employeeCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "payslipCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "invoiceCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "bankAccountCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "vatSubmissionCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityCount",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeMethod",
+            "optional": false,
+            "type": "TimeMethod",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeInputHours",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeInputMinutes",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "timeQuantity",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "minutesPerUnit",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "tiers",
+            "optional": true,
+            "type": "TierLevel[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "manualPrice",
+            "optional": true,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityAssignmentMode",
+            "optional": true,
+            "type": "EntityAssignmentMode",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "pricingDriver",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "duePattern",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "itemNotes",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "baseAmount",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "subtotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "totalPrice",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "estimatedHours",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isOptional",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sortOrder",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalitems",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Proposal",
+            "field": "proposalId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "ServiceTemplate",
+            "field": "serviceTemplateId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "Proposal",
+      {
+        "id": "ENT-013",
+        "name": "Proposal",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "clientGroupId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "attentionToContactId",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalNumber",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "title",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "ProposalStatus",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "paymentFrequency",
+            "optional": false,
+            "type": "PaymentFrequency",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "commencementDate",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "expiryDate",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "notes",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "introText",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "termsText",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "monthlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "yearlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "onceoffTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "totalHours",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "acv",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "year1Total",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "approvalRequestedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "approvalRequestedById",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "approvedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "approvedById",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "sentAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sentById",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "viewedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "acceptedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "rejectedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "rejectionReason",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "portalToken",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdById",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposals",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "ClientGroup",
+            "field": "clientGroupId"
+          }
+        ]
+      }
+    ],
+    [
+      "ProposalWithDetails",
+      {
+        "id": "ENT-014",
+        "name": "ProposalWithDetails",
+        "extendsFrom": "Proposal",
+        "fields": [
+          {
+            "name": "clientGroup",
+            "optional": false,
+            "type": "ClientGroup",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entities",
+            "optional": false,
+            "type": "Entity[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "contacts",
+            "optional": false,
+            "type": "ContactPerson[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "attentionTo",
+            "optional": true,
+            "type": "ContactPerson",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "items",
+            "optional": false,
+            "type": "ProposalItem[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalwithdetails",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ProposalSummary",
+      {
+        "id": "ENT-015",
+        "name": "ProposalSummary",
+        "fields": [
+          {
+            "name": "monthlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "yearlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "onceoffTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "acv",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "year1Total",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "totalHours",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "effectiveRate",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "perCycle",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalsummarys",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "CashFlowMonth",
+      {
+        "id": "ENT-016",
+        "name": "CashFlowMonth",
+        "fields": [
+          {
+            "name": "month",
+            "optional": false,
+            "type": "number; // 1–12",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string; // \"Jan\", \"Feb\", etc.",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "monthly",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "yearly",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "onceoff",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "total",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "cashflowmonths",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "WorkPlanEntry",
+      {
+        "id": "ENT-017",
+        "name": "WorkPlanEntry",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalItemId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "clientGroupId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "serviceName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "clientName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "billingCategory",
+            "optional": false,
+            "type": "BillingCategory",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "frequency",
+            "optional": false,
+            "type": "Frequency",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "scheduledMonth",
+            "optional": false,
+            "type": "string; // \"YYYY-MM\"",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "estimatedHours",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "assignedUserId",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "WorkPlanStatus",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "notes",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "completedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "workplanentrys",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "Proposal",
+            "field": "proposalId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "ProposalItem",
+            "field": "proposalItemId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "ClientGroup",
+            "field": "clientGroupId"
+          }
+        ]
+      }
+    ],
+    [
+      "EngagementParagraph",
+      {
+        "id": "ENT-018",
+        "name": "EngagementParagraph",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "serviceTemplateId",
+            "optional": true,
+            "type": "string; // null = standard/firm-wide",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "type",
+            "optional": false,
+            "type": "\"standard\" | \"service_specific\"",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "title",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "content",
+            "optional": false,
+            "type": "string; // HTML",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isRequired",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sortOrder",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "engagementparagraphs",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "ServiceTemplate",
+            "field": "serviceTemplateId"
+          }
+        ]
+      }
+    ],
+    [
+      "EngagementLetter",
+      {
+        "id": "ENT-019",
+        "name": "EngagementLetter",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "clientGroupId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "introduction",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "scope",
+            "optional": false,
+            "type": "string; // HTML",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "\"draft\" | \"sent\" | \"signed\" | \"rejected\"",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sentAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "signedAt",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "signingToken",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "principalId",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "engagementletters",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "Proposal",
+            "field": "proposalId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "ClientGroup",
+            "field": "clientGroupId"
+          },
+          {
+            "type": "many-to-one",
+            "target": "Principal",
+            "field": "principalId"
+          }
+        ]
+      }
+    ],
+    [
+      "Principal",
+      {
+        "id": "ENT-020",
+        "name": "Principal",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "qualification",
+            "optional": true,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "roles",
+            "optional": false,
+            "type": "(\"director\" | \"principal\" | \"statutory-auditor\")[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "sortOrder",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "principals",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "FirmSettings",
+      {
+        "id": "ENT-021",
+        "name": "FirmSettings",
+        "fields": [
+          {
+            "name": "firmId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "defaultTaxRate",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "defaultPaymentFrequency",
+            "optional": false,
+            "type": "PaymentFrequency",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "defaultExpiryDays",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalNumberPrefix",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "proposalNumberCounter",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "requireApproval",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "approverRoles",
+            "optional": false,
+            "type": "UserRole[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "updatedAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "firmsettings",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Firm",
+            "field": "firmId"
+          }
+        ]
+      }
+    ],
+    [
+      "ActivityItem",
+      {
+        "id": "ENT-022",
+        "name": "ActivityItem",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "description",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "userId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "userName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "createdAt",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "activityitems",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Entity",
+            "field": "entityId"
+          }
+        ]
+      }
+    ],
+    [
+      "ProposalBuilderEntity",
+      {
+        "id": "ENT-023",
+        "name": "ProposalBuilderEntity",
+        "fields": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityType",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "registrationNumber",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "taxNumber",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "vatNumber",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "notes",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalbuilderentitys",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ProposalBuilderClientGroup",
+      {
+        "id": "ENT-024",
+        "name": "ProposalBuilderClientGroup",
+        "fields": [
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "groupType",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "notes",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalbuilderclientgroups",
+        "entityType": "core",
+        "relationships": []
+      }
+    ],
+    [
+      "ProposalEntitySummary",
+      {
+        "id": "ENT-025",
+        "name": "ProposalEntitySummary",
+        "fields": [
+          {
+            "name": "entityId",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": true,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityName",
+            "optional": false,
+            "type": "string",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "monthlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "yearlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "onceoffTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "annualContractValue",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "year1Total",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "totalHours",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "isShared",
+            "optional": false,
+            "type": "boolean",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalentitysummarys",
+        "entityType": "core",
+        "relationships": [
+          {
+            "type": "many-to-one",
+            "target": "Entity",
+            "field": "entityId"
+          }
+        ]
+      }
+    ],
+    [
+      "ProposalBuilderSummary",
+      {
+        "id": "ENT-026",
+        "name": "ProposalBuilderSummary",
+        "fields": [
+          {
+            "name": "itemCount",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "monthlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "yearlyTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "onceoffTotal",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "annualContractValue",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "year1Total",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "totalHours",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "perCycle",
+            "optional": false,
+            "type": "number",
+            "isArray": false,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          },
+          {
+            "name": "entityTotals",
+            "optional": false,
+            "type": "ProposalEntitySummary[]",
+            "isArray": true,
+            "isObject": false,
+            "isEnum": false,
+            "isId": false,
+            "isTimestamp": false
+          }
+        ],
+        "tableName": "proposalbuildersummarys",
+        "entityType": "core",
+        "relationships": []
+      }
+    ]
+  ],
+  "relationships": [
+    [
+      "MockUser",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "AuthSession",
+      []
+    ],
+    [
+      "Firm",
+      []
+    ],
+    [
+      "ClientGroup",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "Entity",
+      [
+        {
+          "type": "many-to-one",
+          "target": "ClientGroup",
+          "field": "clientGroupId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "ContactPerson",
+      [
+        {
+          "type": "many-to-one",
+          "target": "ClientGroup",
+          "field": "clientGroupId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "ClientGroupWithDetails",
+      []
+    ],
+    [
+      "ServiceCategory",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "TierLevel",
+      []
+    ],
+    [
+      "ServiceTemplate",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "ServiceTemplateWithCategory",
+      []
+    ],
+    [
+      "ProposalItem",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Proposal",
+          "field": "proposalId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "ServiceTemplate",
+          "field": "serviceTemplateId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "Proposal",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "ClientGroup",
+          "field": "clientGroupId"
+        }
+      ]
+    ],
+    [
+      "ProposalWithDetails",
+      []
+    ],
+    [
+      "ProposalSummary",
+      []
+    ],
+    [
+      "CashFlowMonth",
+      []
+    ],
+    [
+      "WorkPlanEntry",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "Proposal",
+          "field": "proposalId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "ProposalItem",
+          "field": "proposalItemId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "ClientGroup",
+          "field": "clientGroupId"
+        }
+      ]
+    ],
+    [
+      "EngagementParagraph",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "ServiceTemplate",
+          "field": "serviceTemplateId"
+        }
+      ]
+    ],
+    [
+      "EngagementLetter",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "Proposal",
+          "field": "proposalId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "ClientGroup",
+          "field": "clientGroupId"
+        },
+        {
+          "type": "many-to-one",
+          "target": "Principal",
+          "field": "principalId"
+        }
+      ]
+    ],
+    [
+      "Principal",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "FirmSettings",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Firm",
+          "field": "firmId"
+        }
+      ]
+    ],
+    [
+      "ActivityItem",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Entity",
+          "field": "entityId"
+        }
+      ]
+    ],
+    [
+      "ProposalBuilderEntity",
+      []
+    ],
+    [
+      "ProposalBuilderClientGroup",
+      []
+    ],
+    [
+      "ProposalEntitySummary",
+      [
+        {
+          "type": "many-to-one",
+          "target": "Entity",
+          "field": "entityId"
+        }
+      ]
+    ],
+    [
+      "ProposalBuilderSummary",
+      []
+    ]
+  ],
+  "requirements": {
+    "functional": [
+      [
+        "FR-001",
+        {
+          "code": "FR-001",
+          "desc": "View list of all MockUsers",
+          "priority": "MUST",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-002",
+        {
+          "code": "FR-002",
+          "desc": "View detailed MockUser information",
+          "priority": "MUST",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-003",
+        {
+          "code": "FR-003",
+          "desc": "Search and filter MockUsers",
+          "priority": "MUST",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-004",
+        {
+          "code": "FR-004",
+          "desc": "Create new MockUser",
+          "priority": "MUST",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-005",
+        {
+          "code": "FR-005",
+          "desc": "Update existing MockUser",
+          "priority": "MUST",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-006",
+        {
+          "code": "FR-006",
+          "desc": "Delete/archive MockUser",
+          "priority": "SHOULD",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-007",
+        {
+          "code": "FR-007",
+          "desc": "Export MockUser data",
+          "priority": "COULD",
+          "entity": "MockUser",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-008",
+        {
+          "code": "FR-008",
+          "desc": "View list of all AuthSessions",
+          "priority": "MUST",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-009",
+        {
+          "code": "FR-009",
+          "desc": "View detailed AuthSession information",
+          "priority": "MUST",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-010",
+        {
+          "code": "FR-010",
+          "desc": "Search and filter AuthSessions",
+          "priority": "MUST",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-011",
+        {
+          "code": "FR-011",
+          "desc": "Create new AuthSession",
+          "priority": "MUST",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-012",
+        {
+          "code": "FR-012",
+          "desc": "Update existing AuthSession",
+          "priority": "MUST",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-013",
+        {
+          "code": "FR-013",
+          "desc": "Delete/archive AuthSession",
+          "priority": "SHOULD",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-014",
+        {
+          "code": "FR-014",
+          "desc": "Export AuthSession data",
+          "priority": "COULD",
+          "entity": "AuthSession",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-015",
+        {
+          "code": "FR-015",
+          "desc": "View list of all Firms",
+          "priority": "MUST",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-016",
+        {
+          "code": "FR-016",
+          "desc": "View detailed Firm information",
+          "priority": "MUST",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-017",
+        {
+          "code": "FR-017",
+          "desc": "Search and filter Firms",
+          "priority": "MUST",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-018",
+        {
+          "code": "FR-018",
+          "desc": "Create new Firm",
+          "priority": "MUST",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-019",
+        {
+          "code": "FR-019",
+          "desc": "Update existing Firm",
+          "priority": "MUST",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-020",
+        {
+          "code": "FR-020",
+          "desc": "Delete/archive Firm",
+          "priority": "SHOULD",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-021",
+        {
+          "code": "FR-021",
+          "desc": "Export Firm data",
+          "priority": "COULD",
+          "entity": "Firm",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-022",
+        {
+          "code": "FR-022",
+          "desc": "View list of all ClientGroups",
+          "priority": "MUST",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-023",
+        {
+          "code": "FR-023",
+          "desc": "View detailed ClientGroup information",
+          "priority": "MUST",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-024",
+        {
+          "code": "FR-024",
+          "desc": "Search and filter ClientGroups",
+          "priority": "MUST",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-025",
+        {
+          "code": "FR-025",
+          "desc": "Create new ClientGroup",
+          "priority": "MUST",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-026",
+        {
+          "code": "FR-026",
+          "desc": "Update existing ClientGroup",
+          "priority": "MUST",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-027",
+        {
+          "code": "FR-027",
+          "desc": "Delete/archive ClientGroup",
+          "priority": "SHOULD",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-028",
+        {
+          "code": "FR-028",
+          "desc": "Export ClientGroup data",
+          "priority": "COULD",
+          "entity": "ClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-029",
+        {
+          "code": "FR-029",
+          "desc": "View list of all Entitys",
+          "priority": "MUST",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-030",
+        {
+          "code": "FR-030",
+          "desc": "View detailed Entity information",
+          "priority": "MUST",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-031",
+        {
+          "code": "FR-031",
+          "desc": "Search and filter Entitys",
+          "priority": "MUST",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-032",
+        {
+          "code": "FR-032",
+          "desc": "Create new Entity",
+          "priority": "MUST",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-033",
+        {
+          "code": "FR-033",
+          "desc": "Update existing Entity",
+          "priority": "MUST",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-034",
+        {
+          "code": "FR-034",
+          "desc": "Delete/archive Entity",
+          "priority": "SHOULD",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-035",
+        {
+          "code": "FR-035",
+          "desc": "Export Entity data",
+          "priority": "COULD",
+          "entity": "Entity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-036",
+        {
+          "code": "FR-036",
+          "desc": "View list of all ContactPersons",
+          "priority": "MUST",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-037",
+        {
+          "code": "FR-037",
+          "desc": "View detailed ContactPerson information",
+          "priority": "MUST",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-038",
+        {
+          "code": "FR-038",
+          "desc": "Search and filter ContactPersons",
+          "priority": "MUST",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-039",
+        {
+          "code": "FR-039",
+          "desc": "Create new ContactPerson",
+          "priority": "MUST",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-040",
+        {
+          "code": "FR-040",
+          "desc": "Update existing ContactPerson",
+          "priority": "MUST",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-041",
+        {
+          "code": "FR-041",
+          "desc": "Delete/archive ContactPerson",
+          "priority": "SHOULD",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-042",
+        {
+          "code": "FR-042",
+          "desc": "Export ContactPerson data",
+          "priority": "COULD",
+          "entity": "ContactPerson",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-043",
+        {
+          "code": "FR-043",
+          "desc": "View list of all ClientGroupWithDetailss",
+          "priority": "MUST",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-044",
+        {
+          "code": "FR-044",
+          "desc": "View detailed ClientGroupWithDetails information",
+          "priority": "MUST",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-045",
+        {
+          "code": "FR-045",
+          "desc": "Search and filter ClientGroupWithDetailss",
+          "priority": "MUST",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-046",
+        {
+          "code": "FR-046",
+          "desc": "Create new ClientGroupWithDetails",
+          "priority": "MUST",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-047",
+        {
+          "code": "FR-047",
+          "desc": "Update existing ClientGroupWithDetails",
+          "priority": "MUST",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-048",
+        {
+          "code": "FR-048",
+          "desc": "Delete/archive ClientGroupWithDetails",
+          "priority": "SHOULD",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-049",
+        {
+          "code": "FR-049",
+          "desc": "Export ClientGroupWithDetails data",
+          "priority": "COULD",
+          "entity": "ClientGroupWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-050",
+        {
+          "code": "FR-050",
+          "desc": "View list of all ServiceCategorys",
+          "priority": "MUST",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-051",
+        {
+          "code": "FR-051",
+          "desc": "View detailed ServiceCategory information",
+          "priority": "MUST",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-052",
+        {
+          "code": "FR-052",
+          "desc": "Search and filter ServiceCategorys",
+          "priority": "MUST",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-053",
+        {
+          "code": "FR-053",
+          "desc": "Create new ServiceCategory",
+          "priority": "MUST",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-054",
+        {
+          "code": "FR-054",
+          "desc": "Update existing ServiceCategory",
+          "priority": "MUST",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-055",
+        {
+          "code": "FR-055",
+          "desc": "Delete/archive ServiceCategory",
+          "priority": "SHOULD",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-056",
+        {
+          "code": "FR-056",
+          "desc": "Export ServiceCategory data",
+          "priority": "COULD",
+          "entity": "ServiceCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-057",
+        {
+          "code": "FR-057",
+          "desc": "View list of all TierLevels",
+          "priority": "MUST",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-058",
+        {
+          "code": "FR-058",
+          "desc": "View detailed TierLevel information",
+          "priority": "MUST",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-059",
+        {
+          "code": "FR-059",
+          "desc": "Search and filter TierLevels",
+          "priority": "MUST",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-060",
+        {
+          "code": "FR-060",
+          "desc": "Create new TierLevel",
+          "priority": "MUST",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-061",
+        {
+          "code": "FR-061",
+          "desc": "Update existing TierLevel",
+          "priority": "MUST",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-062",
+        {
+          "code": "FR-062",
+          "desc": "Delete/archive TierLevel",
+          "priority": "SHOULD",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-063",
+        {
+          "code": "FR-063",
+          "desc": "Export TierLevel data",
+          "priority": "COULD",
+          "entity": "TierLevel",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-064",
+        {
+          "code": "FR-064",
+          "desc": "View list of all ServiceTemplates",
+          "priority": "MUST",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-065",
+        {
+          "code": "FR-065",
+          "desc": "View detailed ServiceTemplate information",
+          "priority": "MUST",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-066",
+        {
+          "code": "FR-066",
+          "desc": "Search and filter ServiceTemplates",
+          "priority": "MUST",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-067",
+        {
+          "code": "FR-067",
+          "desc": "Create new ServiceTemplate",
+          "priority": "MUST",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-068",
+        {
+          "code": "FR-068",
+          "desc": "Update existing ServiceTemplate",
+          "priority": "MUST",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-069",
+        {
+          "code": "FR-069",
+          "desc": "Delete/archive ServiceTemplate",
+          "priority": "SHOULD",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-070",
+        {
+          "code": "FR-070",
+          "desc": "Export ServiceTemplate data",
+          "priority": "COULD",
+          "entity": "ServiceTemplate",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-071",
+        {
+          "code": "FR-071",
+          "desc": "View list of all ServiceTemplateWithCategorys",
+          "priority": "MUST",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-072",
+        {
+          "code": "FR-072",
+          "desc": "View detailed ServiceTemplateWithCategory information",
+          "priority": "MUST",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-073",
+        {
+          "code": "FR-073",
+          "desc": "Search and filter ServiceTemplateWithCategorys",
+          "priority": "MUST",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-074",
+        {
+          "code": "FR-074",
+          "desc": "Create new ServiceTemplateWithCategory",
+          "priority": "MUST",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-075",
+        {
+          "code": "FR-075",
+          "desc": "Update existing ServiceTemplateWithCategory",
+          "priority": "MUST",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-076",
+        {
+          "code": "FR-076",
+          "desc": "Delete/archive ServiceTemplateWithCategory",
+          "priority": "SHOULD",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-077",
+        {
+          "code": "FR-077",
+          "desc": "Export ServiceTemplateWithCategory data",
+          "priority": "COULD",
+          "entity": "ServiceTemplateWithCategory",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-078",
+        {
+          "code": "FR-078",
+          "desc": "View list of all ProposalItems",
+          "priority": "MUST",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-079",
+        {
+          "code": "FR-079",
+          "desc": "View detailed ProposalItem information",
+          "priority": "MUST",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-080",
+        {
+          "code": "FR-080",
+          "desc": "Search and filter ProposalItems",
+          "priority": "MUST",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-081",
+        {
+          "code": "FR-081",
+          "desc": "Create new ProposalItem",
+          "priority": "MUST",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-082",
+        {
+          "code": "FR-082",
+          "desc": "Update existing ProposalItem",
+          "priority": "MUST",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-083",
+        {
+          "code": "FR-083",
+          "desc": "Delete/archive ProposalItem",
+          "priority": "SHOULD",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-084",
+        {
+          "code": "FR-084",
+          "desc": "Export ProposalItem data",
+          "priority": "COULD",
+          "entity": "ProposalItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-085",
+        {
+          "code": "FR-085",
+          "desc": "View list of all Proposals",
+          "priority": "MUST",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-086",
+        {
+          "code": "FR-086",
+          "desc": "View detailed Proposal information",
+          "priority": "MUST",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-087",
+        {
+          "code": "FR-087",
+          "desc": "Search and filter Proposals",
+          "priority": "MUST",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-088",
+        {
+          "code": "FR-088",
+          "desc": "Create new Proposal",
+          "priority": "MUST",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-089",
+        {
+          "code": "FR-089",
+          "desc": "Update existing Proposal",
+          "priority": "MUST",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-090",
+        {
+          "code": "FR-090",
+          "desc": "Delete/archive Proposal",
+          "priority": "SHOULD",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-091",
+        {
+          "code": "FR-091",
+          "desc": "Export Proposal data",
+          "priority": "COULD",
+          "entity": "Proposal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-092",
+        {
+          "code": "FR-092",
+          "desc": "View list of all ProposalWithDetailss",
+          "priority": "MUST",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-093",
+        {
+          "code": "FR-093",
+          "desc": "View detailed ProposalWithDetails information",
+          "priority": "MUST",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-094",
+        {
+          "code": "FR-094",
+          "desc": "Search and filter ProposalWithDetailss",
+          "priority": "MUST",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-095",
+        {
+          "code": "FR-095",
+          "desc": "Create new ProposalWithDetails",
+          "priority": "MUST",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-096",
+        {
+          "code": "FR-096",
+          "desc": "Update existing ProposalWithDetails",
+          "priority": "MUST",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-097",
+        {
+          "code": "FR-097",
+          "desc": "Delete/archive ProposalWithDetails",
+          "priority": "SHOULD",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-098",
+        {
+          "code": "FR-098",
+          "desc": "Export ProposalWithDetails data",
+          "priority": "COULD",
+          "entity": "ProposalWithDetails",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-099",
+        {
+          "code": "FR-099",
+          "desc": "View list of all ProposalSummarys",
+          "priority": "MUST",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-100",
+        {
+          "code": "FR-100",
+          "desc": "View detailed ProposalSummary information",
+          "priority": "MUST",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-101",
+        {
+          "code": "FR-101",
+          "desc": "Search and filter ProposalSummarys",
+          "priority": "MUST",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-102",
+        {
+          "code": "FR-102",
+          "desc": "Create new ProposalSummary",
+          "priority": "MUST",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-103",
+        {
+          "code": "FR-103",
+          "desc": "Update existing ProposalSummary",
+          "priority": "MUST",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-104",
+        {
+          "code": "FR-104",
+          "desc": "Delete/archive ProposalSummary",
+          "priority": "SHOULD",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-105",
+        {
+          "code": "FR-105",
+          "desc": "Export ProposalSummary data",
+          "priority": "COULD",
+          "entity": "ProposalSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-106",
+        {
+          "code": "FR-106",
+          "desc": "View list of all CashFlowMonths",
+          "priority": "MUST",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-107",
+        {
+          "code": "FR-107",
+          "desc": "View detailed CashFlowMonth information",
+          "priority": "MUST",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-108",
+        {
+          "code": "FR-108",
+          "desc": "Search and filter CashFlowMonths",
+          "priority": "MUST",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-109",
+        {
+          "code": "FR-109",
+          "desc": "Create new CashFlowMonth",
+          "priority": "MUST",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-110",
+        {
+          "code": "FR-110",
+          "desc": "Update existing CashFlowMonth",
+          "priority": "MUST",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-111",
+        {
+          "code": "FR-111",
+          "desc": "Delete/archive CashFlowMonth",
+          "priority": "SHOULD",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-112",
+        {
+          "code": "FR-112",
+          "desc": "Export CashFlowMonth data",
+          "priority": "COULD",
+          "entity": "CashFlowMonth",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-113",
+        {
+          "code": "FR-113",
+          "desc": "View list of all WorkPlanEntrys",
+          "priority": "MUST",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-114",
+        {
+          "code": "FR-114",
+          "desc": "View detailed WorkPlanEntry information",
+          "priority": "MUST",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-115",
+        {
+          "code": "FR-115",
+          "desc": "Search and filter WorkPlanEntrys",
+          "priority": "MUST",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-116",
+        {
+          "code": "FR-116",
+          "desc": "Create new WorkPlanEntry",
+          "priority": "MUST",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-117",
+        {
+          "code": "FR-117",
+          "desc": "Update existing WorkPlanEntry",
+          "priority": "MUST",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-118",
+        {
+          "code": "FR-118",
+          "desc": "Delete/archive WorkPlanEntry",
+          "priority": "SHOULD",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-119",
+        {
+          "code": "FR-119",
+          "desc": "Export WorkPlanEntry data",
+          "priority": "COULD",
+          "entity": "WorkPlanEntry",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-120",
+        {
+          "code": "FR-120",
+          "desc": "View list of all EngagementParagraphs",
+          "priority": "MUST",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-121",
+        {
+          "code": "FR-121",
+          "desc": "View detailed EngagementParagraph information",
+          "priority": "MUST",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-122",
+        {
+          "code": "FR-122",
+          "desc": "Search and filter EngagementParagraphs",
+          "priority": "MUST",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-123",
+        {
+          "code": "FR-123",
+          "desc": "Create new EngagementParagraph",
+          "priority": "MUST",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-124",
+        {
+          "code": "FR-124",
+          "desc": "Update existing EngagementParagraph",
+          "priority": "MUST",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-125",
+        {
+          "code": "FR-125",
+          "desc": "Delete/archive EngagementParagraph",
+          "priority": "SHOULD",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-126",
+        {
+          "code": "FR-126",
+          "desc": "Export EngagementParagraph data",
+          "priority": "COULD",
+          "entity": "EngagementParagraph",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-127",
+        {
+          "code": "FR-127",
+          "desc": "View list of all EngagementLetters",
+          "priority": "MUST",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-128",
+        {
+          "code": "FR-128",
+          "desc": "View detailed EngagementLetter information",
+          "priority": "MUST",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-129",
+        {
+          "code": "FR-129",
+          "desc": "Search and filter EngagementLetters",
+          "priority": "MUST",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-130",
+        {
+          "code": "FR-130",
+          "desc": "Create new EngagementLetter",
+          "priority": "MUST",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-131",
+        {
+          "code": "FR-131",
+          "desc": "Update existing EngagementLetter",
+          "priority": "MUST",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-132",
+        {
+          "code": "FR-132",
+          "desc": "Delete/archive EngagementLetter",
+          "priority": "SHOULD",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-133",
+        {
+          "code": "FR-133",
+          "desc": "Export EngagementLetter data",
+          "priority": "COULD",
+          "entity": "EngagementLetter",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-134",
+        {
+          "code": "FR-134",
+          "desc": "View list of all Principals",
+          "priority": "MUST",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-135",
+        {
+          "code": "FR-135",
+          "desc": "View detailed Principal information",
+          "priority": "MUST",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-136",
+        {
+          "code": "FR-136",
+          "desc": "Search and filter Principals",
+          "priority": "MUST",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-137",
+        {
+          "code": "FR-137",
+          "desc": "Create new Principal",
+          "priority": "MUST",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-138",
+        {
+          "code": "FR-138",
+          "desc": "Update existing Principal",
+          "priority": "MUST",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-139",
+        {
+          "code": "FR-139",
+          "desc": "Delete/archive Principal",
+          "priority": "SHOULD",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-140",
+        {
+          "code": "FR-140",
+          "desc": "Export Principal data",
+          "priority": "COULD",
+          "entity": "Principal",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-141",
+        {
+          "code": "FR-141",
+          "desc": "View list of all FirmSettingss",
+          "priority": "MUST",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-142",
+        {
+          "code": "FR-142",
+          "desc": "View detailed FirmSettings information",
+          "priority": "MUST",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-143",
+        {
+          "code": "FR-143",
+          "desc": "Search and filter FirmSettingss",
+          "priority": "MUST",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-144",
+        {
+          "code": "FR-144",
+          "desc": "Create new FirmSettings",
+          "priority": "MUST",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-145",
+        {
+          "code": "FR-145",
+          "desc": "Update existing FirmSettings",
+          "priority": "MUST",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-146",
+        {
+          "code": "FR-146",
+          "desc": "Delete/archive FirmSettings",
+          "priority": "SHOULD",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-147",
+        {
+          "code": "FR-147",
+          "desc": "Export FirmSettings data",
+          "priority": "COULD",
+          "entity": "FirmSettings",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-148",
+        {
+          "code": "FR-148",
+          "desc": "View list of all ActivityItems",
+          "priority": "MUST",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-149",
+        {
+          "code": "FR-149",
+          "desc": "View detailed ActivityItem information",
+          "priority": "MUST",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-150",
+        {
+          "code": "FR-150",
+          "desc": "Search and filter ActivityItems",
+          "priority": "MUST",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-151",
+        {
+          "code": "FR-151",
+          "desc": "Create new ActivityItem",
+          "priority": "MUST",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-152",
+        {
+          "code": "FR-152",
+          "desc": "Update existing ActivityItem",
+          "priority": "MUST",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-153",
+        {
+          "code": "FR-153",
+          "desc": "Delete/archive ActivityItem",
+          "priority": "SHOULD",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-154",
+        {
+          "code": "FR-154",
+          "desc": "Export ActivityItem data",
+          "priority": "COULD",
+          "entity": "ActivityItem",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-155",
+        {
+          "code": "FR-155",
+          "desc": "View list of all ProposalBuilderEntitys",
+          "priority": "MUST",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-156",
+        {
+          "code": "FR-156",
+          "desc": "View detailed ProposalBuilderEntity information",
+          "priority": "MUST",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-157",
+        {
+          "code": "FR-157",
+          "desc": "Search and filter ProposalBuilderEntitys",
+          "priority": "MUST",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-158",
+        {
+          "code": "FR-158",
+          "desc": "Create new ProposalBuilderEntity",
+          "priority": "MUST",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-159",
+        {
+          "code": "FR-159",
+          "desc": "Update existing ProposalBuilderEntity",
+          "priority": "MUST",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-160",
+        {
+          "code": "FR-160",
+          "desc": "Delete/archive ProposalBuilderEntity",
+          "priority": "SHOULD",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-161",
+        {
+          "code": "FR-161",
+          "desc": "Export ProposalBuilderEntity data",
+          "priority": "COULD",
+          "entity": "ProposalBuilderEntity",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-162",
+        {
+          "code": "FR-162",
+          "desc": "View list of all ProposalBuilderClientGroups",
+          "priority": "MUST",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-163",
+        {
+          "code": "FR-163",
+          "desc": "View detailed ProposalBuilderClientGroup information",
+          "priority": "MUST",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-164",
+        {
+          "code": "FR-164",
+          "desc": "Search and filter ProposalBuilderClientGroups",
+          "priority": "MUST",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-165",
+        {
+          "code": "FR-165",
+          "desc": "Create new ProposalBuilderClientGroup",
+          "priority": "MUST",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-166",
+        {
+          "code": "FR-166",
+          "desc": "Update existing ProposalBuilderClientGroup",
+          "priority": "MUST",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-167",
+        {
+          "code": "FR-167",
+          "desc": "Delete/archive ProposalBuilderClientGroup",
+          "priority": "SHOULD",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-168",
+        {
+          "code": "FR-168",
+          "desc": "Export ProposalBuilderClientGroup data",
+          "priority": "COULD",
+          "entity": "ProposalBuilderClientGroup",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-169",
+        {
+          "code": "FR-169",
+          "desc": "View list of all ProposalEntitySummarys",
+          "priority": "MUST",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-170",
+        {
+          "code": "FR-170",
+          "desc": "View detailed ProposalEntitySummary information",
+          "priority": "MUST",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-171",
+        {
+          "code": "FR-171",
+          "desc": "Search and filter ProposalEntitySummarys",
+          "priority": "MUST",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-172",
+        {
+          "code": "FR-172",
+          "desc": "Create new ProposalEntitySummary",
+          "priority": "MUST",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-173",
+        {
+          "code": "FR-173",
+          "desc": "Update existing ProposalEntitySummary",
+          "priority": "MUST",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-174",
+        {
+          "code": "FR-174",
+          "desc": "Delete/archive ProposalEntitySummary",
+          "priority": "SHOULD",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-175",
+        {
+          "code": "FR-175",
+          "desc": "Export ProposalEntitySummary data",
+          "priority": "COULD",
+          "entity": "ProposalEntitySummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-176",
+        {
+          "code": "FR-176",
+          "desc": "View list of all ProposalBuilderSummarys",
+          "priority": "MUST",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-177",
+        {
+          "code": "FR-177",
+          "desc": "View detailed ProposalBuilderSummary information",
+          "priority": "MUST",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-178",
+        {
+          "code": "FR-178",
+          "desc": "Search and filter ProposalBuilderSummarys",
+          "priority": "MUST",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-179",
+        {
+          "code": "FR-179",
+          "desc": "Create new ProposalBuilderSummary",
+          "priority": "MUST",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-180",
+        {
+          "code": "FR-180",
+          "desc": "Update existing ProposalBuilderSummary",
+          "priority": "MUST",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-181",
+        {
+          "code": "FR-181",
+          "desc": "Delete/archive ProposalBuilderSummary",
+          "priority": "SHOULD",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ],
+      [
+        "FR-182",
+        {
+          "code": "FR-182",
+          "desc": "Export ProposalBuilderSummary data",
+          "priority": "COULD",
+          "entity": "ProposalBuilderSummary",
+          "status": "defined"
+        }
+      ]
+    ],
+    "nonFunctional": [
+      [
+        "NFR-001",
+        {
+          "code": "NFR-001",
+          "category": "Performance",
+          "desc": "Page load time < 2 seconds",
+          "target": "2s",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-002",
+        {
+          "code": "NFR-002",
+          "category": "Performance",
+          "desc": "Time to interactive < 3 seconds",
+          "target": "3s",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-003",
+        {
+          "code": "NFR-003",
+          "category": "Performance",
+          "desc": "API response time < 500ms",
+          "target": "500ms",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-004",
+        {
+          "code": "NFR-004",
+          "category": "Security",
+          "desc": "All API endpoints require authentication",
+          "target": "100%",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-005",
+        {
+          "code": "NFR-005",
+          "category": "Security",
+          "desc": "Role-based access control enforced",
+          "target": "all endpoints",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-006",
+        {
+          "code": "NFR-006",
+          "category": "Security",
+          "desc": "Passwords hashed with bcrypt",
+          "target": "N/A",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-007",
+        {
+          "code": "NFR-007",
+          "category": "Accessibility",
+          "desc": "WCAG 2.1 AA compliance",
+          "target": "AA",
+          "priority": "SHOULD"
+        }
+      ],
+      [
+        "NFR-008",
+        {
+          "code": "NFR-008",
+          "category": "Reliability",
+          "desc": "System uptime SLA",
+          "target": "99.9%",
+          "priority": "MUST"
+        }
+      ],
+      [
+        "NFR-009",
+        {
+          "code": "NFR-009",
+          "category": "Scalability",
+          "desc": "Support 10,000 concurrent users",
+          "target": "10,000",
+          "priority": "SHOULD"
+        }
+      ],
+      [
+        "NFR-010",
+        {
+          "code": "NFR-010",
+          "category": "Maintainability",
+          "desc": "Code coverage > 80%",
+          "target": "80%",
+          "priority": "SHOULD"
+        }
+      ]
+    ],
+    "useCases": [
+      [
+        "UC-001",
+        {
+          "code": "UC-002",
+          "name": "Manage MockUsers",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "MockUser"
+        }
+      ],
+      [
+        "UC-002",
+        {
+          "code": "UC-003",
+          "name": "Manage AuthSessions",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "AuthSession"
+        }
+      ],
+      [
+        "UC-003",
+        {
+          "code": "UC-004",
+          "name": "Manage Firms",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "Firm"
+        }
+      ],
+      [
+        "UC-004",
+        {
+          "code": "UC-005",
+          "name": "Manage ClientGroups",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ClientGroup"
+        }
+      ],
+      [
+        "UC-005",
+        {
+          "code": "UC-006",
+          "name": "Manage Entitys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "Entity"
+        }
+      ],
+      [
+        "UC-006",
+        {
+          "code": "UC-007",
+          "name": "Manage ContactPersons",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ContactPerson"
+        }
+      ],
+      [
+        "UC-007",
+        {
+          "code": "UC-008",
+          "name": "Manage ClientGroupWithDetailss",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ClientGroupWithDetails"
+        }
+      ],
+      [
+        "UC-008",
+        {
+          "code": "UC-009",
+          "name": "Manage ServiceCategorys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ServiceCategory"
+        }
+      ],
+      [
+        "UC-009",
+        {
+          "code": "UC-010",
+          "name": "Manage TierLevels",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "TierLevel"
+        }
+      ],
+      [
+        "UC-010",
+        {
+          "code": "UC-011",
+          "name": "Manage ServiceTemplates",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ServiceTemplate"
+        }
+      ],
+      [
+        "UC-011",
+        {
+          "code": "UC-012",
+          "name": "Manage ServiceTemplateWithCategorys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ServiceTemplateWithCategory"
+        }
+      ],
+      [
+        "UC-012",
+        {
+          "code": "UC-013",
+          "name": "Manage ProposalItems",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalItem"
+        }
+      ],
+      [
+        "UC-013",
+        {
+          "code": "UC-014",
+          "name": "Manage Proposals",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "Proposal"
+        }
+      ],
+      [
+        "UC-014",
+        {
+          "code": "UC-015",
+          "name": "Manage ProposalWithDetailss",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalWithDetails"
+        }
+      ],
+      [
+        "UC-015",
+        {
+          "code": "UC-016",
+          "name": "Manage ProposalSummarys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalSummary"
+        }
+      ],
+      [
+        "UC-016",
+        {
+          "code": "UC-017",
+          "name": "Manage CashFlowMonths",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "CashFlowMonth"
+        }
+      ],
+      [
+        "UC-017",
+        {
+          "code": "UC-018",
+          "name": "Manage WorkPlanEntrys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "WorkPlanEntry"
+        }
+      ],
+      [
+        "UC-018",
+        {
+          "code": "UC-019",
+          "name": "Manage EngagementParagraphs",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "EngagementParagraph"
+        }
+      ],
+      [
+        "UC-019",
+        {
+          "code": "UC-020",
+          "name": "Manage EngagementLetters",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "EngagementLetter"
+        }
+      ],
+      [
+        "UC-020",
+        {
+          "code": "UC-021",
+          "name": "Manage Principals",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "Principal"
+        }
+      ],
+      [
+        "UC-021",
+        {
+          "code": "UC-022",
+          "name": "Manage FirmSettingss",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "FirmSettings"
+        }
+      ],
+      [
+        "UC-022",
+        {
+          "code": "UC-023",
+          "name": "Manage ActivityItems",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ActivityItem"
+        }
+      ],
+      [
+        "UC-023",
+        {
+          "code": "UC-024",
+          "name": "Manage ProposalBuilderEntitys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalBuilderEntity"
+        }
+      ],
+      [
+        "UC-024",
+        {
+          "code": "UC-025",
+          "name": "Manage ProposalBuilderClientGroups",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalBuilderClientGroup"
+        }
+      ],
+      [
+        "UC-025",
+        {
+          "code": "UC-026",
+          "name": "Manage ProposalEntitySummarys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalEntitySummary"
+        }
+      ],
+      [
+        "UC-026",
+        {
+          "code": "UC-027",
+          "name": "Manage ProposalBuilderSummarys",
+          "actor": "Authenticated User",
+          "precondition": "User is logged in",
+          "mainFlow": [
+            "User navigates to ${name} section",
+            "System displays list of ${name}s",
+            "User performs CRUD operation",
+            "System persists changes"
+          ],
+          "entity": "ProposalBuilderSummary"
+        }
+      ]
+    ],
+    "userStories": [
+      [
+        "US-001",
+        {
+          "code": "US-002",
+          "role": "user",
+          "story": "As a user, I want to manage MockUsers so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all MockUsers",
+            "Can create new MockUser",
+            "Can update existing MockUser",
+            "Can delete MockUser with confirmation"
+          ],
+          "entity": "MockUser"
+        }
+      ],
+      [
+        "US-002",
+        {
+          "code": "US-003",
+          "role": "user",
+          "story": "As a user, I want to manage AuthSessions so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all AuthSessions",
+            "Can create new AuthSession",
+            "Can update existing AuthSession",
+            "Can delete AuthSession with confirmation"
+          ],
+          "entity": "AuthSession"
+        }
+      ],
+      [
+        "US-003",
+        {
+          "code": "US-004",
+          "role": "user",
+          "story": "As a user, I want to manage Firms so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all Firms",
+            "Can create new Firm",
+            "Can update existing Firm",
+            "Can delete Firm with confirmation"
+          ],
+          "entity": "Firm"
+        }
+      ],
+      [
+        "US-004",
+        {
+          "code": "US-005",
+          "role": "user",
+          "story": "As a user, I want to manage ClientGroups so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ClientGroups",
+            "Can create new ClientGroup",
+            "Can update existing ClientGroup",
+            "Can delete ClientGroup with confirmation"
+          ],
+          "entity": "ClientGroup"
+        }
+      ],
+      [
+        "US-005",
+        {
+          "code": "US-006",
+          "role": "user",
+          "story": "As a user, I want to manage Entitys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all Entitys",
+            "Can create new Entity",
+            "Can update existing Entity",
+            "Can delete Entity with confirmation"
+          ],
+          "entity": "Entity"
+        }
+      ],
+      [
+        "US-006",
+        {
+          "code": "US-007",
+          "role": "user",
+          "story": "As a user, I want to manage ContactPersons so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ContactPersons",
+            "Can create new ContactPerson",
+            "Can update existing ContactPerson",
+            "Can delete ContactPerson with confirmation"
+          ],
+          "entity": "ContactPerson"
+        }
+      ],
+      [
+        "US-007",
+        {
+          "code": "US-008",
+          "role": "user",
+          "story": "As a user, I want to manage ClientGroupWithDetailss so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ClientGroupWithDetailss",
+            "Can create new ClientGroupWithDetails",
+            "Can update existing ClientGroupWithDetails",
+            "Can delete ClientGroupWithDetails with confirmation"
+          ],
+          "entity": "ClientGroupWithDetails"
+        }
+      ],
+      [
+        "US-008",
+        {
+          "code": "US-009",
+          "role": "user",
+          "story": "As a user, I want to manage ServiceCategorys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ServiceCategorys",
+            "Can create new ServiceCategory",
+            "Can update existing ServiceCategory",
+            "Can delete ServiceCategory with confirmation"
+          ],
+          "entity": "ServiceCategory"
+        }
+      ],
+      [
+        "US-009",
+        {
+          "code": "US-010",
+          "role": "user",
+          "story": "As a user, I want to manage TierLevels so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all TierLevels",
+            "Can create new TierLevel",
+            "Can update existing TierLevel",
+            "Can delete TierLevel with confirmation"
+          ],
+          "entity": "TierLevel"
+        }
+      ],
+      [
+        "US-010",
+        {
+          "code": "US-011",
+          "role": "user",
+          "story": "As a user, I want to manage ServiceTemplates so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ServiceTemplates",
+            "Can create new ServiceTemplate",
+            "Can update existing ServiceTemplate",
+            "Can delete ServiceTemplate with confirmation"
+          ],
+          "entity": "ServiceTemplate"
+        }
+      ],
+      [
+        "US-011",
+        {
+          "code": "US-012",
+          "role": "user",
+          "story": "As a user, I want to manage ServiceTemplateWithCategorys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ServiceTemplateWithCategorys",
+            "Can create new ServiceTemplateWithCategory",
+            "Can update existing ServiceTemplateWithCategory",
+            "Can delete ServiceTemplateWithCategory with confirmation"
+          ],
+          "entity": "ServiceTemplateWithCategory"
+        }
+      ],
+      [
+        "US-012",
+        {
+          "code": "US-013",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalItems so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalItems",
+            "Can create new ProposalItem",
+            "Can update existing ProposalItem",
+            "Can delete ProposalItem with confirmation"
+          ],
+          "entity": "ProposalItem"
+        }
+      ],
+      [
+        "US-013",
+        {
+          "code": "US-014",
+          "role": "user",
+          "story": "As a user, I want to manage Proposals so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all Proposals",
+            "Can create new Proposal",
+            "Can update existing Proposal",
+            "Can delete Proposal with confirmation"
+          ],
+          "entity": "Proposal"
+        }
+      ],
+      [
+        "US-014",
+        {
+          "code": "US-015",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalWithDetailss so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalWithDetailss",
+            "Can create new ProposalWithDetails",
+            "Can update existing ProposalWithDetails",
+            "Can delete ProposalWithDetails with confirmation"
+          ],
+          "entity": "ProposalWithDetails"
+        }
+      ],
+      [
+        "US-015",
+        {
+          "code": "US-016",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalSummarys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalSummarys",
+            "Can create new ProposalSummary",
+            "Can update existing ProposalSummary",
+            "Can delete ProposalSummary with confirmation"
+          ],
+          "entity": "ProposalSummary"
+        }
+      ],
+      [
+        "US-016",
+        {
+          "code": "US-017",
+          "role": "user",
+          "story": "As a user, I want to manage CashFlowMonths so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all CashFlowMonths",
+            "Can create new CashFlowMonth",
+            "Can update existing CashFlowMonth",
+            "Can delete CashFlowMonth with confirmation"
+          ],
+          "entity": "CashFlowMonth"
+        }
+      ],
+      [
+        "US-017",
+        {
+          "code": "US-018",
+          "role": "user",
+          "story": "As a user, I want to manage WorkPlanEntrys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all WorkPlanEntrys",
+            "Can create new WorkPlanEntry",
+            "Can update existing WorkPlanEntry",
+            "Can delete WorkPlanEntry with confirmation"
+          ],
+          "entity": "WorkPlanEntry"
+        }
+      ],
+      [
+        "US-018",
+        {
+          "code": "US-019",
+          "role": "user",
+          "story": "As a user, I want to manage EngagementParagraphs so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all EngagementParagraphs",
+            "Can create new EngagementParagraph",
+            "Can update existing EngagementParagraph",
+            "Can delete EngagementParagraph with confirmation"
+          ],
+          "entity": "EngagementParagraph"
+        }
+      ],
+      [
+        "US-019",
+        {
+          "code": "US-020",
+          "role": "user",
+          "story": "As a user, I want to manage EngagementLetters so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all EngagementLetters",
+            "Can create new EngagementLetter",
+            "Can update existing EngagementLetter",
+            "Can delete EngagementLetter with confirmation"
+          ],
+          "entity": "EngagementLetter"
+        }
+      ],
+      [
+        "US-020",
+        {
+          "code": "US-021",
+          "role": "user",
+          "story": "As a user, I want to manage Principals so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all Principals",
+            "Can create new Principal",
+            "Can update existing Principal",
+            "Can delete Principal with confirmation"
+          ],
+          "entity": "Principal"
+        }
+      ],
+      [
+        "US-021",
+        {
+          "code": "US-022",
+          "role": "user",
+          "story": "As a user, I want to manage FirmSettingss so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all FirmSettingss",
+            "Can create new FirmSettings",
+            "Can update existing FirmSettings",
+            "Can delete FirmSettings with confirmation"
+          ],
+          "entity": "FirmSettings"
+        }
+      ],
+      [
+        "US-022",
+        {
+          "code": "US-023",
+          "role": "user",
+          "story": "As a user, I want to manage ActivityItems so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ActivityItems",
+            "Can create new ActivityItem",
+            "Can update existing ActivityItem",
+            "Can delete ActivityItem with confirmation"
+          ],
+          "entity": "ActivityItem"
+        }
+      ],
+      [
+        "US-023",
+        {
+          "code": "US-024",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalBuilderEntitys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalBuilderEntitys",
+            "Can create new ProposalBuilderEntity",
+            "Can update existing ProposalBuilderEntity",
+            "Can delete ProposalBuilderEntity with confirmation"
+          ],
+          "entity": "ProposalBuilderEntity"
+        }
+      ],
+      [
+        "US-024",
+        {
+          "code": "US-025",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalBuilderClientGroups so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalBuilderClientGroups",
+            "Can create new ProposalBuilderClientGroup",
+            "Can update existing ProposalBuilderClientGroup",
+            "Can delete ProposalBuilderClientGroup with confirmation"
+          ],
+          "entity": "ProposalBuilderClientGroup"
+        }
+      ],
+      [
+        "US-025",
+        {
+          "code": "US-026",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalEntitySummarys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalEntitySummarys",
+            "Can create new ProposalEntitySummary",
+            "Can update existing ProposalEntitySummary",
+            "Can delete ProposalEntitySummary with confirmation"
+          ],
+          "entity": "ProposalEntitySummary"
+        }
+      ],
+      [
+        "US-026",
+        {
+          "code": "US-027",
+          "role": "user",
+          "story": "As a user, I want to manage ProposalBuilderSummarys so that I can track academic progress",
+          "acceptanceCriteria": [
+            "Can view all ProposalBuilderSummarys",
+            "Can create new ProposalBuilderSummary",
+            "Can update existing ProposalBuilderSummary",
+            "Can delete ProposalBuilderSummary with confirmation"
+          ],
+          "entity": "ProposalBuilderSummary"
+        }
+      ]
+    ],
+    "errors": [
+      [
+        "ERR-001",
+        {
+          "code": "ERR-001",
+          "message": "Authentication required",
+          "category": "Auth",
+          "severity": "ERROR"
+        }
+      ],
+      [
+        "ERR-002",
+        {
+          "code": "ERR-002",
+          "message": "Permission denied",
+          "category": "Auth",
+          "severity": "WARNING"
+        }
+      ],
+      [
+        "ERR-003",
+        {
+          "code": "ERR-003",
+          "message": "Resource not found",
+          "category": "Data",
+          "severity": "WARNING"
+        }
+      ],
+      [
+        "ERR-004",
+        {
+          "code": "ERR-004",
+          "message": "Validation failed",
+          "category": "Input",
+          "severity": "WARNING"
+        }
+      ],
+      [
+        "ERR-005",
+        {
+          "code": "ERR-005",
+          "message": "Duplicate entry",
+          "category": "Data",
+          "severity": "WARNING"
+        }
+      ],
+      [
+        "ERR-006",
+        {
+          "code": "ERR-006",
+          "message": "Database error",
+          "category": "System",
+          "severity": "ERROR"
+        }
+      ],
+      [
+        "ERR-007",
+        {
+          "code": "ERR-007",
+          "message": "Network error",
+          "category": "System",
+          "severity": "ERROR"
+        }
+      ],
+      [
+        "ERR-008",
+        {
+          "code": "ERR-008",
+          "message": "Rate limit exceeded",
+          "category": "System",
+          "severity": "WARNING"
+        }
+      ],
+      [
+        "ERR-009",
+        {
+          "code": "ERR-009",
+          "message": "Service unavailable",
+          "category": "System",
+          "severity": "ERROR"
+        }
+      ],
+      [
+        "ERR-010",
+        {
+          "code": "ERR-010",
+          "message": "Request timeout",
+          "category": "System",
+          "severity": "ERROR"
+        }
+      ]
+    ],
+    "security": [
+      [
+        "SEC-001",
+        {
+          "code": "SEC-001",
+          "control": "Input Validation",
+          "description": "All user inputs validated server-side",
+          "priority": "CRITICAL"
+        }
+      ],
+      [
+        "SEC-002",
+        {
+          "code": "SEC-002",
+          "control": "SQL Injection Prevention",
+          "description": "Parameterized queries only (Convex enforced)",
+          "priority": "CRITICAL"
+        }
+      ],
+      [
+        "SEC-003",
+        {
+          "code": "SEC-003",
+          "control": "XSS Prevention",
+          "description": "Output encoding for all dynamic content",
+          "priority": "CRITICAL"
+        }
+      ],
+      [
+        "SEC-004",
+        {
+          "code": "SEC-004",
+          "control": "CSRF Protection",
+          "description": "JWT tokens with SameSite cookies",
+          "priority": "HIGH"
+        }
+      ],
+      [
+        "SEC-005",
+        {
+          "code": "SEC-005",
+          "control": "Audit Logging",
+          "description": "All data changes logged with user attribution",
+          "priority": "HIGH"
+        }
+      ]
+    ],
+    "risks": [
+      [
+        "RISK-001",
+        {
+          "code": "RISK-001",
+          "risk": "Data migration failure",
+          "probability": "LOW",
+          "impact": "HIGH",
+          "mitigation": "Backup before migration"
+        }
+      ],
+      [
+        "RISK-002",
+        {
+          "code": "RISK-002",
+          "risk": "Authentication bypass",
+          "probability": "LOW",
+          "impact": "CRITICAL",
+          "mitigation": "Clerk security best practices"
+        }
+      ],
+      [
+        "RISK-003",
+        {
+          "code": "RISK-003",
+          "risk": "Performance degradation",
+          "probability": "MEDIUM",
+          "impact": "MEDIUM",
+          "mitigation": "Convex indexes + caching"
+        }
+      ],
+      [
+        "RISK-004",
+        {
+          "code": "RISK-004",
+          "risk": "Vendor lock-in (Convex)",
+          "probability": "LOW",
+          "impact": "MEDIUM",
+          "mitigation": "Abstract data layer"
+        }
+      ]
+    ]
+  },
+  "apiSurface": {
+    "queries": [],
+    "mutations": []
+  },
+  "screens": [
+    [
+      "SCR-001",
+      {
+        "code": "SCR-001",
+        "route": "/(admin)/administrator",
+        "file": "app\\(admin)\\administrator\\page.tsx",
+        "name": "Administrator",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-002",
+      {
+        "code": "SCR-002",
+        "route": "/(app)/appsmap",
+        "file": "app\\(app)\\appsmap\\page.tsx",
+        "name": "Appsmap",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-003",
+      {
+        "code": "SCR-003",
+        "route": "/(app)/cash-flow",
+        "file": "app\\(app)\\cash-flow\\page.tsx",
+        "name": "Cash Flow",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-004",
+      {
+        "code": "SCR-004",
+        "route": "/(app)/clients",
+        "file": "app\\(app)\\clients\\page.tsx",
+        "name": "Clients",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-005",
+      {
+        "code": "SCR-005",
+        "route": "/(app)/clients/[id]",
+        "file": "app\\(app)\\clients\\[id]\\page.tsx",
+        "name": "[Id]",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-006",
+      {
+        "code": "SCR-006",
+        "route": "/(app)/contacts",
+        "file": "app\\(app)\\contacts\\page.tsx",
+        "name": "Contacts",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-007",
+      {
+        "code": "SCR-007",
+        "route": "/(app)/dashboard",
+        "file": "app\\(app)\\dashboard\\page.tsx",
+        "name": "Dashboard",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-008",
+      {
+        "code": "SCR-008",
+        "route": "/(app)/engagement-letters",
+        "file": "app\\(app)\\engagement-letters\\page.tsx",
+        "name": "Engagement Letters",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-009",
+      {
+        "code": "SCR-009",
+        "route": "/(app)/packages",
+        "file": "app\\(app)\\packages\\page.tsx",
+        "name": "Packages",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-010",
+      {
+        "code": "SCR-010",
+        "route": "/(app)/proposals/new",
+        "file": "app\\(app)\\proposals\\new\\page.tsx",
+        "name": "New",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-011",
+      {
+        "code": "SCR-011",
+        "route": "/(app)/proposals",
+        "file": "app\\(app)\\proposals\\page.tsx",
+        "name": "Proposals",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-012",
+      {
+        "code": "SCR-012",
+        "route": "/(app)/proposals/[id]",
+        "file": "app\\(app)\\proposals\\[id]\\page.tsx",
+        "name": "[Id]",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-013",
+      {
+        "code": "SCR-013",
+        "route": "/(app)/services",
+        "file": "app\\(app)\\services\\page.tsx",
+        "name": "Services",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-014",
+      {
+        "code": "SCR-014",
+        "route": "/(app)/services/pricing-tool",
+        "file": "app\\(app)\\services\\pricing-tool\\page.tsx",
+        "name": "Pricing Tool",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-015",
+      {
+        "code": "SCR-015",
+        "route": "/(app)/settings",
+        "file": "app\\(app)\\settings\\page.tsx",
+        "name": "Settings",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-016",
+      {
+        "code": "SCR-016",
+        "route": "/(app)/templates",
+        "file": "app\\(app)\\templates\\page.tsx",
+        "name": "Templates",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-017",
+      {
+        "code": "SCR-017",
+        "route": "/(app)/work-planning",
+        "file": "app\\(app)\\work-planning\\page.tsx",
+        "name": "Work Planning",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-018",
+      {
+        "code": "SCR-018",
+        "route": "/(auth)/auth",
+        "file": "app\\(auth)\\auth\\page.tsx",
+        "name": "Auth",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-019",
+      {
+        "code": "SCR-019",
+        "route": "/(auth)/auth/redirect",
+        "file": "app\\(auth)\\auth\\redirect\\page.tsx",
+        "name": "Redirect",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-020",
+      {
+        "code": "SCR-020",
+        "route": "/(auth)/auth/sso-callback",
+        "file": "app\\(auth)\\auth\\sso-callback\\page.tsx",
+        "name": "Sso Callback",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-021",
+      {
+        "code": "SCR-021",
+        "route": "/(portal)/portal/[token]",
+        "file": "app\\(portal)\\portal\\[token]\\page.tsx",
+        "name": "[Token]",
+        "requirements": []
+      }
+    ],
+    [
+      "SCR-022",
+      {
+        "code": "SCR-022",
+        "route": "/",
+        "file": "app\\page.tsx",
+        "name": "Landing",
+        "requirements": []
+      }
+    ]
+  ],
+  "components": [
+    [
+      "app\\(admin)\\administrator\\page.tsx",
+      {
+        "path": "app\\(admin)\\administrator\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": true,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\cash-flow\\page.tsx",
+      {
+        "path": "app\\(app)\\cash-flow\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\clients\\[id]\\page.tsx",
+      {
+        "path": "app\\(app)\\clients\\[id]\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": true,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\proposals\\new\\page.tsx",
+      {
+        "path": "app\\(app)\\proposals\\new\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": true,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\proposals\\[id]\\page.tsx",
+      {
+        "path": "app\\(app)\\proposals\\[id]\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": true,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\services\\page.tsx",
+      {
+        "path": "app\\(app)\\services\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": true
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\settings\\page.tsx",
+      {
+        "path": "app\\(app)\\settings\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": true,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": true
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(app)\\work-planning\\page.tsx",
+      {
+        "path": "app\\(app)\\work-planning\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": true
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "app\\(portal)\\portal\\[token]\\page.tsx",
+      {
+        "path": "app\\(portal)\\portal\\[token]\\page.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": true,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": true
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\AddServiceSheet.tsx",
+      {
+        "path": "components\\sheets\\AddServiceSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": false,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\AddVersionSheet.tsx",
+      {
+        "path": "components\\sheets\\AddVersionSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": false,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\DuplicateServiceSheet.tsx",
+      {
+        "path": "components\\sheets\\DuplicateServiceSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\EditServiceSheet.tsx",
+      {
+        "path": "components\\sheets\\EditServiceSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": true,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\GlobalPriceAdjustmentSheet.tsx",
+      {
+        "path": "components\\sheets\\GlobalPriceAdjustmentSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": false,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\ImportSectionsSheet.tsx",
+      {
+        "path": "components\\sheets\\ImportSectionsSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": false,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "components\\sheets\\NewSectionSheet.tsx",
+      {
+        "path": "components\\sheets\\NewSectionSheet.tsx",
+        "patterns": {
+          "usesState": true,
+          "usesEffect": false,
+          "usesRouter": false,
+          "mockApiCalls": 0,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 0,
+        "transformationStatus": "pending"
+      }
+    ],
+    [
+      "services\\mockApi.ts",
+      {
+        "path": "services\\mockApi.ts",
+        "patterns": {
+          "usesState": false,
+          "usesEffect": false,
+          "usesRouter": false,
+          "mockApiCalls": 1,
+          "isClientComponent": true,
+          "hasForm": false,
+          "hasTable": false,
+          "hasDialog": false
+        },
+        "complexity": 1,
+        "transformationStatus": "pending"
+      }
+    ]
+  ],
+  "atoms": {
+    "total_atoms": 482,
+    "by_category": {
+      "screen": 66,
+      "wiring": 182,
+      "error": 52,
+      "requirement": 182
+    },
+    "verified": 35,
+    "pending": 447
+  },
+  "stats": {
+    "entities": 26,
+    "requirements": 192,
+    "filesCreated": 1,
+    "filesModified": 0,
+    "componentsTransformed": 0,
+    "docsGenerated": 0,
+    "gatesPassed": 0,
+    "gatesFailed": 0,
+    "testsGenerated": 0
+  }
+}

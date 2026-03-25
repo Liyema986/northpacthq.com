@@ -1,0 +1,673 @@
+{
+  "timestamp": "2026-03-23T12:05:24.779Z",
+  "chains": [
+    {
+      "id": "CHAIN-001",
+      "entity": "MockUser",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "mockusers.getAll exists but no frontend consumer",
+        "mockusers.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-002",
+      "entity": "AuthSession",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "authsessions.getAll exists but no frontend consumer",
+        "authsessions.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-003",
+      "entity": "Firm",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "firms.getAll exists but no frontend consumer",
+        "firms.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-004",
+      "entity": "ClientGroup",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "clientgroups.getAll exists but no frontend consumer",
+        "clientgroups.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-005",
+      "entity": "Entity",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "entitys.getAll exists but no frontend consumer",
+        "entitys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-006",
+      "entity": "ContactPerson",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "contactpersons.getAll exists but no frontend consumer",
+        "contactpersons.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-007",
+      "entity": "ClientGroupWithDetails",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "clientgroupwithdetails.getAll exists but no frontend consumer",
+        "clientgroupwithdetails.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-008",
+      "entity": "ServiceCategory",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "servicecategorys.getAll exists but no frontend consumer",
+        "servicecategorys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-009",
+      "entity": "TierLevel",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "tierlevels.getAll exists but no frontend consumer",
+        "tierlevels.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-010",
+      "entity": "ServiceTemplate",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "servicetemplates.getAll exists but no frontend consumer",
+        "servicetemplates.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-011",
+      "entity": "ServiceTemplateWithCategory",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "servicetemplatewithcategorys.getAll exists but no frontend consumer",
+        "servicetemplatewithcategorys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-012",
+      "entity": "ProposalItem",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalitems.getAll exists but no frontend consumer",
+        "proposalitems.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-013",
+      "entity": "Proposal",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposals.getAll exists but no frontend consumer",
+        "proposals.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-014",
+      "entity": "ProposalWithDetails",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalwithdetails.getAll exists but no frontend consumer",
+        "proposalwithdetails.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-015",
+      "entity": "ProposalSummary",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalsummarys.getAll exists but no frontend consumer",
+        "proposalsummarys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-016",
+      "entity": "CashFlowMonth",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "cashflowmonths.getAll exists but no frontend consumer",
+        "cashflowmonths.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-017",
+      "entity": "WorkPlanEntry",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "workplanentrys.getAll exists but no frontend consumer",
+        "workplanentrys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-018",
+      "entity": "EngagementParagraph",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "engagementparagraphs.getAll exists but no frontend consumer",
+        "engagementparagraphs.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-019",
+      "entity": "EngagementLetter",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "engagementletters.getAll exists but no frontend consumer",
+        "engagementletters.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-020",
+      "entity": "Principal",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "principals.getAll exists but no frontend consumer",
+        "principals.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-021",
+      "entity": "FirmSettings",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "firmsettings.getAll exists but no frontend consumer",
+        "firmsettings.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-022",
+      "entity": "ActivityItem",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "activityitems.getAll exists but no frontend consumer",
+        "activityitems.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-023",
+      "entity": "ProposalBuilderEntity",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalbuilderentitys.getAll exists but no frontend consumer",
+        "proposalbuilderentitys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-024",
+      "entity": "ProposalBuilderClientGroup",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalbuilderclientgroups.getAll exists but no frontend consumer",
+        "proposalbuilderclientgroups.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-025",
+      "entity": "ProposalEntitySummary",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalentitysummarys.getAll exists but no frontend consumer",
+        "proposalentitysummarys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "id": "CHAIN-026",
+      "entity": "ProposalBuilderSummary",
+      "links": {
+        "hasCreateMutation": true,
+        "hasUpdateMutation": true,
+        "hasRemoveMutation": true,
+        "hasGetAllQuery": true,
+        "hasGetByIdQuery": true,
+        "frontendConsumers": 0,
+        "frontendMutators": 0
+      },
+      "issues": [
+        "proposalbuildersummarys.getAll exists but no frontend consumer",
+        "proposalbuildersummarys.create exists but no frontend calls it"
+      ],
+      "status": "incomplete"
+    }
+  ],
+  "apiSurface": {
+    "mutations": [
+      "activityitems.create",
+      "activityitems.update",
+      "activityitems.remove",
+      "authsessions.create",
+      "authsessions.update",
+      "authsessions.remove",
+      "cashflowmonths.create",
+      "cashflowmonths.update",
+      "cashflowmonths.remove",
+      "clientgroups.create",
+      "clientgroups.update",
+      "clientgroups.remove",
+      "clientgroupwithdetails.create",
+      "clientgroupwithdetails.update",
+      "clientgroupwithdetails.remove",
+      "contactpersons.create",
+      "contactpersons.update",
+      "contactpersons.remove",
+      "engagementletters.create",
+      "engagementletters.update",
+      "engagementletters.remove",
+      "engagementparagraphs.create",
+      "engagementparagraphs.update",
+      "engagementparagraphs.remove",
+      "entitys.create",
+      "entitys.update",
+      "entitys.remove",
+      "firms.create",
+      "firms.update",
+      "firms.remove",
+      "firmsettings.create",
+      "firmsettings.update",
+      "firmsettings.remove",
+      "mockusers.create",
+      "mockusers.update",
+      "mockusers.remove",
+      "principals.create",
+      "principals.update",
+      "principals.remove",
+      "proposalbuilderclientgroups.create",
+      "proposalbuilderclientgroups.update",
+      "proposalbuilderclientgroups.remove",
+      "proposalbuilderentitys.create",
+      "proposalbuilderentitys.update",
+      "proposalbuilderentitys.remove",
+      "proposalbuildersummarys.create",
+      "proposalbuildersummarys.update",
+      "proposalbuildersummarys.remove",
+      "proposalentitysummarys.create",
+      "proposalentitysummarys.update",
+      "proposalentitysummarys.remove",
+      "proposalitems.create",
+      "proposalitems.update",
+      "proposalitems.remove",
+      "proposals.create",
+      "proposals.update",
+      "proposals.remove",
+      "proposalsummarys.create",
+      "proposalsummarys.update",
+      "proposalsummarys.remove",
+      "proposalwithdetails.create",
+      "proposalwithdetails.update",
+      "proposalwithdetails.remove",
+      "servicecategorys.create",
+      "servicecategorys.update",
+      "servicecategorys.remove",
+      "servicetemplates.create",
+      "servicetemplates.update",
+      "servicetemplates.remove",
+      "servicetemplatewithcategorys.create",
+      "servicetemplatewithcategorys.update",
+      "servicetemplatewithcategorys.remove",
+      "tierlevels.create",
+      "tierlevels.update",
+      "tierlevels.remove",
+      "users.ensureCurrentUser",
+      "users.update",
+      "users.updateRole",
+      "users.remove",
+      "workplanentrys.create",
+      "workplanentrys.update",
+      "workplanentrys.remove"
+    ],
+    "queries": [
+      "activityitems.getAll",
+      "activityitems.getById",
+      "activityitems.getByEntityId",
+      "activityitems.getByUserId",
+      "activityitems.getPaginated",
+      "permissions.getCurrentUserPermissions",
+      "authsessions.getAll",
+      "authsessions.getById",
+      "authsessions.getPaginated",
+      "cashflowmonths.getAll",
+      "cashflowmonths.getById",
+      "cashflowmonths.getPaginated",
+      "clientgroups.getAll",
+      "clientgroups.getById",
+      "clientgroups.getByFirmId",
+      "clientgroups.getPaginated",
+      "clientgroupwithdetails.getAll",
+      "clientgroupwithdetails.getById",
+      "clientgroupwithdetails.getPaginated",
+      "contactpersons.getAll",
+      "contactpersons.getById",
+      "contactpersons.getByClientGroupId",
+      "contactpersons.getByFirmId",
+      "contactpersons.getPaginated",
+      "engagementletters.getAll",
+      "engagementletters.getById",
+      "engagementletters.getByFirmId",
+      "engagementletters.getByProposalId",
+      "engagementletters.getPaginated",
+      "engagementparagraphs.getAll",
+      "engagementparagraphs.getById",
+      "engagementparagraphs.getByFirmId",
+      "engagementparagraphs.getByServiceTemplateId",
+      "engagementparagraphs.getPaginated",
+      "entitys.getAll",
+      "entitys.getById",
+      "entitys.getByClientGroupId",
+      "entitys.getByFirmId",
+      "entitys.getPaginated",
+      "firms.getAll",
+      "firms.getById",
+      "firms.getPaginated",
+      "firmsettings.getAll",
+      "firmsettings.getById",
+      "firmsettings.getByFirmId",
+      "firmsettings.getPaginated",
+      "mockusers.getAll",
+      "mockusers.getById",
+      "mockusers.getByFirmId",
+      "mockusers.getPaginated",
+      "principals.getAll",
+      "principals.getById",
+      "principals.getByFirmId",
+      "principals.getPaginated",
+      "proposalbuilderclientgroups.getAll",
+      "proposalbuilderclientgroups.getById",
+      "proposalbuilderclientgroups.getPaginated",
+      "proposalbuilderentitys.getAll",
+      "proposalbuilderentitys.getById",
+      "proposalbuilderentitys.getPaginated",
+      "proposalbuildersummarys.getAll",
+      "proposalbuildersummarys.getById",
+      "proposalbuildersummarys.getPaginated",
+      "proposalentitysummarys.getAll",
+      "proposalentitysummarys.getById",
+      "proposalentitysummarys.getByEntityId",
+      "proposalentitysummarys.getPaginated",
+      "proposalitems.getAll",
+      "proposalitems.getById",
+      "proposalitems.getByProposalId",
+      "proposalitems.getByServiceTemplateId",
+      "proposalitems.getPaginated",
+      "proposals.getAll",
+      "proposals.getById",
+      "proposals.getByFirmId",
+      "proposals.getByClientGroupId",
+      "proposals.getPaginated",
+      "proposalsummarys.getAll",
+      "proposalsummarys.getById",
+      "proposalsummarys.getPaginated",
+      "proposalwithdetails.getAll",
+      "proposalwithdetails.getById",
+      "proposalwithdetails.getPaginated",
+      "servicecategorys.getAll",
+      "servicecategorys.getById",
+      "servicecategorys.getByFirmId",
+      "servicecategorys.getPaginated",
+      "servicetemplates.getAll",
+      "servicetemplates.getById",
+      "servicetemplates.getByFirmId",
+      "servicetemplates.getByCategoryId",
+      "servicetemplates.getPaginated",
+      "servicetemplatewithcategorys.getAll",
+      "servicetemplatewithcategorys.getById",
+      "servicetemplatewithcategorys.getPaginated",
+      "tierlevels.getAll",
+      "tierlevels.getById",
+      "tierlevels.getPaginated",
+      "users.getCurrentUser",
+      "users.getById",
+      "users.getAll",
+      "workplanentrys.getAll",
+      "workplanentrys.getById",
+      "workplanentrys.getByFirmId",
+      "workplanentrys.getByProposalId",
+      "workplanentrys.getPaginated"
+    ],
+    "frontendCalls": []
+  },
+  "summary": {
+    "total": 26,
+    "complete": 0,
+    "incomplete": 26
+  }
+}
