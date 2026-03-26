@@ -194,7 +194,7 @@ export function Pricing() {
                   "w-full h-[52px] md:h-[44px] rounded-full font-semibold text-[14px] md:text-[13px] gap-2 group mt-auto",
                   plan.featured
                     ? "text-north-navy hover:opacity-90"
-                    : "bg-white border border-slate-200 text-slate-900 hover:border-north-gold hover:text-north-gold"
+                    : "bg-north-gold text-white hover:bg-north-gold/90"
                 )}
                 style={plan.featured ? { background: "#fff" } : {}}
               >

@@ -105,7 +105,7 @@ export function ProcessSection() {
             >
               <Button
                 onClick={() => router.push("/auth")}
-                className="w-full sm:w-auto h-[52px] sm:h-[46px] rounded-full font-semibold text-[15px] sm:text-[14px] gap-2 group bg-north-gold text-north-navy hover:bg-north-gold/90"
+                className="w-full sm:w-auto h-[52px] sm:h-[46px] rounded-full font-semibold text-[15px] sm:text-[14px] gap-2 group bg-north-gold text-white hover:bg-north-gold/90"
               >
                 Start your first proposal
                 <ArrowRight className="h-4 w-4 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-1" />

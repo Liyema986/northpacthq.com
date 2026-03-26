@@ -95,7 +95,7 @@ export function CTA() {
         >
           <Button
             asChild
-            className="w-full sm:w-auto rounded-full font-semibold text-[15px] sm:text-[14px] h-[52px] sm:h-[46px] px-8 gap-2 group bg-north-gold text-north-navy hover:bg-north-gold/90 shadow-none transition-transform hover:scale-[1.02]"
+            className="w-full sm:w-auto rounded-full font-semibold text-[15px] sm:text-[14px] h-[52px] sm:h-[46px] px-8 gap-2 group bg-north-gold text-white hover:bg-north-gold/90 shadow-none transition-transform hover:scale-[1.02]"
           >
             <Link href="/auth" className="flex items-center gap-2">
               Get started free

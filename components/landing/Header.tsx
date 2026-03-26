@@ -182,7 +182,7 @@ export function Header({ activeSection, onSectionChange }: HeaderProps) {
             >
               <button
                 onClick={() => { setMobileOpen(false); goDashboardOr("/auth?tab=sign-up"); }}
-                className="w-full h-[52px] rounded-full bg-north-gold text-north-navy font-semibold text-[16px] hover:bg-north-gold/90 transition-colors"
+                className="w-full h-[52px] rounded-full bg-north-gold text-white font-semibold text-[16px] hover:bg-north-gold/90 transition-colors"
               >
                 Get Started Free
               </button>

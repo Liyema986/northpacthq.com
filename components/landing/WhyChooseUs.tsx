@@ -136,7 +136,7 @@ export function WhyChooseUs() {
               </p>
               <Button
                 onClick={() => router.push("/auth")}
-                className="rounded-full font-semibold text-[14px] h-[46px] px-7 gap-2 group bg-north-gold text-north-navy hover:bg-north-gold/90"
+                className="rounded-full font-semibold text-[14px] h-[46px] px-7 gap-2 group bg-north-gold text-white hover:bg-north-gold/90"
               >
                 Start for free
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />

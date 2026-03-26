@@ -92,7 +92,7 @@ export function Hero() {
         >
           <Button
             onClick={handleGetStarted}
-            className="w-full sm:w-auto rounded-full bg-north-gold text-north-navy hover:bg-north-gold/90 font-semibold text-[16px] h-[52px] px-9 shadow-none transition-transform hover:scale-[1.02]"
+            className="w-full sm:w-auto rounded-full bg-north-gold text-white hover:bg-north-gold/90 font-semibold text-[16px] h-[52px] px-9 shadow-none transition-transform hover:scale-[1.02]"
           >
             Get Started Free
           </Button>
