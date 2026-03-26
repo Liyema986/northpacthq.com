@@ -20,7 +20,8 @@ const nextConfig: NextConfig = {
   
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ["@clerk/nextjs", "convex", "@radix-ui/react-icons"],
+    // Avoid listing "convex" here — it can break convex/react chunk loading in dev.
+    optimizePackageImports: ["@clerk/nextjs", "@radix-ui/react-icons"],
   },
   
   transpilePackages: ["convex"],
