@@ -654,6 +654,24 @@ export const listLetterVersions = query({
 });
 
 /**
+ * Lightweight picker list: returns _id + name for all letter versions in the firm.
+ */
+export const listLetterVersionsForPicker = query({
+  args: { userId: v.id("users") },
+  returns: v.array(v.object({ _id: v.id("engagementLetterVersions"), name: v.string() })),
+  handler: async (ctx, args) => {
+    const firmId = await getUserFirmIdSafe(ctx, args.userId);
+    if (!firmId) return [];
+    const versions = await ctx.db
+      .query("engagementLetterVersions")
+      .withIndex("by_firm_sort", (q) => q.eq("firmId", firmId))
+      .order("asc")
+      .collect();
+    return versions.map((v) => ({ _id: v._id, name: v.name }));
+  },
+});
+
+/**
  * Single engagement letter version (scope library) for edit screen.
  */
 export const getLetterVersion = query({
@@ -1220,6 +1238,162 @@ export const updateEngagementSuiteSettings = mutation({
     });
 
     return { success: true };
+  },
+});
+
+/**
+ * Finds all sections that have services on the proposal and are linked to
+ * a scope library template. Returns a map: templateVersionId -> { our, your }
+ * responsibility text from the section(s).
+ */
+async function collectSectionResponsibilities(
+  ctx: MutationCtx,
+  proposal: Doc<"proposals">,
+  firmId: Id<"firms">
+): Promise<Map<string, { our: string; your: string; sectionNames: string[] }>> {
+  const sectionIdsOnProposal = new Set<string>();
+  for (const row of proposal.services) {
+    const svc = await ctx.db.get(row.serviceId);
+    if (svc?.sectionId) sectionIdsOnProposal.add(String(svc.sectionId));
+  }
+
+  const allSections = await ctx.db
+    .query("serviceSections")
+    .withIndex("by_firm", (q) => q.eq("firmId", firmId))
+    .collect();
+
+  const grouped = new Map<string, { our: string; your: string; sectionNames: string[] }>();
+
+  for (const sec of allSections) {
+    if (!sectionIdsOnProposal.has(String(sec._id))) continue;
+    if (!sec.linkedLetterVersionId) continue;
+
+    const key = String(sec.linkedLetterVersionId);
+    const existing = grouped.get(key) ?? { our: "", your: "", sectionNames: [] };
+
+    if (sec.ourResponsibilityText?.trim()) {
+      existing.our = existing.our
+        ? existing.our + "\n\n" + sec.ourResponsibilityText.trim()
+        : sec.ourResponsibilityText.trim();
+    }
+    if (sec.yourResponsibilityText?.trim()) {
+      existing.your = existing.your
+        ? existing.your + "\n\n" + sec.yourResponsibilityText.trim()
+        : sec.yourResponsibilityText.trim();
+    }
+    existing.sectionNames.push(sec.name);
+    grouped.set(key, existing);
+  }
+
+  return grouped;
+}
+
+/**
+ * Generate engagement letters from the scope library templates linked to a
+ * proposal's service sections. Groups sections by linkedLetterVersionId,
+ * replaces template variables, and inserts one engagementLetters row per template.
+ */
+export const generateLetterFromScopeLibrary = mutation({
+  args: {
+    userId: v.id("users"),
+    proposalId: v.id("proposals"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+
+    const proposal = await ctx.db.get(args.proposalId);
+    if (!proposal || proposal.firmId !== user.firmId)
+      throw new Error("Proposal not found");
+
+    const client = await ctx.db.get(proposal.clientId);
+    if (!client) throw new Error("Client not found");
+
+    const firm = await ctx.db.get(user.firmId);
+    if (!firm) throw new Error("Firm not found");
+
+    const grouped = await collectSectionResponsibilities(ctx, proposal, user.firmId);
+
+    if (grouped.size === 0)
+      throw new Error(
+        "No sections on this proposal are linked to a scope library template"
+      );
+
+    const existingLetters = await ctx.db
+      .query("engagementLetters")
+      .withIndex("by_firm", (q) => q.eq("firmId", user.firmId))
+      .collect();
+    let nextNum = existingLetters.length + 1;
+
+    const results: { letterId: Id<"engagementLetters">; letterNumber: string; templateName: string }[] = [];
+
+    for (const [tplIdStr, { our, your }] of grouped) {
+      const tplId = tplIdStr as Id<"engagementLetterVersions">;
+      const version = await ctx.db.get(tplId);
+      if (!version) continue;
+
+      const yearEndMonth = proposal.financialYearEndMonth ?? "";
+      const yearEndYear = proposal.financialYearEndYear ?? "";
+      const yearEndDate = [yearEndMonth, yearEndYear].filter(Boolean).join(" ");
+
+      const clientAddress = [
+        client.addressLine1,
+        client.city,
+        client.region,
+        client.postalCode,
+        client.country,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      const vars: Record<string, string> = {
+        COMPANY_NAME: client.companyName,
+        COMPANY_ADDRESS: clientAddress,
+        YEAR_END_DATE: yearEndDate,
+        ENGAGEMENT_DATE: formatDate(Date.now()),
+        OUR_RESPONSIBILITIES: our,
+        YOUR_RESPONSIBILITIES: your,
+      };
+
+      const rawIntro = version.introduction ?? "";
+      const rawScope = version.scope ?? "";
+      let body = [rawIntro, rawScope].filter(Boolean).join("\n\n");
+
+      body = body.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
+        key in vars ? vars[key] : match
+      );
+
+      const letterNumber = `ENG-${new Date().getFullYear()}-${String(nextNum).padStart(3, "0")}`;
+      nextNum++;
+
+      const letterId = await ctx.db.insert("engagementLetters", {
+        firmId: user.firmId,
+        proposalId: args.proposalId,
+        clientId: proposal.clientId,
+        letterNumber,
+        scopeLibraryVersionId: tplId,
+        jurisdiction: firm.jurisdiction || "US",
+        serviceType: version.name,
+        content: body,
+        status: "draft",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      await ctx.db.insert("activities", {
+        firmId: user.firmId,
+        userId: args.userId,
+        entityType: "engagement-letter",
+        entityId: letterId,
+        action: "created",
+        metadata: { letterNumber, proposalId: args.proposalId },
+        timestamp: Date.now(),
+      });
+
+      results.push({ letterId, letterNumber, templateName: version.name });
+    }
+
+    return { success: true, letters: results };
   },
 });
 

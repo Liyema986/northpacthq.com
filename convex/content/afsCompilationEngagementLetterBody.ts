@@ -3,17 +3,15 @@
  * Stored in `engagementLetterVersions.scope`; `introduction` is left unset.
  */
 export const AFS_COMPILATION_ENGAGEMENT_LETTER_BODY = `The Directors
-HF Cilliers De Hoek Proprietary Limited
-38 Kerk Street
-Douglas
-8730
-01 June 2025
+{{COMPANY_NAME}}
+{{COMPANY_ADDRESS}}
+{{ENGAGEMENT_DATE}}
 Attention: Sirs
 ENGAGEMENT LETTER
 Dear Sirs
 You have requested that we provide the following services:
 On the  basis of information  that you will  provide, we will assist  you in the  preparation and presentation  of the following
-financial statements for HF Cilliers De Hoek Proprietary Limited: the statement of financial position as at 28 February 2025, and
+financial statements for {{COMPANY_NAME}}: the statement of financial position as at {{YEAR_END_DATE}}, and
 the statement of comprehensive income, statement of changes in equity and statement of cash flows for the year then ended,
 and the notes, comprising  a summary of significant accounting policies  and other explanatory information, on the  historical
 cost basis,  reflecting all  cash transactions  with the  addition of trade  accounts payable,  trade accounts  receivable less  an
@@ -22,9 +20,10 @@ reporting date, and capitalization of significant long-lived assets at historica
 the straight-line basis. These financial statements will not include explanatory notes, other than a note describing the basis of
 accounting as set out in this engagement letter.
 The purpose for which the financial statements will be used is to provide full-year financial information showing the company's
-financial position at the financial reporting date of 28 February 2025 and financial performance for the year then ended. The
+financial position at the financial reporting date of {{YEAR_END_DATE}} and financial performance for the year then ended. The
 financial statements will be solely for your use, and will not be distributed to other parties.
 Our Responsibilities
+{{OUR_RESPONSIBILITIES}}
 A compilation engagement involves  applying expertise in accounting and financial reporting  to assist you in the preparation
 and presentation  of financial  information. Since  a compilation  engagement is  not an  assurance engagement,  we are  not
 required to verify  the accuracy or  completeness of the  information you provide to  us for the  compilation engagement, or
@@ -50,7 +49,7 @@ achieving the objective of ensuring, as far as possible, the orderly and efficie
 Professional obligation to respond to non-compliance with laws and regulations  in terms of the IRBA Code of Professional
 Conduct (the Code)
 The partners and employees of our firm have a professional obligation to act in the public interest, and to act in order  to: (i)
-enable HF  Cilliers De  Hoek Proprietary  Limited (the  company) to rectify,  remediate or  mitigate the  consequences of  any
+enable {{COMPANY_NAME}} (the  company) to rectify,  remediate or  mitigate the  consequences of  any
 identified or suspected non-compliance with laws or regulations as described in the Code; or (ii) deter the commission of the
 non-compliance or suspected non-compliance with laws or regulations where it has not yet occurred.
 Non-compliance  with  laws  or  regulations  (non-compliance)  comprises  acts  of  omission  or  commission,  intentional  or
@@ -87,6 +86,7 @@ the professional ethics rules of confidentiality, which we observe.
 
 
 Your Responsibilities
+{{YOUR_RESPONSIBILITIES}}
 The compilation engagement to be performed is conducted on the basis that you acknowledge and understand that our role is
 to assist you in the preparation and presentation of the financial statements in accordance with the IFRS for SMEs® Accounting
 Standard as  issued by  the International  Accounting Standards  Board (IASB®).  Accordingly, you  have the  following overall
@@ -231,8 +231,7 @@ Our Compilation Report
 As part of our engagement, we will issue our report attached to the financial statements compiled by us, which  will describe
 the financial statements, and the work we performed for this compilation engagement [see attached]. The report will also note
 that the  use of the  financial statements  is restricted to  the purpose  set out in  this engagement  letter, and that  use and
-distribution of our report provided for the compilation engagement is restricted to you, as the directors of HF Cilliers De Hoek
-Proprietary Limited.
+distribution of our report provided for the compilation engagement is restricted to you, as the directors of {{COMPANY_NAME}}.
 Please sign  and  return the  attached copy  of this  letter to  indicate  your acknowledgement  of, and  agreement with,  the
 arrangements for our engagement to compile the financial statements described herein, and our respective responsibilities.
 Other Terms of Engagement
@@ -260,17 +259,22 @@ If you have any questions about the contents of this letter, please raise them w
 with your requirements and if the above terms are acceptable to you, please sign the copy of this letter in the space provided
 and return it to us. We appreciate the opportunity of continuing to be of service to your company.
 Yours faithfully
+__________________________________________________________________________________
 FS Schoeman
 Partner
 Risen Advisory
-Acknowledged and agreed on behalf of the directors of HF Cilliers De Hoek Proprietary Limited by
-In signing  this document,  you consent to  the processing  of the personal  information contained  within this document.  All
-information will be processed in terms of our privacy policy which can be obtained on request.
+
+Acknowledged and agreed on behalf of the directors of {{COMPANY_NAME}} by
+
+In signing this document, you consent to the processing of the personal information contained within this document. All information will be processed in terms of our privacy policy which can be obtained on request.
+
 Yours faithfully
-Director
-HF Cilliers
-Title
+
+___________________________________________________________    Director
+HF Cilliers                                                ___________________________________________________________
 08/08/2025
+                                                                      Title
+___________________________________________________________
 Date
 6`;
 

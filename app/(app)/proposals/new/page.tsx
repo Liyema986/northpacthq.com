@@ -559,6 +559,10 @@ function NewProposalInner() {
         ? "proposal_then_engagement_after_accept"
         : "proposal_only";
 
+      const primaryEntity = proposal.entities[0];
+      const fyeMonth = primaryEntity?.financialYearEndMonth || undefined;
+      const fyeYear = primaryEntity?.financialYearEndYear || undefined;
+
       if (isEditMode) {
         const result = await updateProposalMutation({
           userId,
@@ -579,6 +583,8 @@ function NewProposalInner() {
               }
             : {}),
           documentType: docType,
+          financialYearEndMonth: fyeMonth,
+          financialYearEndYear: fyeYear,
         });
 
         if (!result.success) {
@@ -610,6 +616,8 @@ function NewProposalInner() {
             }
           : {}),
         documentType: docType,
+        financialYearEndMonth: fyeMonth,
+        financialYearEndYear: fyeYear,
       });
 
       if (!result.success || !result.proposalId) {

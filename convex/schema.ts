@@ -268,6 +268,9 @@ export default defineSchema({
     iconColor: v.optional(v.string()),
     /** HTML: shown once in the engagement letter when any service from this section is on the proposal */
     engagementParagraphHtml: v.optional(v.string()),
+    ourResponsibilityText: v.optional(v.string()),
+    yourResponsibilityText: v.optional(v.string()),
+    linkedLetterVersionId: v.optional(v.id("engagementLetterVersions")),
     sortOrder: v.number(),
     isPublished: v.boolean(),
     createdAt: v.number(),
@@ -537,7 +540,8 @@ export default defineSchema({
     proposalId: v.id("proposals"),
     clientId: v.id("clients"),
     letterNumber: v.string(), // "ENG-2026-001"
-    templateId: v.id("letterTemplates"),
+    templateId: v.optional(v.id("letterTemplates")),
+    scopeLibraryVersionId: v.optional(v.id("engagementLetterVersions")),
     jurisdiction: v.string(), // "US", "UK", etc.
     serviceType: v.string(), // "audit", "bookkeeping", etc.
     content: v.string(), // Full letter HTML

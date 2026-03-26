@@ -45,6 +45,9 @@ const sectionReturn = v.object({
   iconName: v.optional(v.string()),
   iconColor: v.optional(v.string()),
   engagementParagraphHtml: v.optional(v.string()),
+  ourResponsibilityText: v.optional(v.string()),
+  yourResponsibilityText: v.optional(v.string()),
+  linkedLetterVersionId: v.optional(v.id("engagementLetterVersions")),
   sortOrder: v.number(),
   isPublished: v.boolean(),
   lineItems: v.array(lineItemReturn),
@@ -121,6 +124,9 @@ export const listSectionsWithItems = query({
           iconName: section.iconName,
           iconColor: section.iconColor,
           engagementParagraphHtml: section.engagementParagraphHtml,
+          ourResponsibilityText: section.ourResponsibilityText,
+          yourResponsibilityText: section.yourResponsibilityText,
+          linkedLetterVersionId: section.linkedLetterVersionId,
           sortOrder: section.sortOrder,
           isPublished: section.isPublished,
           lineItems,
@@ -186,6 +192,9 @@ export const updateSection = mutation({
     iconColor: v.optional(v.string()),
     isPublished: v.optional(v.boolean()),
     engagementParagraphHtml: v.optional(v.string()),
+    ourResponsibilityText: v.optional(v.string()),
+    yourResponsibilityText: v.optional(v.string()),
+    linkedLetterVersionId: v.optional(v.id("engagementLetterVersions")),
   },
   returns: v.object({ success: v.boolean(), error: v.optional(v.string()) }),
   handler: async (ctx, args) => {
@@ -210,6 +219,12 @@ export const updateSection = mutation({
     if (args.isPublished !== undefined) updates.isPublished = args.isPublished;
     if (args.engagementParagraphHtml !== undefined)
       updates.engagementParagraphHtml = args.engagementParagraphHtml;
+    if (args.ourResponsibilityText !== undefined)
+      updates.ourResponsibilityText = args.ourResponsibilityText;
+    if (args.yourResponsibilityText !== undefined)
+      updates.yourResponsibilityText = args.yourResponsibilityText;
+    if (args.linkedLetterVersionId !== undefined)
+      updates.linkedLetterVersionId = args.linkedLetterVersionId;
 
     await ctx.db.patch(args.sectionId, updates);
     return { success: true };

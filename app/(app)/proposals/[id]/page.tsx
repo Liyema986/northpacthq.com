@@ -176,6 +176,12 @@ function ProposalDetailPageInner() {
   );
   const updateProposal = useMutation(api.proposals.updateProposal);
   const deleteProposal = useMutation(api.proposals.deleteProposal);
+  const generateScopeLibraryLetter = useMutation(api.engagementLetters.generateLetterFromScopeLibrary);
+  const generatedLetter = useQuery(
+    api.engagementLetters.getLetterByProposal,
+    userId && id ? { userId, proposalId: id as Id<"proposals"> } : "skip"
+  );
+  const [generatingLetter, setGeneratingLetter] = useState(false);
   const firmPackages = useQuery(
     api.packageTemplates.list,
     userId ? { userId } : "skip"
@@ -327,6 +333,28 @@ function ProposalDetailPageInner() {
     }
   }
 
+  async function handleGenerateScopeLibraryLetter() {
+    if (!userId || !proposal) return;
+    setGeneratingLetter(true);
+    try {
+      const result = await generateScopeLibraryLetter({
+        userId,
+        proposalId: id as Id<"proposals">,
+      });
+      if (result.success) {
+        const count = result.letters.length;
+        toast.success(
+          `Generated ${count} engagement letter${count > 1 ? "s" : ""}`
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate";
+      toast.error(msg);
+    } finally {
+      setGeneratingLetter(false);
+    }
+  }
+
   if (loading) {
     return (
       <>
@@ -472,6 +500,14 @@ function ProposalDetailPageInner() {
                     {proposal.status === s && <span className="ml-auto text-[#C8A96E]">✓</span>}
                   </DropdownMenuItem>
                 ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleGenerateScopeLibraryLetter}
+                  disabled={generatingLetter}
+                >
+                  <FileText className="mr-2 h-4 w-4 text-slate-500" />
+                  {generatingLetter ? "Generating…" : "Generate engagement letter"}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 focus:bg-red-50 focus:text-red-700"
@@ -1130,6 +1166,45 @@ function ProposalDetailPageInner() {
                       Copy Portal Link
                     </Button>
                   </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
+                  <FileText className="h-4 w-4 text-amber-600" />
+                  <span className="text-[13px] font-semibold text-slate-800">Engagement Letter</span>
+                </div>
+                <div className="p-4 space-y-3">
+                  {generatedLetter ? (
+                    <>
+                      <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                          <FileText className="h-5 w-5 text-amber-700" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-medium text-slate-900 truncate">{generatedLetter.letterNumber}</p>
+                          <p className="text-[11px] text-slate-400">{generatedLetter.serviceType ?? "Engagement letter"} · {generatedLetter.status}</p>
+                        </div>
+                      </div>
+                      <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-slate-100 bg-white p-5 text-[13px] text-slate-700 leading-relaxed whitespace-pre-line">
+                        {generatedLetter.content ?? ""}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-[12px] text-slate-400">No engagement letter generated yet.</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGenerateScopeLibraryLetter}
+                        disabled={generatingLetter}
+                        className="w-full"
+                      >
+                        <FileText className="h-3.5 w-3.5 mr-1.5" />
+                        {generatingLetter ? "Generating…" : "Generate engagement letter"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 

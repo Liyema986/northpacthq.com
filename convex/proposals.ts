@@ -376,6 +376,8 @@ export const updateProposal = mutation({
     template: v.optional(v.string()),
     documentType: v.optional(v.string()),
     clientId: v.optional(v.id("clients")),
+    financialYearEndMonth: v.optional(v.string()),
+    financialYearEndYear: v.optional(v.string()),
   },
   returns: v.object({
     success: v.boolean(),
@@ -405,6 +407,8 @@ export const updateProposal = mutation({
     if (args.cashFlowStartMonth !== undefined) updates.cashFlowStartMonth = args.cashFlowStartMonth;
     if (args.oneOffCashMonth !== undefined) updates.oneOffCashMonth = args.oneOffCashMonth;
     if (args.paymentNotes !== undefined) updates.paymentNotes = args.paymentNotes;
+    if (args.financialYearEndMonth !== undefined) updates.financialYearEndMonth = args.financialYearEndMonth;
+    if (args.financialYearEndYear !== undefined) updates.financialYearEndYear = args.financialYearEndYear;
 
     if (args.entities !== undefined) updates.entities = args.entities;
     if (args.packageTemplate !== undefined) updates.packageTemplate = args.packageTemplate;

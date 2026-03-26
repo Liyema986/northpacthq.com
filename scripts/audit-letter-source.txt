@@ -483,14 +483,18 @@ The form and content of our report may need to be amended in the light of our au
  
  
 Yours faithfully
+__________________________________________________________________________________
 <Name of individual practitioner responsible for the engagement>
 <Registration number of firm and/or practitioner>
 Risen Advisory
+
 Acknowledged and agreed on behalf of the directors of RA Illustratives Proprietary Limited by
-In signing  this document,  you consent to  the processing  of the personal  information contained  within this document.  All
-information will be processed in terms of our privacy policy which can be obtained on request.
+
+In signing this document, you consent to the processing of the personal information contained within this document. All information will be processed in terms of our privacy policy which can be obtained on request.
+
 Yours faithfully
-(Practitioner/Partner(s)/Director(s) name)
-Date
-Title
+
+(Practitioner/Partner(s)/Director(s) name)                                                                    Title
+
+Date __________________________________________________________________________________
 11

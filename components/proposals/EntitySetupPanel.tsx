@@ -889,6 +889,30 @@ function ClientGroupLayout({
 
 // ─── Shared entity form (always expanded) ─────────────────────────────────────
 
+const YEAR_END_MONTH_OPTIONS = [
+  "31 January",
+  "28 February",
+  "31 March",
+  "30 April",
+  "31 May",
+  "30 June",
+  "31 July",
+  "31 August",
+  "30 September",
+  "31 October",
+  "30 November",
+  "31 December",
+];
+
+const SELECT_YE_NONE = "__ye_none__";
+
+const YEAR_OPTIONS = (() => {
+  const current = new Date().getFullYear();
+  const years: string[] = [];
+  for (let y = current - 2; y <= current + 5; y++) years.push(String(y));
+  return years;
+})();
+
 function EntityFields({
   entity,
   onUpdateEntity,
@@ -899,6 +923,7 @@ function EntityFields({
   const typeValue = coerceEntityTypeForSelect(entity.entityType) as EntityType;
   const revenueVal = entity.revenueRange ?? "Not Applicable";
   const taxBandVal = entity.incomeTaxRange ?? "Not Applicable";
+  const yeMonthVal = entity.financialYearEndMonth || SELECT_YE_NONE;
 
   return (
     <div className={formGrid2}>
@@ -965,6 +990,60 @@ function EntityFields({
             {INCOME_TAX_RANGE_OPTIONS.map((opt) => (
               <SelectItem key={opt} value={opt} className="text-sm">
                 {opt}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field
+        label="Financial year-end"
+        labelTooltip="Last day of the entity's financial year. Used in engagement letters and work planning."
+      >
+        <Select
+          value={yeMonthVal}
+          onValueChange={(v) =>
+            onUpdateEntity(entity.id, {
+              financialYearEndMonth: v === SELECT_YE_NONE ? undefined : v,
+            })
+          }
+        >
+          <SelectTrigger className={cn(selectTriggerCls)}>
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent position="popper" className="max-h-72">
+            <SelectItem value={SELECT_YE_NONE} className="text-muted-foreground">
+              Not set
+            </SelectItem>
+            {YEAR_END_MONTH_OPTIONS.map((m) => (
+              <SelectItem key={m} value={m} className="text-sm">
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field
+        label="Year-end year"
+        labelTooltip="The calendar year of the current financial year-end."
+      >
+        <Select
+          value={entity.financialYearEndYear || SELECT_YE_NONE}
+          onValueChange={(v) =>
+            onUpdateEntity(entity.id, {
+              financialYearEndYear: v === SELECT_YE_NONE ? undefined : v,
+            })
+          }
+        >
+          <SelectTrigger className={cn(selectTriggerCls)}>
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent position="popper" className="max-h-72">
+            <SelectItem value={SELECT_YE_NONE} className="text-muted-foreground">
+              Not set
+            </SelectItem>
+            {YEAR_OPTIONS.map((y) => (
+              <SelectItem key={y} value={y} className="text-sm">
+                {y}
               </SelectItem>
             ))}
           </SelectContent>

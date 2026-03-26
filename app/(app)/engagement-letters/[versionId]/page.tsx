@@ -29,8 +29,267 @@ import {
   type EngagementLetterVersionId,
 } from "@/lib/engagement-letter-constants";
 import { normalizeLetterWhitespace, normalizeScopeForStorage } from "@/lib/engagement-letter-text";
+import { TEMPLATE_VARIABLES } from "@/lib/engagement-letter-variables";
 
 const ACCENT = "#C8A96E";
+
+/* ── letterBodyToHtml ─────────────────────────────────────────────────
+ * Converts raw engagement-letter text (OCR/PDF with hard-wrapped lines)
+ * into structured HTML with proper headings, justified paragraphs,
+ * indented bullet lists, a compact address block, and preserved
+ * signature/closing formatting.
+ * ─────────────────────────────────────────────────────────────────── */
+
+type LetterSection = {
+  type: "address" | "title" | "heading" | "paragraph" | "bullets" | "signature";
+  lines: string[];
+};
+
+const _esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const _escWithBadges = (s: string) =>
+  _esc(s).replace(
+    /\{\{(\w+)\}\}/g,
+    (_m, token: string) =>
+      `<span class="letter-variable-badge" contenteditable="false" data-token="${token}">{{${token}}}</span>`
+  );
+
+function _isBulletLine(t: string): boolean {
+  return (
+    /^[•○◦–]\s/.test(t) ||
+    /^[•○◦–]$/.test(t) ||
+    /^\([a-z]\)\s/.test(t) ||
+    /^\([a-z]\)$/.test(t) ||
+    /^[a-z]\)\s/.test(t)
+  );
+}
+
+function _stripBulletPrefix(t: string): string {
+  return t
+    .replace(/^[•○◦–]\s*/, "")
+    .replace(/^\([a-z]\)\s*/, "")
+    .replace(/^[a-z]\)\s*/, "");
+}
+
+function _isAllCaps(t: string): boolean {
+  return t.length > 3 && t.length < 80 && t === t.toUpperCase() && /[A-Z]/.test(t) && !/[a-z]/.test(t);
+}
+
+function _isHeadingLike(t: string): boolean {
+  return t.length > 0 && t.length < 80 && /^[A-Z]/.test(t) && !/[.,:;]\s*$/.test(t) && !_isBulletLine(t);
+}
+
+function _endsWithSentence(t: string): boolean {
+  return /[.!?":;]\s*$/.test(t.trimEnd()) || /\)\s*$/.test(t.trimEnd());
+}
+
+function _isSignatureTrigger(t: string): boolean {
+  return (
+    /^Yours (faithfully|sincerely)/i.test(t) ||
+    /^Acknowledged and agreed/i.test(t) ||
+    t.includes("______") ||
+    /^In signing this document/i.test(t)
+  );
+}
+
+function _renderBullets(rawLines: string[]): string {
+  const prose: string[] = [];
+  const items: string[] = [];
+  let cur: string | null = null;
+  let seenBullet = false;
+
+  for (const raw of rawLines) {
+    const t = raw.trim();
+    if (!t) continue;
+    if (_isBulletLine(t)) {
+      seenBullet = true;
+      if (cur !== null) items.push(cur);
+      const after = _stripBulletPrefix(t);
+      cur = after || "";
+    } else if (!seenBullet) {
+      prose.push(t);
+    } else if (cur !== null) {
+      cur = cur ? cur + " " + t : t;
+    }
+  }
+  if (cur !== null) items.push(cur);
+
+  let html = "";
+  if (prose.length)
+    html += `<p>${_escWithBadges(prose.join(" ").replace(/ {2,}/g, " "))}</p>`;
+  if (items.length) {
+    html += '<ul class="letter-bullets">';
+    for (const item of items) if (item) html += `<li>${_escWithBadges(item.replace(/ {2,}/g, " "))}</li>`;
+    html += "</ul>";
+  }
+  return html;
+}
+
+function letterBodyToHtml(rawText: string): string {
+  let text = rawText.replace(/\ufffd/g, "\u2022").replace(/\u00b7/g, "\u2022");
+
+  const allLines = text.split("\n");
+
+  const lines: string[] = [];
+  for (let i = 0; i < allLines.length; i++) {
+    const t = allLines[i].trim();
+    if (/^\d{1,2}$/.test(t) && parseInt(t) < 30) {
+      const prevBlank = i === 0 || !allLines[i - 1].trim() || _endsWithSentence(allLines[i - 1].trim());
+      const nextBlank = i === allLines.length - 1 || !allLines[i + 1].trim();
+      if (prevBlank || nextBlank) continue;
+    }
+    lines.push(allLines[i]);
+  }
+
+  const sections: LetterSection[] = [];
+
+  let dearIdx = -1;
+  for (let i = 0; i < Math.min(lines.length, 15); i++) {
+    if (/^Dear\s/i.test(lines[i].trim())) { dearIdx = i; break; }
+  }
+
+  if (dearIdx >= 0) {
+    const addrLines: string[] = [];
+    let embeddedTitle: string | null = null;
+    for (let i = 0; i <= dearIdx; i++) {
+      const t = lines[i].trim();
+      if (!t) continue;
+      if (_isAllCaps(t) && t.length > 5) embeddedTitle = t;
+      else addrLines.push(t);
+    }
+    if (addrLines.length) sections.push({ type: "address", lines: addrLines });
+    if (embeddedTitle) sections.push({ type: "title", lines: [embeddedTitle] });
+  }
+
+  let sigZone = false;
+  let group: LetterSection | null = null;
+  let isFirstBody = true;
+  const startAt = dearIdx >= 0 ? dearIdx + 1 : 0;
+
+  function flush() {
+    if (!group || !group.lines.some((l) => l.trim())) { group = null; return; }
+    if (group.type === "paragraph") {
+      const merged = group.lines.join(" ").replace(/ {2,}/g, " ").trim();
+      if (merged.length < 200 && /^[A-Z]/.test(merged) && !/[.,:;!?"]\s*$/.test(merged)) {
+        group.type = "heading";
+      }
+    }
+    sections.push(group);
+    group = null;
+  }
+
+  for (let i = startAt; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+
+    if (!trimmed) { flush(); continue; }
+
+    if (!sigZone && _isSignatureTrigger(trimmed)) { flush(); sigZone = true; }
+
+    if (sigZone) {
+      if (!group || group.type !== "signature") { flush(); group = { type: "signature", lines: [] }; }
+      group!.lines.push(lines[i]);
+      continue;
+    }
+
+    if (isFirstBody) {
+      isFirstBody = false;
+      if (
+        trimmed.length < 100 &&
+        /^[A-Z]/.test(trimmed) &&
+        !/[.,:;]\s*$/.test(trimmed) &&
+        !trimmed.includes(". ")
+      ) {
+        flush();
+        sections.push({ type: "title", lines: [trimmed] });
+        continue;
+      }
+    }
+
+    if (_isAllCaps(trimmed) && trimmed.length > 5) {
+      flush();
+      sections.push({ type: "title", lines: [trimmed] });
+      continue;
+    }
+
+    if (!group && _isHeadingLike(trimmed)) {
+      const nextT = i + 1 < lines.length ? lines[i + 1].trim() : "";
+      if (nextT.length > 60 || !nextT || _isHeadingLike(nextT)) {
+        sections.push({ type: "heading", lines: [trimmed] });
+        continue;
+      }
+    }
+
+    if (_isBulletLine(trimmed)) {
+      if (!group || group.type !== "bullets") { flush(); group = { type: "bullets", lines: [] }; }
+      group!.lines.push(trimmed);
+      continue;
+    }
+
+    if (group?.type === "bullets") {
+      if (
+        _isHeadingLike(trimmed) &&
+        group.lines.length > 0 &&
+        _endsWithSentence(group.lines[group.lines.length - 1].trim())
+      ) {
+        const nextT = i + 1 < lines.length ? lines[i + 1].trim() : "";
+        if (nextT.length > 60 || !nextT || _isHeadingLike(nextT)) {
+          flush();
+          sections.push({ type: "heading", lines: [trimmed] });
+          continue;
+        }
+      }
+      group.lines.push(trimmed);
+      continue;
+    }
+
+    if (group?.type === "paragraph" && group.lines.length > 0) {
+      const prevT = group.lines[group.lines.length - 1].trim();
+      if (
+        _endsWithSentence(prevT) &&
+        trimmed.length < 80 &&
+        /^[A-Z]/.test(trimmed) &&
+        !/[.,:;]\s*$/.test(trimmed)
+      ) {
+        const nextT = i + 1 < lines.length ? lines[i + 1].trim() : "";
+        if (nextT.length > 60 || !nextT || _isHeadingLike(nextT)) {
+          flush();
+          sections.push({ type: "heading", lines: [trimmed] });
+          continue;
+        }
+      }
+    }
+
+    if (!group || group.type !== "paragraph") { flush(); group = { type: "paragraph", lines: [] }; }
+    group!.lines.push(trimmed);
+  }
+  flush();
+
+  return sections
+    .map((s) => {
+      const clean = s.lines.filter((l) => l.trim());
+      if (!clean.length) return "";
+      switch (s.type) {
+        case "address":
+          return `<div class="letter-address">${clean.map((l) => _escWithBadges(l.trim())).join("<br>")}</div>`;
+        case "title":
+          return `<h2 class="letter-title">${_escWithBadges(clean.join(" ").replace(/ {2,}/g, " ").trim())}</h2>`;
+        case "heading":
+          return `<h3 class="letter-heading">${_escWithBadges(clean.join(" ").replace(/ {2,}/g, " ").trim())}</h3>`;
+        case "paragraph": {
+          const merged = clean.join(" ").replace(/ {2,}/g, " ").trim();
+          return `<p>${_escWithBadges(merged)}</p>`;
+        }
+        case "bullets":
+          return _renderBullets(clean);
+        case "signature":
+          return `<div class="letter-signature">${s.lines.map((l) => _escWithBadges(l)).join("<br>")}</div>`;
+        default:
+          return "";
+      }
+    })
+    .join("");
+}
 
 function mergeLetterBody(introduction?: string | null, scope?: string | null): string {
   const a = introduction?.trim();
@@ -204,9 +463,36 @@ export default function EditLetterVersionPage() {
   const [showSuiteNav, setShowSuiteNav] = useState(true);
   const [suiteView, setSuiteView] = useState<SuiteEditorView>("template");
   const [emailPreviewTab, setEmailPreviewTab] = useState<"signed" | "acceptance">("signed");
+  const [editing, setEditing] = useState(false);
+  const [varMenuOpen, setVarMenuOpen] = useState(false);
   const afsBundledSyncLock = useRef(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const [ranLegacyAfsRepair, setRanLegacyAfsRepair] = useState(false);
+
+  useEffect(() => {
+    if (editing) {
+      const frame = requestAnimationFrame(() => {
+        editorRef.current?.focus();
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [editing]);
+
+  function insertVariable(token: string) {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) {
+      setLetterBody((prev) => prev + `{{${token}}}`);
+    } else {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(`{{${token}}}`));
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      if (editorRef.current) setLetterBody(editorRef.current.innerText);
+    }
+    setVarMenuOpen(false);
+  }
 
   /** Patches DB rows that still have old bare-line (a)(b)(c) AFS layout; refetches version via Convex. */
   useEffect(() => {
@@ -433,24 +719,80 @@ export default function EditLetterVersionPage() {
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
             ) : suiteView === "template" ? (
-              <div className="relative w-full px-4 py-10 sm:px-6 sm:py-12">
-                <button
-                  type="button"
-                  aria-label="Edit letter"
-                  title="Edit letter"
-                  className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200/90 bg-white text-slate-500 shadow-sm transition-colors hover:border-[#C8A96E]/40 hover:bg-[#C8A96E]/8 hover:text-[#C8A96E] sm:right-6 sm:top-6"
-                  onClick={() => editorRef.current?.focus()}
-                >
-                  <Pencil className="h-4 w-4" strokeWidth={2} />
-                </button>
+              <div className="flex w-full flex-col">
                 <div
-                  ref={editorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  spellCheck
-                  onInput={(e) => setLetterBody(e.currentTarget.innerText)}
-                  className="w-full min-h-[min(80vh,64rem)] whitespace-pre-wrap pr-11 text-left font-serif text-[15px] leading-[1.85] text-slate-900 [text-wrap:pretty] focus:outline-none empty:before:content-['Start_typing_your_engagement_letter…'] empty:before:text-slate-300 sm:pr-12"
-                />
+                  className={cn(
+                    "relative w-full overflow-hidden bg-white transition-colors",
+                    editing ? "ring-2 ring-[#C8A96E]/30 ring-inset" : ""
+                  )}
+                >
+                  {/* Edit mode indicator bar */}
+                  <div className={cn(
+                    "flex items-center justify-between px-4 py-2 text-[12px] font-medium transition-colors",
+                    editing
+                      ? "bg-[#C8A96E]/10 text-[#C8A96E]"
+                      : "bg-slate-50 text-slate-400"
+                  )}>
+                    <span>{editing ? "Editing — click anywhere in the letter to type" : "Read-only — click Edit to make changes"}</span>
+                    <div className="flex items-center gap-2">
+                      {editing && (
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setVarMenuOpen((v) => !v)}
+                            className="flex items-center gap-1.5 rounded-md border border-[#C8A96E]/30 bg-white px-3 py-1.5 text-[12px] font-semibold text-[#C8A96E] hover:bg-[#C8A96E]/5 transition-colors"
+                          >
+                            + Variable
+                          </button>
+                          {varMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-md border border-slate-200 bg-white shadow-lg py-1">
+                              {TEMPLATE_VARIABLES.map((v) => (
+                                <button
+                                  key={v.token}
+                                  type="button"
+                                  onClick={() => insertVariable(v.token)}
+                                  className="flex w-full flex-col px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+                                >
+                                  <span className="text-[12px] font-semibold text-slate-700">{`{{${v.token}}}`}</span>
+                                  <span className="text-[11px] text-slate-400">{v.description}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setEditing((prev) => !prev)}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors",
+                          editing
+                            ? "bg-[#C8A96E] text-white hover:bg-[#b8963e]"
+                            : "bg-white border border-slate-200 text-slate-700 hover:border-[#C8A96E]/40 hover:text-[#C8A96E]"
+                        )}
+                      >
+                        <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+                        {editing ? "Done editing" : "Edit"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Letter body — same justified HTML in both modes */}
+                  <div className="px-6 py-10 sm:px-10 sm:py-12">
+                    <div
+                      ref={editorRef}
+                      contentEditable={editing}
+                      suppressContentEditableWarning
+                      spellCheck={editing}
+                      onInput={editing ? (e) => setLetterBody(e.currentTarget.innerText) : undefined}
+                      dangerouslySetInnerHTML={{ __html: letterBodyToHtml(letterBody) }}
+                      className={cn(
+                        "engagement-letter-body w-full min-h-[min(80vh,64rem)] font-serif text-[14.5px] leading-[1.8] text-slate-900 focus:outline-none",
+                        editing ? "cursor-text" : "cursor-default select-none pointer-events-none"
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
             ) : (
               userId && (

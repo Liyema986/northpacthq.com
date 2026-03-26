@@ -45,6 +45,8 @@ export type ConvexProposalHydrateInput = {
   template?: string;
   packageTemplate?: string;
   documentType?: string;
+  financialYearEndMonth?: string;
+  financialYearEndYear?: string;
 };
 
 function coerceBilling(raw?: string): BillingCategory {
@@ -206,6 +208,11 @@ export function hydrateDraftFromConvexProposal(args: {
       },
     ];
   }
+  if (entities[0]) {
+    entities[0].financialYearEndMonth = proposal.financialYearEndMonth;
+    entities[0].financialYearEndYear = proposal.financialYearEndYear;
+  }
+
   const nameToId = new Map<string, string>();
   for (const e of entities) {
     nameToId.set(e.name, e.id);

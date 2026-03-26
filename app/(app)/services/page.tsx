@@ -34,6 +34,7 @@ import { EditServiceSheet, type LineItemForEdit } from "@/components/sheets/Edit
 import { DuplicateServiceSheet, type LineItemForDuplicate } from "@/components/sheets/DuplicateServiceSheet";
 import { GlobalPriceAdjustmentSheet } from "@/components/sheets/GlobalPriceAdjustmentSheet";
 import { ImportSectionsSheet }        from "@/components/sheets/ImportSectionsSheet";
+import { ServiceLetterConfigSheet, type SectionLetterConfig } from "@/components/sheets/ServiceLetterConfigSheet";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -59,6 +60,9 @@ type SectionRow = {
   iconColor?: string;
   /** Engagement letter: section intro when any line from this section is on a proposal */
   engagementParagraphHtml?: string;
+  ourResponsibilityText?: string;
+  yourResponsibilityText?: string;
+  linkedLetterVersionId?: Id<"engagementLetterVersions">;
   sortOrder: number;
   isPublished: boolean;
   lineItems: LineItemRow[];
@@ -182,6 +186,7 @@ export default function ServicesPage() {
 
   const [editCtx, setEditCtx] = useState<{ item: LineItemForEdit; sectionName: string } | null>(null);
   const [dupCtx, setDupCtx] = useState<{ item: LineItemForDuplicate; sectionId: Id<"serviceSections">; sectionName: string } | null>(null);
+  const [letterConfigCtx, setLetterConfigCtx] = useState<SectionLetterConfig | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: Id<"services">; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -694,6 +699,18 @@ export default function ServicesPage() {
                               >
                                 <TrendingUp className="mr-2 h-3.5 w-3.5 text-emerald-500" />Section price adjustment
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-[13px]"
+                                onClick={() => setLetterConfigCtx({
+                                  _id: sec._id,
+                                  name: sec.name,
+                                  ourResponsibilityText: sec.ourResponsibilityText,
+                                  yourResponsibilityText: sec.yourResponsibilityText,
+                                  linkedLetterVersionId: sec.linkedLetterVersionId,
+                                })}
+                              >
+                                <FileText className="mr-2 h-3.5 w-3.5 text-slate-500" />Engagement letter config
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem className="text-[13px]" onClick={() => handleSetAllActive(sec, true)}>
                                 <ToggleRight className="mr-2 h-3.5 w-3.5 text-emerald-500" />Activate all
@@ -921,6 +938,12 @@ export default function ServicesPage() {
             sectionMode={priceSectionMode}
           />
           <ImportSectionsSheet open={importOpen} onOpenChange={setImportOpen} userId={userId} />
+          <ServiceLetterConfigSheet
+            open={!!letterConfigCtx}
+            onOpenChange={(v) => { if (!v) setLetterConfigCtx(null); }}
+            section={letterConfigCtx}
+            userId={userId}
+          />
         </>
       )}
     </>

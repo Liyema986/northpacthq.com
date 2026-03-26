@@ -574,6 +574,10 @@ export interface ProposalBuilderEntity {
   revenueRange?: string;
   /** SARS / class band for income tax (optional) */
   incomeTaxRange?: string;
+  /** Financial year-end month, e.g. "28 February" */
+  financialYearEndMonth?: string;
+  /** Financial year-end year, e.g. "2026" */
+  financialYearEndYear?: string;
 }
 
 /** Contact row for Proposal Builder picker (grouped: organisations vs individuals). */
