@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
@@ -74,7 +74,7 @@ function formatLastSync(ts: number | null): string {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function AppsMapPage() {
+function AppsMapContent() {
   const { user } = useNorthPactAuth();
   const userId = user?.id as Id<"users"> | undefined;
   const searchParams = useSearchParams();
@@ -663,5 +663,13 @@ export default function AppsMapPage() {
         </SheetContent>
       </Sheet>
     </>
+  );
+}
+
+export default function AppsMapPage() {
+  return (
+    <Suspense>
+      <AppsMapContent />
+    </Suspense>
   );
 }
