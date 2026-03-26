@@ -409,14 +409,6 @@ function AuthPageContent() {
       {/* ═══ RIGHT — Auth forms ═══ */}
       <div className="flex-1 flex flex-col bg-white overflow-y-auto">
 
-        {/* Mobile header — logo only, no back button */}
-        {!isCodeStep && (
-          <div className="lg:hidden flex-shrink-0 flex items-center px-5 pt-5 pb-4 border-b border-slate-100">
-            <Link href="/">
-              <Image src="/logo1.png" alt="NorthPact" width={110} height={30} className="object-contain h-7 w-auto" />
-            </Link>
-          </div>
-        )}
 
         <div className="flex-1 flex flex-col px-5 sm:px-8 lg:px-12 py-4 sm:py-6 overflow-y-auto">
           <div className="w-full max-w-[500px] mx-auto my-auto flex flex-col">
