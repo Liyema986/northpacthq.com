@@ -40,7 +40,7 @@ export function WhyChooseUs() {
 
   return (
     <section id="why-choose-us" className="w-full bg-white">
-      <div className="w-full px-6 md:px-14 py-14 md:py-16">
+      <div className="w-full px-6 md:px-14 py-12 md:py-16">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
 
@@ -52,14 +52,13 @@ export function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55 }}
-              className="mb-8"
+              className="mb-6 md:mb-8"
             >
               <span className="inline-block text-[11px] font-bold tracking-[0.22em] uppercase mb-3 text-north-gold">
                 Why NorthPact
               </span>
               <h2
-                className="text-slate-900 font-bold leading-[1.06]"
-                style={{ fontSize: "clamp(1.8rem, 3.2vw, 44px)" }}
+                className="text-slate-900 font-bold leading-[1.06] text-[1.7rem] sm:text-[2rem] md:text-[2.4rem] lg:text-[2.75rem]"
               >
                 Built for firms that{" "}
                 <em className="not-italic text-north-gold">refuse</em>{" "}
@@ -75,7 +74,7 @@ export function WhyChooseUs() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.08 }}
-                  className="flex gap-5 py-4 group"
+                  className="flex gap-4 md:gap-5 py-4 group"
                 >
                   <span className="text-[11px] font-bold tabular-nums mt-0.5 shrink-0 w-5 text-north-gold">
                     {r.number}
@@ -97,7 +96,7 @@ export function WhyChooseUs() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55, delay: 0.15 }}
-            className="flex flex-col justify-between pl-0 lg:pl-16 pt-10 lg:pt-0"
+            className="flex flex-col justify-between pl-0 lg:pl-16 pt-8 md:pt-10 lg:pt-0"
           >
             {/* 2×2 stat grid — fills the full right half */}
             <div className="grid grid-cols-2 gap-px bg-slate-100 rounded-2xl overflow-hidden flex-1">
@@ -108,18 +107,18 @@ export function WhyChooseUs() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.2 + i * 0.09 }}
-                  className="flex flex-col justify-between bg-white p-8"
+                  className="flex flex-col justify-between bg-white p-4 sm:p-6 md:p-8"
                 >
                   <div>
                     <span
-                      className="font-bold leading-none tabular-nums"
-                      style={{ fontSize: "clamp(2.2rem, 3.8vw, 52px)", color: "#0F172A" }}
+                      className="font-bold leading-none tabular-nums text-[1.8rem] sm:text-[2.2rem] md:text-[2.8rem] lg:text-[3.25rem]"
+                      style={{ color: "#0F172A" }}
                     >
                       {s.value}
                     </span>
-                    <p className="text-slate-400 text-[13px] mt-2 leading-snug">{s.label}</p>
+                    <p className="text-slate-400 text-[12px] sm:text-[13px] mt-1.5 md:mt-2 leading-snug">{s.label}</p>
                   </div>
-                  <div className="mt-6 h-[2px] w-10 rounded-full bg-north-gold" />
+                  <div className="mt-4 sm:mt-6 h-[2px] w-8 sm:w-10 rounded-full bg-north-gold" />
                 </motion.div>
               ))}
             </div>

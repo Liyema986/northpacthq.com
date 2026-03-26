@@ -49,7 +49,7 @@ export function CTA() {
       ))}
 
       {/* Main content */}
-      <div className="relative z-10 w-full mx-auto px-6 md:px-14 py-14 md:py-16 flex flex-col items-center text-center gap-3">
+      <div className="relative z-10 w-full mx-auto px-6 md:px-14 py-12 md:py-16 flex flex-col items-center text-center gap-3">
 
         {/* Label */}
         <motion.span
@@ -68,8 +68,7 @@ export function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.08 }}
-          className="text-white font-semibold w-full mt-1"
-          style={{ fontSize: "clamp(1.9rem, 4.5vw, 58px)", lineHeight: 1.05 }}
+          className="text-white font-semibold w-full mt-1 text-[1.7rem] sm:text-[2.2rem] md:text-[3rem] lg:text-[3.625rem] leading-[1.05]"
         >
           Your next deal is{" "}
           <span className="text-north-gold">one proposal away.</span>
@@ -81,8 +80,7 @@ export function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55, delay: 0.18 }}
-          className="text-north-gray/80 max-w-[560px] w-full"
-          style={{ fontSize: "clamp(0.875rem, 1.4vw, 15px)", lineHeight: 1.65 }}
+          className="text-north-gray/80 max-w-[560px] w-full text-[14px] md:text-[15px] leading-[1.65]"
         >
           Join 2,000+ professionals creating proposals that win. Start free — no credit card needed.
         </motion.p>
@@ -93,22 +91,22 @@ export function CTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55, delay: 0.26 }}
-          className="flex flex-col sm:flex-row gap-2.5 mt-3"
+          className="flex flex-col sm:flex-row gap-2.5 mt-3 w-full sm:w-auto"
         >
           <Button
             asChild
-            className="rounded-full font-semibold text-[14px] h-[46px] px-8 gap-2 group bg-north-gold text-north-navy hover:bg-north-gold/90 shadow-none transition-transform hover:scale-[1.02]"
+            className="w-full sm:w-auto rounded-full font-semibold text-[15px] sm:text-[14px] h-[52px] sm:h-[46px] px-8 gap-2 group bg-north-gold text-north-navy hover:bg-north-gold/90 shadow-none transition-transform hover:scale-[1.02]"
           >
             <Link href="/auth" className="flex items-center gap-2">
               Get started free
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
 
           <Button
             asChild
             variant="ghost"
-            className="rounded-full font-semibold text-[14px] h-[46px] px-8 text-white hover:text-white hover:bg-north-gold/15 border border-north-gold/60 hover:border-north-gold"
+            className="w-full sm:w-auto rounded-full font-semibold text-[15px] sm:text-[14px] h-[52px] sm:h-[46px] px-8 text-white hover:text-white hover:bg-north-gold/15 border border-north-gold/60 hover:border-north-gold"
           >
             <Link href="#pricing">View pricing</Link>
           </Button>

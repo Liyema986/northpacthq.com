@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useConvexAuth } from "convex/react";
 import { SidebarProvider } from "@/lib/sidebar-context";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Loader2 } from "lucide-react";
+import { RoleBasedRedirect } from "@/components/auth/RoleBasedRedirect";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -17,18 +17,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) return null;
+  // Do not block the whole app with a full-page spinner while Convex auth resolves
+  // (refresh was showing a white screen until loading finished).
+  if (!isLoading && !isAuthenticated) return null;
 
   return (
     <SidebarProvider>
+      <RoleBasedRedirect />
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">

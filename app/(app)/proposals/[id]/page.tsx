@@ -20,7 +20,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import {
-  ChevronLeft, Send, CheckCircle2, MoreHorizontal, FileText,
+  ChevronDown, ChevronLeft, Send, CheckCircle2, MoreHorizontal, FileText,
   DollarSign, TrendingUp, Clock, Download, User, Building2, Mail,
   MessageSquare, Plus, AlertCircle, Tag,
   Banknote, ArrowRight, Copy, Layers3, Users,
@@ -33,6 +33,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useNorthPactAuth } from "@/lib/use-northpact-auth";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -182,6 +187,8 @@ function ProposalDetailPageInner() {
     userId && id ? { userId, proposalId: id as Id<"proposals"> } : "skip"
   );
   const [generatingLetter, setGeneratingLetter] = useState(false);
+  const [docsProposalOpen, setDocsProposalOpen] = useState(false);
+  const [docsLetterOpen, setDocsLetterOpen] = useState(false);
   const firmPackages = useQuery(
     api.packageTemplates.list,
     userId ? { userId } : "skip"
@@ -1139,74 +1146,110 @@ function ProposalDetailPageInner() {
         {/* ── Tab: Docs ─────────────────────────────────────────────────── */}
         {activeTab === "docs" && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
-                  <FileText className="h-4 w-4 text-red-500" />
-                  <span className="text-[13px] font-semibold text-slate-800">Proposal Document</span>
-                </div>
-                <div className="p-4 space-y-3">
-                  <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                      <FileText className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium text-slate-900 truncate">{proposal.title}.pdf</p>
-                      <p className="text-[11px] text-slate-400">{formatDate(createdAtStr)}</p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")}>
-                      <Download className="h-3.5 w-3.5 mr-1.5" />Download
-                    </Button>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")} className="flex-1">
-                      Generate PDF
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/portal/${id}`); toast.success("Portal link copied"); }} className="flex-1">
-                      Copy Portal Link
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
-                  <FileText className="h-4 w-4 text-amber-600" />
-                  <span className="text-[13px] font-semibold text-slate-800">Engagement Letter</span>
-                </div>
-                <div className="p-4 space-y-3">
-                  {generatedLetter ? (
-                    <>
-                      <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                          <FileText className="h-5 w-5 text-amber-700" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-medium text-slate-900 truncate">{generatedLetter.letterNumber}</p>
-                          <p className="text-[11px] text-slate-400">{generatedLetter.serviceType ?? "Engagement letter"} · {generatedLetter.status}</p>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <Collapsible
+                open={docsProposalOpen}
+                onOpenChange={setDocsProposalOpen}
+                className="min-w-0 w-full bg-white border border-slate-100 rounded-xl overflow-hidden"
+              >
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-4 py-3 border-b border-slate-100 text-left transition-colors hover:bg-slate-50/80"
+                  >
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
+                        docsProposalOpen ? "rotate-180" : "rotate-0"
+                      )}
+                      aria-hidden
+                    />
+                    <FileText className="h-4 w-4 text-red-500 shrink-0" />
+                    <span className="text-[13px] font-semibold text-slate-800">Proposal Document</span>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="overflow-hidden">
+                  <div className="p-4 space-y-3">
+                    <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                        <FileText className="h-5 w-5 text-red-600" />
                       </div>
-                      <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-slate-100 bg-white p-5 text-[13px] text-slate-700 leading-relaxed whitespace-pre-line">
-                        {generatedLetter.content ?? ""}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-slate-900 truncate">{proposal.title}.pdf</p>
+                        <p className="text-[11px] text-slate-400">{formatDate(createdAtStr)}</p>
                       </div>
-                    </>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-[12px] text-slate-400">No engagement letter generated yet.</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleGenerateScopeLibraryLetter}
-                        disabled={generatingLetter}
-                        className="w-full"
-                      >
-                        <FileText className="h-3.5 w-3.5 mr-1.5" />
-                        {generatingLetter ? "Generating…" : "Generate engagement letter"}
+                      <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")}>
+                        <Download className="h-3.5 w-3.5 mr-1.5" />Download
                       </Button>
                     </div>
-                  )}
-                </div>
-              </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")} className="flex-1">
+                        Generate PDF
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/portal/${id}`); toast.success("Portal link copied"); }} className="flex-1">
+                        Copy Portal Link
+                      </Button>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible
+                open={docsLetterOpen}
+                onOpenChange={setDocsLetterOpen}
+                className="min-w-0 w-full bg-white border border-slate-100 rounded-xl overflow-hidden"
+              >
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-4 py-3 border-b border-slate-100 text-left transition-colors hover:bg-slate-50/80"
+                  >
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
+                        docsLetterOpen ? "rotate-180" : "rotate-0"
+                      )}
+                      aria-hidden
+                    />
+                    <FileText className="h-4 w-4 text-amber-600 shrink-0" />
+                    <span className="text-[13px] font-semibold text-slate-800">Engagement Letter</span>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="overflow-hidden">
+                  <div className="p-4 space-y-3">
+                    {generatedLetter ? (
+                      <>
+                        <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                            <FileText className="h-5 w-5 text-amber-700" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-medium text-slate-900 truncate">{generatedLetter.letterNumber}</p>
+                            <p className="text-[11px] text-slate-400">{generatedLetter.serviceType ?? "Engagement letter"} · {generatedLetter.status}</p>
+                          </div>
+                        </div>
+                        <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-slate-100 bg-white p-5 text-[13px] text-slate-700 leading-relaxed whitespace-pre-line">
+                          {generatedLetter.content ?? ""}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-[12px] text-slate-400">No engagement letter generated yet.</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGenerateScopeLibraryLetter}
+                          disabled={generatingLetter}
+                          className="w-full"
+                        >
+                          <FileText className="h-3.5 w-3.5 mr-1.5" />
+                          {generatingLetter ? "Generating…" : "Generate engagement letter"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
               <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">

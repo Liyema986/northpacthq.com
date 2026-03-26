@@ -68,7 +68,7 @@ const PLANS = [
 export function Pricing() {
   return (
     <section id="pricing" className="w-full bg-white">
-      <div className="w-full px-6 md:px-14 py-14 md:py-16">
+      <div className="w-full px-6 md:px-14 py-12 md:py-16">
 
         {/* ── Label + headline ───────────────────────────────────── */}
         <motion.div
@@ -76,23 +76,19 @@ export function Pricing() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-6 md:mb-8"
         >
           <span className="inline-block text-[11px] font-bold tracking-[0.22em] uppercase mb-3 text-north-gold">
             Pricing
           </span>
-          <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:gap-20">
+          <div className="flex flex-col lg:flex-row lg:items-end gap-3 md:gap-4 lg:gap-20">
             <h2
-              className="text-slate-900 font-bold leading-[1.06] flex-1"
-              style={{ fontSize: "clamp(1.8rem, 3.2vw, 44px)" }}
+              className="text-slate-900 font-bold leading-[1.06] flex-1 text-[1.7rem] sm:text-[2rem] md:text-[2.4rem] lg:text-[2.75rem]"
             >
               Simple pricing.{" "}
               <span className="text-north-gold">No surprises.</span>
             </h2>
-            <p
-              className="text-slate-500 leading-relaxed max-w-[400px] lg:pb-1"
-              style={{ fontSize: "clamp(0.875rem, 1.3vw, 15px)" }}
-            >
+            <p className="text-slate-500 leading-relaxed max-w-[400px] lg:pb-1 text-[14px] md:text-[15px]">
               Start free. Upgrade when you need to. Cancel any time.
               Every plan includes a 14-day trial of Pro features.
             </p>
@@ -100,7 +96,7 @@ export function Pricing() {
         </motion.div>
 
         {/* ── Plans grid ────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           {PLANS.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -109,7 +105,7 @@ export function Pricing() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className={cn(
-                "relative flex flex-col rounded-[20px] p-6",
+                "relative flex flex-col rounded-[20px] p-5 md:p-6",
                 plan.featured
                   ? "text-white"
                   : "bg-white border border-slate-200"
@@ -195,7 +191,7 @@ export function Pricing() {
               <Button
                 asChild
                 className={cn(
-                  "w-full h-[44px] rounded-full font-semibold text-[13px] gap-2 group mt-auto",
+                  "w-full h-[52px] md:h-[44px] rounded-full font-semibold text-[14px] md:text-[13px] gap-2 group mt-auto",
                   plan.featured
                     ? "text-north-navy hover:opacity-90"
                     : "bg-white border border-slate-200 text-slate-900 hover:border-north-gold hover:text-north-gold"

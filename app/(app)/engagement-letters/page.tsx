@@ -30,12 +30,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ScrollText,
   Plus,
-  Search,
   MoreHorizontal,
   Pencil,
   Copy,
   Trash2,
-  FileText,
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -60,7 +58,6 @@ export default function EngagementLettersPage() {
   const versions = useMemo(() => convexVersions ?? [], [convexVersions]);
   const loading = convexVersions === undefined;
 
-  const [search, setSearch] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [deleteVersionId, setDeleteVersionId] = useState<Id<"engagementLetterVersions"> | null>(null);
   const [defaultsSeeded, setDefaultsSeeded] = useState(false);
@@ -94,17 +91,6 @@ export default function EngagementLettersPage() {
     };
   }, [userId, defaultsSeeded, ensureDefaults, fixLegacyNames, repairLegacyAfsBodies]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return versions;
-    return versions.filter(
-      (v) =>
-        v.name.toLowerCase().includes(q) ||
-        (v.introduction ?? "").toLowerCase().includes(q) ||
-        (v.scope ?? "").toLowerCase().includes(q)
-    );
-  }, [versions, search]);
-
   async function handleDuplicate(id: Id<"engagementLetterVersions">) {
     if (!userId) return;
     try {
@@ -126,81 +112,34 @@ export default function EngagementLettersPage() {
     setDeleteVersionId(null);
   }
 
-  const statTotal = versions.length;
-
   return (
     <>
       <Header />
       <div className="px-6 py-6 space-y-5 max-w-[1600px]">
-        {/* Stat tiles — same visual language as /proposals */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 leading-none">
-                Scope templates
-              </span>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[#C8A96E]/8">
-                <ScrollText className="h-3.5 w-3.5" style={{ color: ACCENT }} />
-              </div>
-            </div>
-            {loading ? (
-              <Skeleton className="h-7 w-12 mt-1" />
-            ) : (
-              <p className="text-[26px] font-bold text-slate-900 leading-none tabular-nums">{statTotal}</p>
-            )}
-            <p className="text-[11px] text-slate-400 mt-1 leading-tight">In your library</p>
-          </div>
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 leading-none">
-                Tip
-              </span>
-              <FileText className="h-3.5 w-3.5 text-slate-400" />
-            </div>
-            <p className="text-[12px] text-slate-600 leading-relaxed">
-              Edit a template to work on the full letter text. Letterhead, emails, and other suite options are available from the
-              editor side panels.
-            </p>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 min-w-48 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] transition-colors bg-white"
-              placeholder="Search templates…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="ml-auto flex items-center gap-2 shrink-0">
-            <Button
-              type="button"
-              size="sm"
-              className="h-9 text-[13px] font-semibold text-white"
-              style={{ background: ACCENT }}
-              onClick={() => setSheetOpen(true)}
-            >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              New template
-            </Button>
-          </div>
-        </div>
-
         {/* Table */}
         <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="text-[14px] font-semibold text-slate-900">Scope library</span>
               <ScopeLibraryStarterTooltip />
             </div>
-            {!loading && (
-              <span className="text-[11px] text-slate-400 shrink-0">
-                {filtered.length} template{filtered.length !== 1 ? "s" : ""}
-              </span>
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {!loading && (
+                <span className="text-[11px] text-slate-400">
+                  {versions.length} template{versions.length !== 1 ? "s" : ""}
+                </span>
+              )}
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 text-[12px] font-semibold text-white"
+                style={{ background: ACCENT }}
+                onClick={() => setSheetOpen(true)}
+              >
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                New template
+              </Button>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -232,29 +171,25 @@ export default function EngagementLettersPage() {
                     </div>
                   ))}
                 </div>
-              ) : filtered.length === 0 ? (
+              ) : versions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center px-4">
                   <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
                     <ScrollText className="h-5 w-5 text-slate-400" />
                   </div>
-                  <p className="text-[15px] font-semibold text-slate-700">
-                    {search ? "No templates match your search" : "No templates yet"}
-                  </p>
-                  {!search && (
-                    <Button
-                      type="button"
-                      className="mt-4 h-9 text-[13px] font-semibold text-white"
-                      style={{ background: ACCENT }}
-                      onClick={() => setSheetOpen(true)}
-                    >
-                      <Plus className="h-3.5 w-3.5 mr-1.5" />
-                      Add template
-                    </Button>
-                  )}
+                  <p className="text-[15px] font-semibold text-slate-700">No templates yet</p>
+                  <Button
+                    type="button"
+                    className="mt-4 h-9 text-[13px] font-semibold text-white"
+                    style={{ background: ACCENT }}
+                    onClick={() => setSheetOpen(true)}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Add template
+                  </Button>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-50">
-                  {filtered.map((v, idx) => (
+                  {versions.map((v, idx) => (
                     <div
                       key={v._id}
                       className={cn("grid pl-2 pr-4 py-3.5 items-start hover:bg-slate-50/60 transition-colors", GRID)}

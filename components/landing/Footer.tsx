@@ -25,72 +25,74 @@ const LINKS = {
 
 export function Footer() {
   return (
-    <footer className="w-full bg-north-gray/25 border-t border-north-navy/10">
-      <div className="w-full mx-auto px-4 md:px-8 pt-12 pb-8">
+    <footer className="w-full bg-north-gray/20 border-t border-north-navy/8">
 
-        {/* ── Top row ───────────────────────────────────────────── */}
-        <div className="flex flex-col lg:flex-row gap-10 lg:gap-24 mb-10">
+      {/* ── Top section ──────────────────────────────────────────── */}
+      <div className="w-full px-5 sm:px-6 md:px-8 pt-10 sm:pt-12 md:pt-16 pb-8 sm:pb-10">
+        <div className="flex flex-col lg:flex-row items-start justify-between gap-8 md:gap-10">
 
-          {/* Brand — larger logo, left-aligned with page content */}
-          <div className="lg:w-[300px] shrink-0 flex flex-col gap-3">
+          {/* Brand */}
+          <div className="flex flex-col gap-3 sm:gap-4 lg:max-w-[280px]">
             <Link href="/" className="flex w-fit items-center">
               <Image
                 src="/logo3.png"
                 alt="NorthPact"
                 width={200}
                 height={60}
-                className="object-contain object-left h-11 sm:h-[52px] w-auto max-w-[min(100%,300px)]"
+                className="object-contain object-left h-9 sm:h-10 md:h-11 w-auto"
               />
             </Link>
-
-            <p className="text-slate-400 text-[13px] leading-relaxed max-w-[280px]">
+            <p className="text-[14px] sm:text-[15px] leading-[1.6] tracking-[-0.16px] text-slate-500 max-w-[280px]">
               Create, send, and track professional proposals. Close deals faster.
             </p>
           </div>
 
-          {/* Link columns */}
-          <div className="flex gap-16 lg:gap-24 lg:ml-auto">
+          {/* Link columns — 2-col grid on mobile (trueagrihq pattern) */}
+          <div className="grid grid-cols-2 gap-x-10 gap-y-7 sm:flex sm:flex-wrap sm:gap-10 lg:gap-16 lg:ml-auto">
             {Object.entries(LINKS).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-3">
-                <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-north-navy">
+                <p className="text-[14px] sm:text-[15px] leading-[1.4] tracking-[-0.3px] text-north-navy font-semibold">
                   {title}
-                </span>
-                <ul className="flex flex-col gap-2">
+                </p>
+                <div className="flex flex-col gap-2.5 sm:gap-3">
                   {links.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.href}
-                        className="text-slate-500 text-[13px] hover:text-north-gold transition-colors duration-150"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      className="text-[14px] sm:text-[14px] leading-[1.5] tracking-[-0.12px] text-slate-500 hover:text-north-gold transition-colors duration-150"
+                    >
+                      {link.label}
+                    </Link>
                   ))}
-                </ul>
+                </div>
               </div>
             ))}
           </div>
-        </div>
 
+        </div>
       </div>
 
-      {/* Full-width divider — touches both edges */}
-      <div className="w-full h-px bg-north-navy/10" />
+      {/* Full-width divider */}
+      <div className="h-px w-full bg-north-navy/8" />
 
-      {/* ── Bottom bar ────────────────────────────────────────── */}
-      <div className="w-full mx-auto px-4 md:px-8 py-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <p className="text-slate-400 text-[12px]">
+      {/* ── Bottom bar ────────────────────────────────────────────── */}
+      <div className="w-full px-5 sm:px-6 md:px-8 py-5 sm:py-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+          <p className="text-[13px] leading-[1.5] tracking-[-0.12px] text-slate-400">
             &copy; {new Date().getFullYear()} NorthPact. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
-            {["Privacy", "Terms", "Cookies"].map((item) => (
+            {[
+              { label: "Privacy Policy", href: "#" },
+              { label: "Terms of Service", href: "#" },
+              { label: "Cookies", href: "#" },
+            ].map((item) => (
               <Link
-                key={item}
-                href="#"
-                className="text-slate-500 text-[12px] hover:text-north-gold transition-colors duration-150"
+                key={item.label}
+                href={item.href}
+                className="text-[13px] leading-[1.5] tracking-[-0.12px] text-slate-400 hover:text-north-gold transition-colors duration-150"
               >
-                {item}
+                {item.label}
               </Link>
             ))}
           </div>

@@ -14,7 +14,7 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: "owner" | "admin" | "senior" | "staff";
+  role: "owner" | "admin" | "senior" | "staff" | "view-only";
   firmId: Id<"firms">;
 }
 

@@ -301,7 +301,7 @@ function AuthPageContent() {
       <Button
         type="button"
         variant="outline"
-        className="h-[52px] sm:h-12 cursor-pointer rounded-xl font-medium"
+        className="h-[52px] sm:h-12 cursor-pointer text-[15px] font-medium rounded-xl sm:rounded-md"
         disabled={!!isOAuthLoading}
         onClick={() => signInWithOAuth("oauth_google")}
       >
@@ -320,7 +320,7 @@ function AuthPageContent() {
       <Button
         type="button"
         variant="outline"
-        className="h-[52px] sm:h-12 cursor-pointer rounded-xl font-medium"
+        className="h-[52px] sm:h-12 cursor-pointer text-[15px] font-medium rounded-xl sm:rounded-md"
         disabled={!!isOAuthLoading}
         onClick={() => signInWithOAuth("oauth_microsoft")}
       >
@@ -409,24 +409,21 @@ function AuthPageContent() {
       {/* ═══ RIGHT — Auth forms ═══ */}
       <div className="flex-1 flex flex-col bg-white overflow-y-auto">
 
-        {/* Mobile header */}
+        {/* Mobile header — logo only, no back button */}
         {!isCodeStep && (
-          <div className="lg:hidden flex-shrink-0 flex items-center justify-between px-5 pt-5 pb-4">
+          <div className="lg:hidden flex-shrink-0 flex items-center px-5 pt-5 pb-4 border-b border-slate-100">
             <Link href="/">
-              <Image src="/logo1.png" alt="NorthPact" width={90} height={24} className="object-contain" />
-            </Link>
-            <Link href="/" className="inline-flex items-center justify-center size-10 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all group" aria-label="Back to home">
-              <ArrowLeft className="w-[18px] h-[18px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.5} />
+              <Image src="/logo1.png" alt="NorthPact" width={110} height={30} className="object-contain h-7 w-auto" />
             </Link>
           </div>
         )}
 
-        <div className="flex-1 flex flex-col px-8 md:px-16 py-6 overflow-y-auto">
+        <div className="flex-1 flex flex-col px-5 sm:px-8 lg:px-12 py-4 sm:py-6 overflow-y-auto">
           <div className="w-full max-w-[500px] mx-auto my-auto flex flex-col">
 
-            {/* Back to home — desktop */}
+            {/* Back to home — all screen sizes, above heading */}
             {!isCodeStep && (
-              <Link href="/" className="mb-4 hidden lg:inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-slate-800 transition-colors group">
+              <Link href="/" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-slate-500 hover:text-slate-800 transition-colors group w-fit">
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" strokeWidth={1.5} />
                 Back to home
               </Link>
@@ -435,16 +432,16 @@ function AuthPageContent() {
             {/* Heading */}
             {isCodeStep ? (
               <div className="mb-5 text-center">
-                <h2 className="text-slate-900 font-bold leading-tight" style={{ fontSize: "clamp(1.6rem, 2.5vw, 32px)" }}>
+                <h2 className="text-[26px] sm:text-[32px] leading-[1.15] tracking-[-0.5px] sm:tracking-[-0.8px] text-slate-900 font-bold">
                   {showForgotPassword && !showResetCode ? "Reset password" : showResetCode ? "Set new password" : "Verify your email"}
                 </h2>
               </div>
             ) : (
               <div className="mb-4">
-                <h2 className="text-slate-900 font-bold leading-tight" style={{ fontSize: "clamp(1.6rem, 2.5vw, 32px)" }}>
+                <h2 className="text-[26px] sm:text-[32px] leading-[1.15] tracking-[-0.5px] sm:tracking-[-0.8px] text-slate-900 font-bold">
                   {activeTab === "login" ? "Welcome back" : "Create your account"}
                 </h2>
-                <p className="text-slate-500 text-[15px] mt-1.5">
+                <p className="text-[15px] sm:text-[16px] leading-[1.5] tracking-[-0.16px] text-slate-500 mt-1.5">
                   {activeTab === "login" ? "Sign in to access your NorthPact portal" : "Get started with NorthPact — free to try"}
                 </p>
                 {inviteToken && !inviteReady && (
@@ -477,18 +474,18 @@ function AuthPageContent() {
             <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as "login" | "signup"); setErrors({}); }}>
               {!isCodeStep && (
                 <>
-                  <TabsList className="grid w-full grid-cols-2 mb-4 h-12 rounded-xl bg-slate-100 p-1">
-                    <TabsTrigger value="login" className="cursor-pointer w-full h-full rounded-[10px] text-[15px] font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  <TabsList className="grid w-full grid-cols-2 mb-3 h-12 rounded-xl bg-[#f8f8f6] p-1">
+                    <TabsTrigger value="login" className="cursor-pointer w-full h-full rounded-[10px] text-[15px] font-medium tracking-[-0.14px] data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       Sign In
                     </TabsTrigger>
-                    <TabsTrigger value="signup" className="cursor-pointer w-full h-full rounded-[10px] text-[15px] font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <TabsTrigger value="signup" className="cursor-pointer w-full h-full rounded-[10px] text-[15px] font-medium tracking-[-0.14px] data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       Sign Up
                     </TabsTrigger>
                   </TabsList>
 
                   <OAuthButtons />
 
-                  <div className="flex items-center gap-3 mt-4 mb-1">
+                  <div className="flex items-center gap-3 mt-4 mb-0">
                     <div className="flex-1 h-px bg-slate-100" />
                     <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-400">or continue with email</span>
                     <div className="flex-1 h-px bg-slate-100" />
@@ -500,18 +497,18 @@ function AuthPageContent() {
               <TabsContent value="login" className={`${isCodeStep ? "mt-0" : "mt-3"} space-y-4`}>
                 {showLoginCode ? (
                   <form onSubmit={handleLoginCode} className="space-y-5">
-                    <p className="text-[15px] text-muted-foreground text-center leading-relaxed">
+                    <p className="text-[15px] sm:text-sm text-muted-foreground text-center leading-relaxed">
                       Enter the 6-digit code we sent to <span className="font-medium text-foreground">{loginEmail}</span>
                     </p>
                     <div className="space-y-2">
-                      <Label htmlFor="login-code">Verification code</Label>
+                      <Label htmlFor="login-code" className="text-[13px] sm:text-sm">Verification code</Label>
                       <Input id="login-code" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} placeholder="000000"
                         value={loginCode} onChange={(e) => setLoginCode(e.target.value.replace(/\D/g, ""))}
-                        className="h-12 text-center text-xl tracking-[0.3em] rounded-xl" />
+                        className="h-[52px] sm:h-12 text-center text-xl sm:text-lg tracking-[0.3em] rounded-xl sm:rounded-md" />
                     </div>
                     <div className="flex gap-3">
-                      <Button type="button" variant="outline" className="flex-1 h-12 cursor-pointer rounded-xl" onClick={() => { setShowLoginCode(false); setLoginCode(""); }} disabled={isLoginSubmitting}>Back</Button>
-                      <Button type="submit" className="flex-1 h-12 cursor-pointer rounded-xl" disabled={isLoginSubmitting || loginCode.length !== 6}>
+                      <Button type="button" variant="outline" className="flex-1 h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[15px] sm:text-sm" onClick={() => { setShowLoginCode(false); setLoginCode(""); }} disabled={isLoginSubmitting}>Back</Button>
+                      <Button type="submit" className="flex-1 h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[15px] sm:text-sm" disabled={isLoginSubmitting || loginCode.length !== 6}>
                         {isLoginSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
                       </Button>
                     </div>
@@ -519,52 +516,52 @@ function AuthPageContent() {
                 ) : showForgotPassword ? (
                   showResetCode ? (
                     <form onSubmit={handleResetPassword} className="space-y-4">
-                      <p className="text-[15px] text-muted-foreground text-center leading-relaxed">
+                      <p className="text-[15px] sm:text-sm text-muted-foreground text-center leading-relaxed">
                         Enter the code sent to <span className="font-medium text-foreground">{forgotEmail}</span> and set your new password.
                       </p>
                       <div className="space-y-2">
-                        <Label htmlFor="reset-code">Reset code</Label>
+                        <Label htmlFor="reset-code" className="text-sm sm:text-[15px]">Reset code</Label>
                         <Input id="reset-code" type="text" inputMode="numeric" placeholder="000000" value={resetCode}
                           onChange={(e) => setResetCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                          className="h-[52px] rounded-xl text-center tracking-[0.3em] font-mono" maxLength={6} autoFocus />
+                          className="h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] text-center tracking-[0.3em] font-mono placeholder:text-slate-300" maxLength={6} autoFocus />
                         {errors.resetCode && <p className="text-xs text-destructive">{errors.resetCode}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="new-password">New password</Label>
+                        <Label htmlFor="new-password" className="text-sm sm:text-[15px]">New password</Label>
                         <Input id="new-password" type="password" placeholder="Min. 6 characters" value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)} className={`h-[52px] rounded-xl ${errors.newPassword ? "border-destructive" : ""}`} />
+                          onChange={(e) => setNewPassword(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.newPassword && "border-destructive")} />
                         {errors.newPassword && <p className="text-xs text-destructive">{errors.newPassword}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="confirm-new-password">Confirm new password</Label>
+                        <Label htmlFor="confirm-new-password" className="text-sm sm:text-[15px]">Confirm new password</Label>
                         <Input id="confirm-new-password" type="password" placeholder="Repeat your password" value={confirmNewPassword}
-                          onChange={(e) => setConfirmNewPassword(e.target.value)} className={`h-[52px] rounded-xl ${errors.confirmNewPassword ? "border-destructive" : ""}`} />
+                          onChange={(e) => setConfirmNewPassword(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.confirmNewPassword && "border-destructive")} />
                         {errors.confirmNewPassword && <p className="text-xs text-destructive">{errors.confirmNewPassword}</p>}
                       </div>
                       <div className="flex gap-2">
-                        <Button type="button" variant="outline" className="h-[52px] cursor-pointer rounded-xl" disabled={isForgotSubmitting}
+                        <Button type="button" variant="outline" className="h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[15px] sm:text-sm" disabled={isForgotSubmitting}
                           onClick={() => { setShowResetCode(false); setResetCode(""); setNewPassword(""); setConfirmNewPassword(""); setErrors({}); }}>Back</Button>
-                        <Button type="submit" className="flex-1 h-[52px] cursor-pointer rounded-xl" disabled={isForgotSubmitting || resetCode.length !== 6}>
+                        <Button type="submit" className="flex-1 h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[15px] sm:text-sm" disabled={isForgotSubmitting || resetCode.length !== 6}>
                           {isForgotSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset Password"}
                         </Button>
                       </div>
                     </form>
                   ) : (
                     <form onSubmit={handleForgotPassword} className="space-y-4">
-                      <p className="text-[15px] text-muted-foreground text-center leading-relaxed">
+                      <p className="text-[15px] sm:text-sm text-muted-foreground text-center leading-relaxed">
                         Enter your email and we&apos;ll send you a code to reset your password.
                       </p>
                       <div className="space-y-2">
-                        <Label htmlFor="forgot-email">Email</Label>
+                        <Label htmlFor="forgot-email" className="text-sm sm:text-[15px]">Email</Label>
                         <Input id="forgot-email" type="email" placeholder="you@example.com" value={forgotEmail}
-                          onChange={(e) => setForgotEmail(e.target.value)} className={`h-[52px] rounded-xl ${errors.forgotEmail ? "border-destructive" : ""}`} autoFocus />
+                          onChange={(e) => setForgotEmail(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.forgotEmail && "border-destructive")} autoFocus />
                         {errors.forgotEmail && <p className="text-xs text-destructive">{errors.forgotEmail}</p>}
                       </div>
-                      <Button type="submit" className="w-full h-[52px] cursor-pointer rounded-xl font-medium" disabled={isForgotSubmitting}>
+                      <Button type="submit" className="w-full h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[16px] sm:text-[15px] font-medium" disabled={isForgotSubmitting}>
                         {isForgotSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending code...</> : "Send Reset Code"}
                       </Button>
                       <button type="button" onClick={() => { setShowForgotPassword(false); setForgotEmail(""); setErrors({}); }}
-                        className="w-full text-[13px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-center">
+                        className="w-full text-[13px] sm:text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer text-center py-1">
                         Back to sign in
                       </button>
                     </form>
@@ -572,25 +569,25 @@ function AuthPageContent() {
                 ) : (
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-email">Email</Label>
+                      <Label htmlFor="login-email" className="text-sm sm:text-[15px]">Email</Label>
                       <Input id="login-email" type="email" placeholder="you@example.com" value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)} readOnly={inviteLocked}
-                        className={`h-[52px] rounded-xl ${errors.email ? "border-destructive" : ""} ${inviteLocked ? "bg-slate-50 text-slate-700" : ""}`} />
+                        className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.email && "border-destructive", inviteLocked && "bg-slate-50 text-slate-700")} />
                       {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="login-password">Password</Label>
+                        <Label htmlFor="login-password" className="text-sm sm:text-[15px]">Password</Label>
                         <button type="button" onClick={() => { setShowForgotPassword(true); setForgotEmail(loginEmail); setErrors({}); }}
-                          className="text-[12px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                          className="text-[12px] sm:text-[13px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                           Forgot password?
                         </button>
                       </div>
                       <Input id="login-password" type="password" placeholder="Min. 6 characters" value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)} className={`h-[52px] rounded-xl ${errors.password ? "border-destructive" : ""}`} />
+                        onChange={(e) => setLoginPassword(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.password && "border-destructive")} />
                       {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                     </div>
-                    <Button type="submit" className="w-full h-[52px] cursor-pointer rounded-xl font-semibold text-[15px] bg-north-gold text-north-navy hover:bg-north-gold/90 !mt-5" disabled={isLoginSubmitting}>
+                    <Button type="submit" className="w-full h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md font-semibold text-[16px] sm:text-[15px] bg-north-gold text-north-navy hover:bg-north-gold/90 !mt-5" disabled={isLoginSubmitting}>
                       {isLoginSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : "Sign In"}
                     </Button>
                   </form>
@@ -601,54 +598,54 @@ function AuthPageContent() {
               <TabsContent value="signup" className={`${isCodeStep ? "mt-0" : "mt-3"} space-y-4`}>
                 {showSignupVerify ? (
                   <form onSubmit={handleSignupVerify} className="space-y-5">
-                    <p className="text-[15px] text-muted-foreground text-center leading-relaxed">
+                    <p className="text-[15px] sm:text-sm text-muted-foreground text-center leading-relaxed">
                       Enter the 6-digit code we sent to <span className="font-medium text-foreground">{signupEmail}</span>
                     </p>
                     <div className="space-y-2">
-                      <Label htmlFor="signup-code">Verification code</Label>
+                      <Label htmlFor="signup-code" className="text-[13px] sm:text-sm">Verification code</Label>
                       <Input id="signup-code" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={6} placeholder="000000"
                         value={signupCode} onChange={(e) => setSignupCode(e.target.value.replace(/\D/g, ""))}
-                        className="h-12 text-center text-xl tracking-[0.3em] rounded-xl" />
+                        className="h-[52px] sm:h-12 text-center text-xl sm:text-lg tracking-[0.3em] rounded-xl sm:rounded-md" />
                     </div>
                     <div className="flex gap-3">
-                      <Button type="button" variant="outline" className="flex-1 h-12 cursor-pointer rounded-xl" onClick={() => { setShowSignupVerify(false); setSignupCode(""); }} disabled={isSignupSubmitting}>Back</Button>
-                      <Button type="submit" className="flex-1 h-12 cursor-pointer rounded-xl" disabled={isSignupSubmitting || signupCode.length !== 6}>
+                      <Button type="button" variant="outline" className="flex-1 h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[15px] sm:text-sm" onClick={() => { setShowSignupVerify(false); setSignupCode(""); }} disabled={isSignupSubmitting}>Back</Button>
+                      <Button type="submit" className="flex-1 h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md text-[15px] sm:text-sm" disabled={isSignupSubmitting || signupCode.length !== 6}>
                         {isSignupSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
                       </Button>
                     </div>
                   </form>
                 ) : (
                   <form onSubmit={handleSignup} className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label htmlFor="signup-name">Full Name</Label>
+                        <Label htmlFor="signup-name" className="text-sm sm:text-[15px]">Full Name</Label>
                         <Input id="signup-name" type="text" placeholder="Your full name" value={signupName}
-                          onChange={(e) => setSignupName(e.target.value)} className={`h-[52px] rounded-xl ${errors.fullName ? "border-destructive" : ""}`} />
+                          onChange={(e) => setSignupName(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.fullName && "border-destructive")} />
                         {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="signup-email">Email</Label>
+                        <Label htmlFor="signup-email" className="text-sm sm:text-[15px]">Email</Label>
                         <Input id="signup-email" type="email" placeholder="you@example.com" value={signupEmail}
                           onChange={(e) => setSignupEmail(e.target.value)} readOnly={inviteLocked}
-                          className={`h-[52px] rounded-xl ${errors.email ? "border-destructive" : ""} ${inviteLocked ? "bg-slate-50 text-slate-700" : ""}`} />
+                          className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.email && "border-destructive", inviteLocked && "bg-slate-50 text-slate-700")} />
                         {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label htmlFor="signup-password">Password</Label>
+                        <Label htmlFor="signup-password" className="text-sm sm:text-[15px]">Password</Label>
                         <Input id="signup-password" type="password" placeholder="Min. 6 characters" value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)} className={`h-[52px] rounded-xl ${errors.password ? "border-destructive" : ""}`} />
+                          onChange={(e) => setSignupPassword(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.password && "border-destructive")} />
                         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="signup-confirm">Confirm Password</Label>
+                        <Label htmlFor="signup-confirm" className="text-sm sm:text-[15px]">Confirm Password</Label>
                         <Input id="signup-confirm" type="password" placeholder="Repeat your password" value={signupConfirmPassword}
-                          onChange={(e) => setSignupConfirmPassword(e.target.value)} className={`h-[52px] rounded-xl ${errors.confirmPassword ? "border-destructive" : ""}`} />
+                          onChange={(e) => setSignupConfirmPassword(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.confirmPassword && "border-destructive")} />
                         {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
                       </div>
                     </div>
-                    <Button type="submit" className="w-full h-[52px] cursor-pointer rounded-xl font-semibold text-[15px] bg-north-gold text-north-navy hover:bg-north-gold/90 !mt-4" disabled={isSignupSubmitting}>
+                    <Button type="submit" className="w-full h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md font-semibold text-[16px] sm:text-[15px] bg-north-gold text-north-navy hover:bg-north-gold/90 !mt-4" disabled={isSignupSubmitting}>
                       {isSignupSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : "Create Account"}
                     </Button>
                   </form>
@@ -660,11 +657,11 @@ function AuthPageContent() {
             <div id="clerk-captcha" className="!m-0 !p-0 [&:empty]:hidden" data-cl-theme="auto" data-cl-size="normal" />
 
             {!isCodeStep && (
-              <p className="text-[12px] text-slate-400 text-center mt-5 leading-relaxed">
+              <p className="text-[12px] text-slate-400/80 text-center mt-4 leading-relaxed pb-4 sm:pb-0 tracking-[-0.08px]">
                 By continuing, you agree to NorthPact&apos;s{" "}
-                <Link href="#" className="underline hover:text-slate-700 transition-colors">Terms of Service</Link>{" "}
+                <Link href="#" className="underline cursor-pointer hover:text-slate-700 transition-colors">Terms of Service</Link>{" "}
                 and{" "}
-                <Link href="#" className="underline hover:text-slate-700 transition-colors">Privacy Policy</Link>.
+                <Link href="#" className="underline cursor-pointer hover:text-slate-700 transition-colors">Privacy Policy</Link>.
               </p>
             )}
 

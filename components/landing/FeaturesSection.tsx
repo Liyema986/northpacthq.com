@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ArrowRight, Bell, FileSignature, BarChart3, CreditCard, MousePointerClick, ShieldCheck } from "lucide-react";
+import { ArrowRight, Bell, FileSignature, BarChart3, CreditCard, MousePointerClick, ShieldCheck, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -71,8 +71,105 @@ export function FeaturesSection() {
 
   return (
     <section id="workflow" className="w-full bg-white">
-      <div className="w-full px-6 md:px-14 py-14 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
+      <div className="w-full px-6 md:px-14 py-12 md:py-16">
+
+        {/* ══ MOBILE — accordion (hidden on lg+) ══════════════════════ */}
+        <div className="lg:hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+            className="mb-6"
+          >
+            <span className="inline-block text-[11px] font-bold tracking-[0.22em] uppercase mb-3 text-north-gold">
+              Features
+            </span>
+            <h2 className="text-slate-900 font-bold leading-[1.06] text-[1.7rem] sm:text-[2rem]">
+              Everything you need.{" "}
+              <em className="not-italic text-north-gold">Nothing you don&apos;t.</em>
+            </h2>
+          </motion.div>
+
+          <div className="flex flex-col divide-y divide-slate-100">
+            {FEATURES.map((f, i) => (
+              <motion.div
+                key={f.id}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: i * 0.05 }}
+              >
+                <button
+                  onClick={() => setActive(active === f.id ? FEATURES[0].id : f.id)}
+                  className="w-full flex items-center gap-3.5 py-4 text-left min-h-[52px]"
+                >
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200"
+                    style={{ background: active === f.id ? f.accent + "20" : "#f1f5f9" }}
+                  >
+                    <f.icon
+                      className="w-4 h-4 transition-colors duration-200"
+                      style={{ color: active === f.id ? f.accent : "#94a3b8" }}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      "flex-1 text-[15px] font-semibold transition-colors duration-200",
+                      active === f.id ? "text-slate-900" : "text-slate-500"
+                    )}
+                  >
+                    {f.label}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0",
+                      active === f.id && "rotate-180"
+                    )}
+                  />
+                </button>
+
+                {active === f.id && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="pb-5 pl-[52px] flex flex-col gap-3"
+                  >
+                    <h3 className="text-slate-900 font-bold text-[1.2rem] leading-[1.2]">
+                      {f.headline}
+                    </h3>
+                    <p className="text-slate-500 text-[14px] leading-relaxed">
+                      {f.body}
+                    </p>
+                    <p
+                      className="text-slate-400 text-[13px] leading-relaxed border-l-2 pl-3"
+                      style={{ borderColor: f.accent + "66" }}
+                    >
+                      {f.detail}
+                    </p>
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-slate-100">
+            <Button
+              onClick={() => router.push("/auth")}
+              className="w-full h-[52px] rounded-full font-semibold text-[15px] gap-2 group bg-north-gold text-north-navy hover:bg-north-gold/90"
+            >
+              Get started free
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <p className="text-slate-400 text-[12px] mt-3 text-center">
+              No credit card required · Up and running in 2 min
+            </p>
+          </div>
+        </div>
+
+        {/* ══ DESKTOP — tab / panel (hidden below lg) ════════════════ */}
+        <div className="hidden lg:grid lg:grid-cols-2 gap-0 items-stretch">
 
           {/* ── LEFT — label + headline + tab list ───────────────── */}
           <div className="flex flex-col pr-0 lg:pr-16 border-b lg:border-b-0 lg:border-r border-slate-100 pb-10 lg:pb-0">

@@ -44,7 +44,11 @@ const nextConfig: NextConfig = {
   // Redirects
   async redirects() {
     return [
-      { source: "/old-path", destination: "/new-path", permanent: true },
+      {
+        source: "/administrator",
+        destination: "/super/administrator",
+        permanent: true,
+      },
     ];
   },
 };

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,6 @@ import {
   ChevronDown,
   ArrowUp,
   ArrowDown,
-  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -269,12 +267,6 @@ export default function PackagesPage() {
                     <span className="text-[13px] text-slate-500"> – {pkg.template}</span>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
-                    <Button variant="outline" size="sm" className="h-8 text-[11px] border-slate-200" asChild>
-                      <Link href={`/proposals/new?packageId=${pkg._id}`}>
-                        <FileText className="w-3.5 h-3.5 mr-1" />
-                        Use in proposal
-                      </Link>
-                    </Button>
                     <button
                       type="button"
                       className="h-8 w-8 flex items-center justify-center rounded text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"

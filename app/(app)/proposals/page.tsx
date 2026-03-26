@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Plus, Search, FileText, TrendingUp, CheckCircle2,
-  Clock, Copy, Trash2, MoreHorizontal, Download,
+  Clock, Copy, Trash2, MoreHorizontal,
   Eye, Pencil, Send, User, History, Banknote, FilePlus,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
@@ -186,27 +186,6 @@ export default function ProposalsPage() {
     finally { setDeleteConfirmId(null); }
   };
 
-  function exportCsv() {
-    const rows = [
-      ["Number", "Title", "Client", "Status", "Total", "Created"],
-      ...filtered.map((p) => [
-        p.proposalNumber,
-        p.title,
-        p.clientName,
-        getStatusLabel(p.status),
-        String(p.total),
-        formatDate(p.createdAt),
-      ]),
-    ];
-    const csv = rows.map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "proposals.csv";
-    a.click();
-    toast.success("CSV exported");
-  }
-
   // ── Stat tiles config ─────────────────────────────────────────────────────
 
   const STAT_TILES = [
@@ -319,13 +298,6 @@ export default function ProposalsPage() {
             />
           </div>
           <div className="ml-auto flex items-center gap-2 shrink-0">
-            <button
-              onClick={exportCsv}
-              disabled={loading || filtered.length === 0}
-              className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-slate-200 text-[13px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors"
-            >
-              <Download className="h-3.5 w-3.5" /> Export CSV
-            </button>
             <Link
               href="/proposals/new"
               className="flex items-center gap-1.5 h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90"

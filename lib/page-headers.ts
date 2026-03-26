@@ -4,6 +4,8 @@
  * Pass `tab` when on /settings to get the sub-section title.
  */
 
+import { ADMIN_PANEL_PATH } from "@/lib/routes";
+
 const SETTINGS_HEADERS: Record<string, { title: string; description: string }> = {
   org:       { title: "Org profile", description: "Organization name, logo, and contact details." },
   overview:  { title: "Org profile", description: "Organization name, logo, and contact details." },
@@ -77,7 +79,7 @@ export function getPageHeader(
   if (base === "/appsmap") {
     return { title: "Apps Map", description: "Visualise your tech stack and integrations." };
   }
-  if (base === "/administrator") {
+  if (base === ADMIN_PANEL_PATH || base === "/administrator") {
     return { title: "Admin", description: "Firm administration, team, and permissions." };
   }
 

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const TESTIMONIALS = [
   {
@@ -64,7 +65,7 @@ const cardVariants = {
 export function Testimonials() {
   return (
     <section id="testimonials" className="w-full bg-white">
-      <div className="w-full px-6 md:px-14 py-14 md:py-16">
+      <div className="w-full px-6 md:px-14 py-12 md:py-16">
 
         {/* ── Label + headline ───────────────────────────────────── */}
         <motion.div
@@ -72,23 +73,19 @@ export function Testimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-6 md:mb-8"
         >
           <span className="inline-block text-[11px] font-bold tracking-[0.22em] uppercase mb-3 text-north-gold">
             Testimonials
           </span>
-          <div className="flex flex-col lg:flex-row lg:items-end gap-4 lg:gap-20">
+          <div className="flex flex-col lg:flex-row lg:items-end gap-3 md:gap-4 lg:gap-20">
             <h2
-              className="text-slate-900 font-bold leading-[1.06] flex-1"
-              style={{ fontSize: "clamp(1.8rem, 3.2vw, 44px)" }}
+              className="text-slate-900 font-bold leading-[1.06] flex-1 text-[1.7rem] sm:text-[2rem] md:text-[2.4rem] lg:text-[2.75rem]"
             >
               Firms that switched.{" "}
               <span className="text-north-gold">Never looked back.</span>
             </h2>
-            <p
-              className="text-slate-500 leading-relaxed max-w-[380px] lg:pb-1"
-              style={{ fontSize: "clamp(0.875rem, 1.3vw, 15px)" }}
-            >
+            <p className="text-slate-500 leading-relaxed max-w-[380px] lg:pb-1 text-[14px] md:text-[15px]">
               2,000+ professionals trust NorthPact to win their most
               important deals.
             </p>
@@ -96,7 +93,7 @@ export function Testimonials() {
         </motion.div>
 
         {/* ── Testimonial grid ───────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {TESTIMONIALS.map((t, i) => (
             <motion.div
               key={t.name}
@@ -105,7 +102,10 @@ export function Testimonials() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={cardVariants}
-              className="flex flex-col gap-4 rounded-[16px] p-5 bg-white border border-slate-100 hover:border-north-gold/30 hover:shadow-sm transition-all duration-200"
+              className={cn(
+                "flex flex-col gap-4 rounded-[16px] p-5 bg-white border border-slate-100 hover:border-north-gold/30 hover:shadow-sm transition-all duration-200",
+                i >= 3 && "hidden md:flex"
+              )}
             >
               {/* Stars */}
               <div className="flex gap-0.5">

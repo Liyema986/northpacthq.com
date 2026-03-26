@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useNorthPactAuth } from "@/lib/use-northpact-auth";
 import { SidebarProvider } from "@/lib/sidebar-context";
 import { useSidebar } from "@/lib/sidebar-context";
@@ -16,13 +18,35 @@ import {
 import {
   Loader2, Shield, Users, BarChart3, LogOut, Activity, PanelLeftClose,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ADMIN_PANEL_PATH } from "@/lib/routes";
+import { RoleBasedRedirect } from "@/components/auth/RoleBasedRedirect";
+
+/** Only the "admin" role gets the firm admin panel. Owners use /dashboard. */
+const FIRM_ADMIN_ROLES = new Set(["admin"]);
 
 const NAV = [
-  { label: "Overview",    tab: "overview",    href: "/administrator?tab=overview",    icon: BarChart3 },
-  { label: "Users",       tab: "users",       href: "/administrator?tab=users",       icon: Users },
-  { label: "Permissions", tab: "permissions", href: "/administrator?tab=permissions", icon: Shield },
-  { label: "Audit Log",   tab: "audit",       href: "/administrator?tab=audit",       icon: Activity },
+  { label: "Overview",    tab: "overview",    href: `${ADMIN_PANEL_PATH}?tab=overview`,    icon: BarChart3 },
+  { label: "Users",       tab: "users",       href: `${ADMIN_PANEL_PATH}?tab=users`,       icon: Users },
+  { label: "Permissions", tab: "permissions", href: `${ADMIN_PANEL_PATH}?tab=permissions`, icon: Shield },
+  { label: "Audit Log",   tab: "audit",       href: `${ADMIN_PANEL_PATH}?tab=audit`,       icon: Activity },
 ];
+
+// ── Loading skeleton ───────────────────────────────────────────────────────────
+function AdminContentSkeleton() {
+  return (
+    <div className="px-4 md:px-6 pt-3 md:pt-4 pb-4 md:pb-6">
+      <div className="space-y-4">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[100px] rounded-md" />
+          ))}
+        </div>
+        <Skeleton className="h-64 w-full rounded-md" />
+      </div>
+    </div>
+  );
+}
 
 // ── Nav links ─────────────────────────────────────────────────────────────────
 function AdminNavLinks({ collapsed }: { collapsed: boolean }) {
@@ -179,17 +203,26 @@ function AdminShell({ children }: { children: React.ReactNode }) {
 
 // ── Root layout ───────────────────────────────────────────────────────────────
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, isLoading } = useNorthPactAuth();
+  const { isAuthenticated, isLoading } = useNorthPactAuth();
   const router = useRouter();
 
+  // Subscribe to Convex role — this is the reactive source of truth.
+  const me = useQuery(api.users.getCurrentUser);
+  const meLoaded = me !== undefined;
+  const canAccessFirmAdmin = meLoaded && me !== null && FIRM_ADMIN_ROLES.has(me.role);
+
+  // Kick out unauthenticated users (Clerk layer).
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/auth");
   }, [isAuthenticated, isLoading, router]);
 
+  // Kick out users whose Convex role is not owner/admin (reactive — fires on role changes).
+  // window.location.replace guarantees leaving the admin route group.
   useEffect(() => {
-    if (!isLoading && user && user.role !== "owner" && user.role !== "admin")
-      router.replace("/dashboard");
-  }, [user, isLoading, router]);
+    if (meLoaded && !canAccessFirmAdmin) {
+      window.location.replace("/dashboard");
+    }
+  }, [meLoaded, canAccessFirmAdmin]);
 
   if (isLoading) {
     return (
@@ -199,13 +232,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAuthenticated || (user?.role !== "owner" && user?.role !== "admin")) {
+  if (!isAuthenticated) {
     return null;
   }
 
   return (
     <SidebarProvider>
-      <AdminShell>{children}</AdminShell>
+      <RoleBasedRedirect />
+      <AdminShell>
+        {/* Gate children: show skeleton while Convex loads or while redirecting away */}
+        {!meLoaded || !canAccessFirmAdmin ? <AdminContentSkeleton /> : children}
+      </AdminShell>
     </SidebarProvider>
   );
 }

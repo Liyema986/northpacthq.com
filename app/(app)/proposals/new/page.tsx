@@ -832,11 +832,7 @@ function mapContactToEntityFields(c: {
 
 export default function NewProposalPage() {
   return (
-    <Suspense fallback={
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-48 bg-muted animate-pulse rounded-lg" />
-      </div>
-    }>
+    <Suspense fallback={null}>
       <NewProposalInner />
     </Suspense>
   );

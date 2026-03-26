@@ -1,5 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// Auth only on the Edge — signed-in or redirect to sign-in. Firm role (owner/admin vs
+// staff, etc.) lives in Convex and is enforced in RoleBasedRedirect (same pattern as
+// trueagrihq: client role gate, not Edge middleware for DB roles).
+
 const isPublicRoute = createRouteMatcher([
   "/",
   "/auth(.*)",
