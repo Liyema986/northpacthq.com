@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, Fragment } from "react";
+import { useMemo, Fragment, Suspense } from "react";
 import { Header } from "@/components/layout/header";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -155,7 +155,7 @@ function WinRateTooltip({ active, payload, label }: {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user } = useNorthPactAuth();
   const uid = user ? (user.id as Id<"users">) : undefined;
 
@@ -1051,5 +1051,13 @@ export default function DashboardPage() {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardContent />
+    </Suspense>
   );
 }
