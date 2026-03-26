@@ -47,8 +47,8 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Link columns — 2-col grid on mobile (trueagrihq pattern) */}
-          <div className="grid grid-cols-2 gap-x-10 gap-y-7 sm:flex sm:flex-wrap sm:gap-10 lg:gap-16 lg:ml-auto">
+          {/* Link columns — stacked on mobile, row on sm+ */}
+          <div className="flex flex-col gap-7 sm:flex-row sm:flex-wrap sm:gap-10 lg:gap-16 lg:ml-auto">
             {Object.entries(LINKS).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-3">
                 <p className="text-[14px] sm:text-[15px] leading-[1.4] tracking-[-0.3px] text-north-navy font-semibold">
@@ -81,7 +81,7 @@ export function Footer() {
           <p className="text-[13px] leading-[1.5] tracking-[-0.12px] text-slate-400">
             &copy; {new Date().getFullYear()} NorthPact. All rights reserved.
           </p>
-          <div className="flex items-center gap-5">
+          <div className="hidden sm:flex items-center gap-5">
             {[
               { label: "Privacy Policy", href: "#" },
               { label: "Terms of Service", href: "#" },
