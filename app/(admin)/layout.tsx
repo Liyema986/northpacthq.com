@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "convex/react";
@@ -16,7 +16,7 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Loader2, Shield, Users, BarChart3, LogOut, Activity, PanelLeftClose,
+  Loader2, Shield, Users, BarChart3, LogOut, Activity, PanelLeftClose, MessageCircle,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ADMIN_PANEL_PATH } from "@/lib/routes";
@@ -30,6 +30,7 @@ const NAV = [
   { label: "Users",       tab: "users",       href: `${ADMIN_PANEL_PATH}?tab=users`,       icon: Users },
   { label: "Permissions", tab: "permissions", href: `${ADMIN_PANEL_PATH}?tab=permissions`, icon: Shield },
   { label: "Audit Log",   tab: "audit",       href: `${ADMIN_PANEL_PATH}?tab=audit`,       icon: Activity },
+  { label: "Support",     tab: "support",     href: `/super/support`,                      icon: MessageCircle },
 ];
 
 // ── Loading skeleton ───────────────────────────────────────────────────────────
@@ -51,12 +52,15 @@ function AdminContentSkeleton() {
 // ── Nav links ─────────────────────────────────────────────────────────────────
 function AdminNavLinks({ collapsed }: { collapsed: boolean }) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const activeTab = searchParams.get("tab") ?? "overview";
 
   return (
     <>
       {NAV.map(({ label, href, tab, icon: Icon }) => {
-        const isActive = activeTab === tab;
+        const isActive = tab === "support"
+          ? pathname === "/super/support"
+          : activeTab === tab;
 
         const content = (
           <Link

@@ -496,6 +496,67 @@ export const updateProfile = mutation({
 });
 
 /**
+ * Upload a user avatar to Convex storage and store the URL on the user record.
+ */
+export const updateUserAvatar = mutation({
+  args: {
+    userId: v.id("users"),
+    storageId: v.id("_storage"),
+  },
+  returns: v.object({ success: v.boolean(), avatarUrl: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { success: false };
+
+    // Try by authUserId first, then fall back to email (covers invited users)
+    let currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_auth_user", (q) => q.eq("authUserId", identity.tokenIdentifier))
+      .unique();
+    if (!currentUser && identity.email) {
+      currentUser = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", identity.email!))
+        .unique();
+    }
+    if (!currentUser || currentUser._id !== args.userId) return { success: false };
+
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) return { success: false };
+    await ctx.db.patch(args.userId, { avatar: url });
+    return { success: true, avatarUrl: url };
+  },
+});
+
+/**
+ * Clear the user's avatar.
+ */
+export const clearUserAvatar = mutation({
+  args: { userId: v.id("users") },
+  returns: v.object({ success: v.boolean() }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { success: false };
+
+    // Try by authUserId first, then fall back to email (covers invited users)
+    let currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_auth_user", (q) => q.eq("authUserId", identity.tokenIdentifier))
+      .unique();
+    if (!currentUser && identity.email) {
+      currentUser = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", identity.email!))
+        .unique();
+    }
+    if (!currentUser || currentUser._id !== args.userId) return { success: false };
+
+    await ctx.db.patch(args.userId, { avatar: undefined });
+    return { success: true };
+  },
+});
+
+/**
  * Get full profile for a specific user (including notification preferences).
  */
 export const getUserProfile = query({

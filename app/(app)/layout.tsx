@@ -6,6 +6,7 @@ import { useConvexAuth } from "convex/react";
 import { SidebarProvider } from "@/lib/sidebar-context";
 import { Sidebar } from "@/components/layout/sidebar";
 import { RoleBasedRedirect } from "@/components/auth/RoleBasedRedirect";
+import { SupportChatWidget } from "@/components/support/SupportChatWidget";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -32,6 +33,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
+      <SupportChatWidget />
     </SidebarProvider>
   );
 }

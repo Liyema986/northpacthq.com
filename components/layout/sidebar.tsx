@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useNorthPactAuth } from "@/lib/use-northpact-auth";
@@ -24,7 +23,9 @@ import {
 interface NavItem {
   label: string;
   href: string;
-  section?: boolean; // renders as a non-clickable section header
+  section?: boolean;  // renders as a non-clickable section header
+  proOnly?: boolean;  // hidden on starter plan — shown on pro/business
+  starterOnly?: boolean; // hidden on pro/business — shown on starter
 }
 
 interface NavGroup {
@@ -67,8 +68,8 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Pricing",
     icon: Package,
     items: [
-      { label: "Services", href: "/services" },
-      { label: "Pricing Tool", href: "/services/pricing-tool" },
+      { label: "Services",      href: "/services" },
+      { label: "Pricing Tool",  href: "/services/pricing-tool" },
     ],
   },
   {
@@ -87,31 +88,29 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Settings",
     icon: Settings,
     items: [
-      { label: "Workspace",     href: "",                            section: true },
-      { label: "Org profile", href: "/settings?tab=org" },
-      { label: "People",        href: "/settings?tab=people" },
-      { label: "Billing",       href: "/settings?tab=billing" },
-      { label: "Apps Map",      href: "/appsmap" },
-      { label: "Account",       href: "",                            section: true },
+      { label: "Workspace",     href: "",                            section: true, proOnly: true },
+      { label: "Org profile", href: "/settings?tab=org",                            proOnly: true },
+      { label: "People",        href: "/settings?tab=people",                       proOnly: true },
+      { label: "Billing",       href: "/settings?tab=billing",                      proOnly: true },
+      { label: "Apps Map",      href: "/appsmap",                                   proOnly: true },
+      { label: "Account",       href: "",                            section: true, proOnly: true },
       { label: "Profile",       href: "/settings?tab=account" },
-      { label: "Notifications", href: "/settings?tab=notifications" },
-      { label: "Preferences",    href: "",                            section: true },
-      { label: "Proposals",     href: "/settings?tab=proposals" },
-      { label: "Workflow",      href: "/settings?tab=workflow" },
-      { label: "Pricing",       href: "/settings?tab=pricing" },
+      { label: "Billing",       href: "/settings?tab=billing",      starterOnly: true },
+      { label: "Apps Map",      href: "/appsmap",                   starterOnly: true },
     ],
   },
 ];
 
 // ── Sub-nav with tree connector lines ─────────────────────────────────────────
 
-function GroupSubNav({ items, open }: { items: NavItem[]; open: boolean }) {
+function GroupSubNav({ items, open, isPro }: { items: NavItem[]; open: boolean; isPro: boolean }) {
   const pathname     = usePathname();
   const searchParams = useSearchParams();
 
   if (!open) return null;
 
-  const clickableItems = items.filter((i) => !i.section);
+  const visibleItems   = items.filter((i) => (!i.proOnly || isPro) && (!i.starterOnly || !isPro));
+  const clickableItems = visibleItems.filter((i) => !i.section);
 
   return (
     <div className="ml-[34px] mt-0.5 relative">
@@ -119,7 +118,7 @@ function GroupSubNav({ items, open }: { items: NavItem[]; open: boolean }) {
       <div className="absolute left-0 top-0 bottom-2 w-px bg-slate-200" />
 
       <div className="space-y-0.5">
-        {items.map((item, idx) => {
+        {visibleItems.map((item, idx) => {
           if (item.section) {
             return (
               <div key={`s-${idx}`} className={cn("relative", idx > 0 && "mt-3")}>
@@ -182,8 +181,11 @@ export function Sidebar() {
 
   const userId = user?.id as Id<"users"> | undefined;
   const firmSettings = useQuery(api.firms.getFirmSettings, userId ? { userId } : "skip");
+  const convexCurrentUser = useQuery(api.users.getCurrentUser);
+  const userAvatar = convexCurrentUser?.avatar ?? undefined;
   const firmLogoUrl = firmSettings?.firmLogoUrl ?? null;
   const firmNameForLogo = firmSettings?.name ?? "Firm";
+  const isPro = firmSettings?.subscriptionPlan === "professional" || firmSettings?.subscriptionPlan === "enterprise";
   const [firmLogoFailed, setFirmLogoFailed] = useState(false);
 
   useEffect(() => {
@@ -246,17 +248,19 @@ export function Sidebar() {
               aria-label="Expand sidebar"
             >
               {showFirmLogo ? (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={firmLogoUrl!}
                   alt={`${firmNameForLogo} logo`}
-                  width={32}
-                  height={32}
                   className="h-8 w-auto object-contain"
-                  priority
-                  unoptimized
-                  onError={() => {
-                    if (firmLogoUrl) setFirmLogoFailed(true);
-                  }}
+                  onError={() => setFirmLogoFailed(true)}
+                />
+              ) : userAvatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={userAvatar}
+                  alt={user?.name ?? "Avatar"}
+                  className="h-8 w-8 rounded-lg object-cover"
                 />
               ) : (
                 <div
@@ -271,17 +275,19 @@ export function Sidebar() {
             <>
               <div className="flex items-center min-w-0">
                 {showFirmLogo ? (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={firmLogoUrl!}
                     alt={`${firmNameForLogo} logo`}
-                    width={120}
-                    height={36}
                     className="h-8 w-auto max-w-[148px] object-contain object-left"
-                    priority
-                    unoptimized
-                    onError={() => {
-                      if (firmLogoUrl) setFirmLogoFailed(true);
-                    }}
+                    onError={() => setFirmLogoFailed(true)}
+                  />
+                ) : userAvatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={userAvatar}
+                    alt={user?.name ?? "Avatar"}
+                    className="h-8 w-8 rounded-lg object-cover"
                   />
                 ) : (
                   <div
@@ -353,7 +359,7 @@ export function Sidebar() {
                 </button>
 
                 <Suspense fallback={null}>
-                  <GroupSubNav items={group.items} open={expanded} />
+                  <GroupSubNav items={group.items} open={expanded} isPro={isPro} />
                 </Suspense>
               </div>
             );
@@ -367,10 +373,15 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <div className="flex justify-center">
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-[#243E63] shrink-0 cursor-default select-none"
-                    style={{ background: "#C8A96E" }}
+                    className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold text-[#243E63] shrink-0 cursor-default select-none"
+                    style={userAvatar ? undefined : { background: "#C8A96E" }}
                   >
-                    {getInitials(user?.name ?? "U")}
+                    {userAvatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={userAvatar} alt={user?.name ?? "Avatar"} className="w-full h-full object-cover" />
+                    ) : (
+                      getInitials(user?.name ?? "U")
+                    )}
                   </div>
                 </div>
               </TooltipTrigger>
@@ -379,10 +390,15 @@ export function Sidebar() {
           ) : (
             <div className="flex items-center gap-2.5 px-1">
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-[#243E63] shrink-0 select-none"
-                style={{ background: "#C8A96E" }}
+                className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold text-[#243E63] shrink-0 select-none"
+                style={userAvatar ? undefined : { background: "#C8A96E" }}
               >
-                {getInitials(user?.name ?? "U")}
+                {userAvatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={userAvatar} alt={user?.name ?? "Avatar"} className="w-full h-full object-cover" />
+                ) : (
+                  getInitials(user?.name ?? "U")
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[12px] font-semibold text-slate-900 truncate leading-tight">

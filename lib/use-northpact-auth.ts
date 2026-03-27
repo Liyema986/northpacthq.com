@@ -16,6 +16,7 @@ export interface AuthUser {
   email: string;
   role: "owner" | "admin" | "senior" | "staff" | "view-only";
   firmId: Id<"firms">;
+  avatar?: string;
 }
 
 export function useNorthPactAuth() {
@@ -41,6 +42,7 @@ export function useNorthPactAuth() {
           email: convexUser.email,
           role: convexUser.role as AuthUser["role"],
           firmId: convexUser.firmId,
+          avatar: convexUser.avatar ?? undefined,
         }
       : null;
 

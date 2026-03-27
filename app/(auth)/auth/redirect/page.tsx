@@ -19,6 +19,14 @@ export default function AuthRedirectPage() {
     if (user === undefined) return; // still loading
     if (redirectHandled.current) return;
     redirectHandled.current = true;
+
+    // Flag new users (created within last 90 seconds) for welcome confetti
+    try {
+      if (user && Date.now() - user._creationTime < 90_000) {
+        sessionStorage.setItem("northpact_new_user_welcome", "1");
+      }
+    } catch {}
+
     router.replace("/dashboard");
   }, [isAuthenticated, user, router]);
 

@@ -579,7 +579,7 @@ function AuthPageContent() {
                         onChange={(e) => setLoginPassword(e.target.value)} className={cn(`h-[52px] sm:h-12 rounded-xl sm:rounded-md text-[16px] sm:text-[15px] placeholder:text-slate-300`, errors.password && "border-destructive")} />
                       {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                     </div>
-                    <Button type="submit" className="w-full h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md font-semibold text-[16px] sm:text-[15px] bg-north-gold text-north-navy hover:bg-north-gold/90 !mt-5" disabled={isLoginSubmitting}>
+                    <Button type="submit" className="w-full h-[52px] sm:h-12 cursor-pointer rounded-xl sm:rounded-md font-semibold text-[16px] sm:text-[15px] bg-north-gold text-white hover:bg-north-gold/90 !mt-5" disabled={isLoginSubmitting}>
                       {isLoginSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : "Sign In"}
                     </Button>
                   </form>

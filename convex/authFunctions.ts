@@ -538,7 +538,11 @@ export const updateFirm = mutation({
     if (args.jurisdiction !== undefined) updates.jurisdiction = args.jurisdiction;
     if (args.currency !== undefined) updates.currency = args.currency;
     if (args.brandColors !== undefined) updates.brandColors = args.brandColors;
-    if (args.logo !== undefined) updates.logo = args.logo;
+    if (args.logo !== undefined) {
+      updates.logo = args.logo;
+      const resolvedUrl = await ctx.storage.getUrl(args.logo);
+      if (resolvedUrl) updates.logoUrl = resolvedUrl;
+    }
     if (args.proposalNumberPrefix !== undefined)
       updates.proposalNumberPrefix = args.proposalNumberPrefix;
     if (args.defaultProposalValidityDays !== undefined)
@@ -612,7 +616,7 @@ export const clearFirmLogo = mutation({
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");
     const now = Date.now();
-    await ctx.db.patch(user.firmId, { updatedAt: now, logo: undefined });
+    await ctx.db.patch(user.firmId, { updatedAt: now, logo: undefined, logoUrl: undefined });
     return { success: true };
   },
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, Fragment, Suspense } from "react";
+import { WelcomeConfetti } from "@/components/dashboard/WelcomeConfetti";
 import { Header } from "@/components/layout/header";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -1056,8 +1057,11 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={null}>
-      <DashboardContent />
-    </Suspense>
+    <>
+      <WelcomeConfetti />
+      <Suspense fallback={null}>
+        <DashboardContent />
+      </Suspense>
+    </>
   );
 }

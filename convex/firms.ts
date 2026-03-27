@@ -16,8 +16,10 @@ export const getFirmSettings = query({
     const firm = await ctx.db.get(firmId);
     if (!firm) return null;
 
-    let firmLogoUrl: string | null = null;
-    if (firm.logo) {
+    // Prefer the stored URL (set at upload time). Fall back to resolving from storageId for
+    // firms that uploaded a logo before this field was added.
+    let firmLogoUrl: string | null = firm.logoUrl ?? null;
+    if (!firmLogoUrl && firm.logo) {
       firmLogoUrl = await ctx.storage.getUrl(firm.logo);
     }
 

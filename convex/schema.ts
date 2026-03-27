@@ -11,6 +11,7 @@ export default defineSchema({
   firms: defineTable({
     name: v.string(),
     logo: v.optional(v.id("_storage")), // File storage reference
+    logoUrl: v.optional(v.string()),   // Resolved CDN URL — stored at upload time for reliable sidebar display
     brandColors: v.object({
       primary: v.string(), // Hex color
       secondary: v.string(),
@@ -879,6 +880,32 @@ export default defineSchema({
   })
     .index("by_firm", ["firmId"])
     .index("by_firm_enabled", ["firmId", "enabled"]),
+
+  // ===== SUPPORT CHAT =====
+  support_messages: defineTable({
+    userId: v.string(),            // authUserId (Convex Auth subject)
+    role: v.union(v.literal("user"), v.literal("support")),
+    content: v.string(),
+    createdAt: v.number(),
+    isAutoReply: v.optional(v.boolean()),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_user_and_created", ["userId", "createdAt"]),
+
+  // ===== HELP ARTICLES =====
+  help_articles: defineTable({
+    collection: v.string(),
+    title: v.string(),
+    slug: v.string(),
+    summary: v.optional(v.string()),
+    body: v.optional(v.string()),
+    url: v.optional(v.string()),
+    sortOrder: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_collection", ["collection"])
+    .index("by_slug", ["slug"]),
 
   // ===== PRINCIPALS (Engagement Letters > Key People) =====
   principals: defineTable({

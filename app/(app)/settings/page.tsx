@@ -28,7 +28,7 @@ import {
 import {
   Loader2, Mail, Trash2, UserCog, UserPlus, Save,
   Zap, Layers, Building2, Check, Search, MoreHorizontal,
-  Upload, Pencil, ArrowRight, X,
+  Upload, Pencil, ArrowRight, X, User,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getInitials, formatDate } from "@/lib/utils";
@@ -182,6 +182,8 @@ function SettingsPageInner() {
   const clearFirmLogoMut               = useMutation(api.authFunctions.clearFirmLogo);
   const generateLogoUploadUrl          = useMutation(api.authFunctions.generateLogoUploadUrl);
   const updateFirmMut                  = useMutation(api.authFunctions.updateFirm);
+  const updateUserAvatarMut            = useMutation(api.users.updateUserAvatar);
+  const clearUserAvatarMut             = useMutation(api.users.clearUserAvatar);
 
   const loading = firmSettings === undefined || convexUsers === undefined;
   const members = convexUsers ?? [];
@@ -206,6 +208,11 @@ function SettingsPageInner() {
   const [phone, setPhone] = useState("");
   const [profileName, setProfileName] = useState(user?.name ?? "");
   const [profileEmail, setProfileEmail] = useState(user?.email ?? "");
+  // Avatar
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarNeedsApply, setAvatarNeedsApply] = useState(false);
+  const avatarDirtyRef = useRef(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [profilePassword, setProfilePassword] = useState("");
   const [savingFirm, setSavingFirm] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -280,6 +287,9 @@ function SettingsPageInner() {
     if (userProfile) {
       setProfileName(userProfile.name ?? "");
       setProfileEmail(userProfile.email ?? "");
+      if (!avatarDirtyRef.current) {
+        setAvatarPreview(userProfile.avatar ?? null);
+      }
     }
   }, [userProfile?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -379,6 +389,36 @@ function SettingsPageInner() {
     toast.success("Logo removed from preview", {
       description: "Click Save logo below, or Save changes at the bottom to update the sidebar.",
     });
+  }
+
+  function onAvatarFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file (PNG, JPG, or WebP).");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Avatar must be 2 MB or smaller.");
+      return;
+    }
+    avatarDirtyRef.current = true;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAvatarPreview(reader.result as string);
+      setAvatarNeedsApply(true);
+      toast.success("Avatar ready — click Save profile to apply.");
+    };
+    reader.onerror = () => toast.error("Could not read that file.");
+    reader.readAsDataURL(file);
+  }
+
+  function clearAvatarLocal() {
+    avatarDirtyRef.current = true;
+    setAvatarPreview(null);
+    setAvatarNeedsApply(true);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+    toast.info("Avatar removed — click Save profile to apply.");
   }
 
   async function saveProposalSettings() {
@@ -682,6 +722,14 @@ function SettingsPageInner() {
         {activeTab === "account" && (
           <div className="space-y-4">
             <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                onChange={onAvatarFileChange}
+              />
+
               <div className="px-6 pt-6 pb-1 border-b border-slate-100">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                   Personal account
@@ -694,16 +742,65 @@ function SettingsPageInner() {
               {/* Row 1 — Avatar | Full name */}
               <div className="border-b border-slate-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-slate-100">
-                  <div className="px-6 py-5 flex items-start justify-between gap-4 border-b md:border-b-0 border-slate-100">
-                    <div className="min-w-0">
+                  {/* Avatar upload */}
+                  <div className="px-6 py-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between border-b md:border-b-0 border-slate-100">
+                    <div className="min-w-0 lg:max-w-[200px]">
                       <p className="text-[13px] font-medium text-slate-800">Avatar</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Shown across the app for you and your team.</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        PNG, JPG or WebP · max 2&nbsp;MB
+                      </p>
                     </div>
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-[13px] font-bold text-[#243E63] shrink-0"
-                      style={{ background: "#C8A96E" }}
-                    >
-                      {getInitials(profileName || (user?.name ?? "U"))}
+                    <div className="flex flex-col sm:flex-row gap-3 items-start shrink-0 lg:justify-end">
+                      {/* Preview */}
+                      <div
+                        className={cn(
+                          "relative flex h-[80px] w-[80px] shrink-0 items-center justify-center overflow-hidden rounded-xl border",
+                          avatarPreview ? "border-slate-200" : "border-dashed border-slate-200 bg-slate-50"
+                        )}
+                      >
+                        {avatarPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-1 px-2 text-center">
+                            <div
+                              className="w-10 h-10 rounded-lg flex items-center justify-center text-[13px] font-bold text-[#243E63]"
+                              style={{ background: "#C8A96E" }}
+                            >
+                              {getInitials(profileName || (user?.name ?? "U"))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {/* Actions */}
+                      <div className="flex flex-col gap-2 min-w-0">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                          >
+                            {avatarPreview ? (
+                              <><Pencil className="h-3.5 w-3.5" />Replace</>
+                            ) : (
+                              <><Upload className="h-3.5 w-3.5" />Upload</>
+                            )}
+                          </button>
+                          {avatarPreview && (
+                            <button
+                              type="button"
+                              onClick={clearAvatarLocal}
+                              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[12px] font-medium text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />Remove
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 leading-snug max-w-[220px]">
+                          Shown on your profile and visible to team members. Click{" "}
+                          <span className="font-medium text-slate-600">Save profile</span> below to apply.
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <div className="px-6 py-5 flex flex-col gap-3">
@@ -766,6 +863,29 @@ function SettingsPageInner() {
                     if (!userId) return;
                     setSavingFirm(true);
                     try {
+                      // Save avatar if it was changed
+                      if (avatarDirtyRef.current) {
+                        if (avatarPreview === null) {
+                          await clearUserAvatarMut({ userId });
+                        } else if (avatarPreview.startsWith("data:")) {
+                          const res = await fetch(avatarPreview);
+                          const blob = await res.blob();
+                          const uploadUrl = await generateLogoUploadUrl({ userId });
+                          const uploadRes = await fetch(uploadUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": blob.type || "application/octet-stream" },
+                            body: blob,
+                          });
+                          if (!uploadRes.ok) throw new Error("Avatar upload failed");
+                          const json = (await uploadRes.json()) as { storageId?: Id<"_storage"> };
+                          if (!json.storageId) throw new Error("No storage ID returned");
+                          const result = await updateUserAvatarMut({ userId, storageId: json.storageId });
+                          if (result.avatarUrl) setAvatarPreview(result.avatarUrl);
+                        }
+                        avatarDirtyRef.current = false;
+                        setAvatarNeedsApply(false);
+                      }
+                      // Save name
                       await updateProfileMut({ userId, name: profileName.trim() || undefined });
                       toast.success("Profile saved");
                     } catch { toast.error("Failed to save profile"); }
@@ -1510,7 +1630,7 @@ function SettingsPageInner() {
             </div>
 
             {/* Plan cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
               {PRICING_PLANS.map((plan) => {
                 const isCurrent = currentPlan === plan.id;
                 const isAnnual = billingPeriod === "annual";
@@ -1524,35 +1644,35 @@ function SettingsPageInner() {
                   <div
                     key={plan.id}
                     className={cn(
-                      "relative flex flex-col rounded-[20px] p-8",
+                      "relative flex flex-col rounded-2xl p-5",
                       plan.highlight ? "text-white" : "bg-white border border-slate-200"
                     )}
                     style={plan.highlight ? { backgroundColor: "#243E63" } : {}}
                   >
                     {plan.badge && (
-                      <span className="absolute top-6 right-6 text-[11px] font-bold tracking-[0.15em] uppercase px-3 py-1 rounded-full text-north-gold bg-north-gold/15 border border-north-gold/25">
+                      <span className="absolute top-4 right-4 text-[10px] font-bold tracking-[0.15em] uppercase px-2.5 py-0.5 rounded-full text-north-gold bg-north-gold/15 border border-north-gold/25">
                         {plan.badge}
                       </span>
                     )}
 
                     <span
                       className={cn(
-                        "text-[12px] font-bold tracking-[0.18em] uppercase mb-6",
+                        "text-[11px] font-bold tracking-[0.18em] uppercase mb-3",
                         plan.highlight ? "text-white/50" : "text-slate-400"
                       )}
                     >
                       {plan.name}
                     </span>
 
-                    <div className="flex items-baseline gap-2 mb-1">
+                    <div className="flex items-baseline gap-1.5 mb-1">
                       <span
                         className={cn("font-bold leading-none", plan.highlight ? "text-white" : "text-slate-900")}
-                        style={{ fontSize: "clamp(2.4rem, 4vw, 52px)" }}
+                        style={{ fontSize: "clamp(1.75rem, 3vw, 36px)" }}
                       >
                         {displayPrice}
                       </span>
                       <span
-                        className={cn("text-[14px]", plan.highlight ? "text-white/50" : "text-slate-400")}
+                        className={cn("text-[12px]", plan.highlight ? "text-white/50" : "text-slate-400")}
                       >
                         {subLabel}
                       </span>
@@ -1560,7 +1680,7 @@ function SettingsPageInner() {
 
                     <p
                       className={cn(
-                        "text-[14px] leading-relaxed mb-8 mt-3",
+                        "text-[12px] leading-relaxed mb-4 mt-2",
                         plan.highlight ? "text-white/60" : "text-slate-500"
                       )}
                     >
@@ -1568,16 +1688,16 @@ function SettingsPageInner() {
                     </p>
 
                     <div
-                      className={cn("h-px w-full mb-8", plan.highlight ? "bg-white/10" : "bg-slate-100")}
+                      className={cn("h-px w-full mb-4", plan.highlight ? "bg-white/10" : "bg-slate-100")}
                     />
 
-                    <ul className="flex flex-col gap-3.5 flex-1 mb-10">
+                    <ul className="flex flex-col gap-2.5 flex-1 mb-5">
                       {plan.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <Check className="h-4 w-4 mt-0.5 shrink-0 text-north-gold" />
+                        <li key={i} className="flex items-start gap-2">
+                          <Check className="h-3.5 w-3.5 mt-0.5 shrink-0 text-north-gold" />
                           <span
                             className={cn(
-                              "text-[14px] leading-snug",
+                              "text-[12px] leading-snug",
                               plan.highlight ? "text-white/80" : "text-slate-600"
                             )}
                           >
