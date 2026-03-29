@@ -6,18 +6,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useNorthPactAuth } from "@/lib/use-northpact-auth";
 import { Header } from "@/components/layout/header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,14 +17,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Sheet, SheetContent, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
-  HelpCircle,
   Trash2,
   ArrowUp,
   ArrowDown,
@@ -46,12 +36,14 @@ import {
   Receipt,
   Percent,
   TrendingUp,
-  Link2,
-  Building2,
   Globe,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const ACCENT = "#C8A96E";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -60,8 +52,6 @@ const PRICING_TOOL_SECTIONS = [
   { id: "fees-display", label: "Fees & Display", icon: Receipt },
   { id: "tax-rates", label: "Tax & Currency", icon: Percent },
   { id: "upsell-annualised", label: "Upsell & Annualised", icon: TrendingUp },
-  { id: "alignment-fee", label: "Alignment Fee", icon: Link2 },
-  { id: "multiple-entities", label: "Multiple Entities", icon: Building2 },
 ] as const;
 
 type SectionId = (typeof PRICING_TOOL_SECTIONS)[number]["id"];
@@ -81,6 +71,7 @@ const PREDEFINED_ANNUAL_RANGES = [
 ];
 
 const PREDEFINED_SECOND_RANGES = [
+  "Income tax total/income ranges",
   "Less than R1m",
   "R1m - R20m",
   "R20m - R50m",
@@ -112,7 +103,7 @@ export default function PricingToolPage() {
 
   const [activeSection, setActiveSection] = useState<SectionId>("revenue-ranges");
 
-  // Revenue Ranges — local copies for inline editing
+  // Revenue Ranges
   const [annualRanges, setAnnualRanges] = useState<string[]>([]);
   const [secondRanges, setSecondRanges] = useState<string[]>([]);
 
@@ -127,13 +118,25 @@ export default function PricingToolPage() {
   // Tax & Currency
   const [currency, setCurrency] = useState("ZAR");
   const [taxRates, setTaxRates] = useState<TaxRate[]>([]);
+
+  // Add Tax Rate Sheet
   const [addTaxOpen, setAddTaxOpen] = useState(false);
   const [newTaxName, setNewTaxName] = useState("");
   const [newTaxRate, setNewTaxRate] = useState("0");
-  const [deleteTaxId, setDeleteTaxId] = useState<string | null>(null);
-  const [editingTaxId, setEditingTaxId] = useState<string | null>(null);
+  const [newTaxNameError, setNewTaxNameError] = useState("");
+  const [newTaxRateError, setNewTaxRateError] = useState("");
+  const [savingTax, setSavingTax] = useState(false);
+
+  // Edit Tax Rate Sheet
+  const [editTaxSheetId, setEditTaxSheetId] = useState<string | null>(null);
   const [editingTaxName, setEditingTaxName] = useState("");
   const [editingTaxRate, setEditingTaxRate] = useState("");
+  const [editTaxNameError, setEditTaxNameError] = useState("");
+  const [editTaxRateError, setEditTaxRateError] = useState("");
+  const [savingEditTax, setSavingEditTax] = useState(false);
+
+  // Delete Tax
+  const [deleteTaxId, setDeleteTaxId] = useState<string | null>(null);
 
   // Upsell & Annualised
   const [upsellSection, setUpsellSection] = useState<"consider" | "roadmap">("consider");
@@ -143,17 +146,10 @@ export default function PricingToolPage() {
   const [annualisedDiscount, setAnnualisedDiscount] = useState("0");
   const [annualisedDiscountError, setAnnualisedDiscountError] = useState<string | null>(null);
 
-  // Alignment Fee
-  const [alignmentLineItems, setAlignmentLineItems] = useState("All Lines");
-  const [alignmentProposals, setAlignmentProposals] = useState<string[]>(["New Client"]);
-  const [alignmentTool, setAlignmentTool] = useState("");
-  const [alignmentPdfMonthly, setAlignmentPdfMonthly] = useState("");
-  const [alignmentPdfOneoff, setAlignmentPdfOneoff] = useState("");
-
-  // Multiple Entities
-  const [enableMultipleEntities, setEnableMultipleEntities] = useState(true);
-  const [businessTypes, setBusinessTypes] = useState("Company\nSole Trader");
-  const [businessTypesError, setBusinessTypesError] = useState<string | null>(null);
+  // Add Range Sheet
+  const [addRangeDialog, setAddRangeDialog] = useState<"annual" | "second" | null>(null);
+  const [newRangeDropdownValue, setNewRangeDropdownValue] = useState("");
+  const [newRangeLabel, setNewRangeLabel] = useState("");
 
   // Seed local state from Convex on load
   useEffect(() => {
@@ -172,13 +168,6 @@ export default function PricingToolPage() {
     setEnableAnnualised(settings.enableAnnualised);
     setDiscountOrIncrease(settings.discountOrIncrease);
     setAnnualisedDiscount(settings.annualisedDiscount);
-    setAlignmentLineItems(settings.alignmentLineItems);
-    setAlignmentProposals(settings.alignmentProposals);
-    setAlignmentTool(settings.alignmentTool);
-    setAlignmentPdfMonthly(settings.alignmentPdfMonthly);
-    setAlignmentPdfOneoff(settings.alignmentPdfOneoff);
-    setEnableMultipleEntities(settings.enableMultipleEntities);
-    setBusinessTypes(settings.businessTypes);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings?._id]);
 
@@ -192,12 +181,7 @@ export default function PricingToolPage() {
     }
   }
 
-  // Add Range sheet
-  const [addRangeDialog, setAddRangeDialog] = useState<"annual" | "second" | null>(null);
-  const [newRangeDropdownValue, setNewRangeDropdownValue] = useState("");
-  const [newRangeLabel, setNewRangeLabel] = useState("");
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  // ─── Revenue Range helpers ─────────────────────────────────────────────────
 
   async function moveRange(which: "annual" | "second", index: number, dir: "up" | "down") {
     const list = which === "annual" ? annualRanges : secondRanges;
@@ -205,73 +189,105 @@ export default function PricingToolPage() {
     if (next < 0 || next >= list.length) return;
     const copy = [...list];
     [copy[index], copy[next]] = [copy[next], copy[index]];
-    if (which === "annual") { setAnnualRanges(copy); await save({ annualRevenueRanges: copy }); }
-    else { setSecondRanges(copy); await save({ secondStyleRanges: copy }); }
+    if (which === "annual") {
+      setAnnualRanges(copy);
+      await save({ annualRevenueRanges: copy });
+    } else {
+      setSecondRanges(copy);
+      await save({ secondStyleRanges: copy });
+    }
   }
 
   async function removeRange(which: "annual" | "second", index: number) {
+    const list = which === "annual" ? [...annualRanges] : [...secondRanges];
+    list.splice(index, 1);
     if (which === "annual") {
-      const next = annualRanges.filter((_, i) => i !== index);
-      setAnnualRanges(next);
-      await save({ annualRevenueRanges: next });
+      setAnnualRanges(list);
+      await save({ annualRevenueRanges: list });
     } else {
-      const next = secondRanges.filter((_, i) => i !== index);
-      setSecondRanges(next);
-      await save({ secondStyleRanges: next });
+      setSecondRanges(list);
+      await save({ secondStyleRanges: list });
     }
   }
 
   function updateRangeLabel(which: "annual" | "second", index: number, value: string) {
     if (which === "annual") {
-      setAnnualRanges((prev) => { const c = [...prev]; c[index] = value; return c; });
+      const copy = [...annualRanges];
+      copy[index] = value;
+      setAnnualRanges(copy);
     } else {
-      setSecondRanges((prev) => { const c = [...prev]; c[index] = value; return c; });
+      const copy = [...secondRanges];
+      copy[index] = value;
+      setSecondRanges(copy);
     }
   }
 
   async function handleAddRange() {
-    const label = newRangeDropdownValue === RANGE_OTHER_VALUE
-      ? newRangeLabel.trim()
-      : newRangeDropdownValue;
-    if (!label) { toast.error("Label is required"); return; }
+    const label = newRangeDropdownValue === RANGE_OTHER_VALUE ? newRangeLabel.trim() : newRangeDropdownValue;
+    if (!label) return;
     if (addRangeDialog === "annual") {
       const next = [...annualRanges, label];
       setAnnualRanges(next);
       await save({ annualRevenueRanges: next });
-      toast.success("Annual revenue range added");
     } else {
       const next = [...secondRanges, label];
       setSecondRanges(next);
       await save({ secondStyleRanges: next });
-      toast.success("Second style range added");
     }
     setAddRangeDialog(null);
     setNewRangeDropdownValue("");
     setNewRangeLabel("");
   }
 
-  async function handleAddTax() {
-    if (!userId) return;
+  // ─── Tax rate handlers ─────────────────────────────────────────────────────
+
+  async function handleAddTaxRate() {
     const name = newTaxName.trim();
-    if (!name) { toast.error("Name is required"); return; }
+    let hasError = false;
+    if (!name) { setNewTaxNameError("Name is required"); hasError = true; }
     const rate = parseFloat(newTaxRate);
-    if (isNaN(rate) || rate < 0 || rate > 100) { toast.error("Rate must be between 0 and 100"); return; }
+    if (isNaN(rate) || rate < 0 || rate > 100) { setNewTaxRateError("Rate must be between 0 and 100"); hasError = true; }
+    if (hasError) return;
+    setSavingTax(true);
     try {
-      await addTaxRateMutation({ userId, name, ratePercent: rate });
+      await addTaxRateMutation({ userId: userId!, name, ratePercent: rate });
       toast.success("Tax rate added");
       setAddTaxOpen(false);
       setNewTaxName("");
       setNewTaxRate("0");
-    } catch { toast.error("Failed to add tax rate"); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to add tax rate");
+    } finally {
+      setSavingTax(false);
+    }
   }
 
-  async function handleDeleteTax(id: string) {
-    if (!userId) return;
+  function handleOpenEditTax(rate: TaxRate) {
+    setEditTaxSheetId(rate.id);
+    setEditingTaxName(rate.name);
+    setEditingTaxRate(String(rate.rate));
+    setEditTaxNameError("");
+    setEditTaxRateError("");
+  }
+
+  async function handleSaveTaxEdit() {
+    if (!editTaxSheetId || !userId) return;
+    const name = editingTaxName.trim();
+    let hasError = false;
+    if (!name) { setEditTaxNameError("Name is required"); hasError = true; }
+    const rate = parseFloat(editingTaxRate);
+    if (isNaN(rate) || rate < 0 || rate > 100) { setEditTaxRateError("Rate must be between 0 and 100"); hasError = true; }
+    if (hasError) return;
+    setSavingEditTax(true);
     try {
-      await removeTaxRateMutation({ userId, taxRateId: id });
-      toast.success("Tax rate deleted");
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed to delete"); }
-    setDeleteTaxId(null);
+      await updateTaxRateMutation({ userId, taxRateId: editTaxSheetId, name, ratePercent: rate });
+      toast.success("Tax rate updated");
+      setEditTaxSheetId(null);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update");
+    } finally {
+      setSavingEditTax(false);
+    }
   }
 
   async function handleSetDefault(id: string) {
@@ -280,19 +296,72 @@ export default function PricingToolPage() {
     toast.success("Default updated");
   }
 
-  async function handleSaveTaxEdit(id: string) {
-    if (!userId) return;
-    const name = editingTaxName.trim();
-    if (!name) { toast.error("Name is required"); return; }
-    const rate = parseFloat(editingTaxRate);
-    if (isNaN(rate) || rate < 0 || rate > 100) { toast.error("Rate must be between 0 and 100"); return; }
-    await updateTaxRateMutation({ userId, taxRateId: id, name, ratePercent: rate });
-    toast.success("Tax rate updated");
-    setEditingTaxId(null);
+  async function handleDeleteTax() {
+    if (!deleteTaxId || !userId) return;
+    try {
+      await removeTaxRateMutation({ userId, taxRateId: deleteTaxId });
+      toast.success("Tax rate removed");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to remove");
+    } finally {
+      setDeleteTaxId(null);
+    }
   }
 
   const addRangePredefinedOptions =
     addRangeDialog === "annual" ? PREDEFINED_ANNUAL_RANGES : PREDEFINED_SECOND_RANGES;
+
+  const loading = settings === undefined;
+
+  // ─── Stat tiles ───────────────────────────────────────────────────────────
+
+  const STAT_TILES = [
+    {
+      id: "revenue-ranges" as SectionId,
+      label: "Revenue Ranges",
+      value: loading ? null : String(annualRanges.length + secondRanges.length),
+      sublabel: loading ? "" : `${annualRanges.length} annual · ${secondRanges.length} second`,
+      icon: BarChart3,
+      iconBg: "bg-blue-50",
+      iconColor: "#3b82f6",
+    },
+    {
+      id: "fees-display" as SectionId,
+      label: "Fees & Display",
+      value: loading ? null : showFees === "breakdown" ? "Breakdown" : "Total",
+      sublabel: loading ? "" : applyMinFee ? `Min. R${minMonthlyFee}/mo` : "No minimum",
+      icon: Receipt,
+      iconBg: "bg-[#C8A96E]/10",
+      iconColor: ACCENT,
+    },
+    {
+      id: "tax-rates" as SectionId,
+      label: "Tax Rates",
+      value: loading ? null : String(taxRates.length),
+      sublabel: loading ? "" : (taxRates.find((t) => t.isDefault)?.name ?? "None default"),
+      icon: Percent,
+      iconBg: "bg-emerald-50",
+      iconColor: "#10b981",
+    },
+    {
+      id: "tax-rates" as SectionId,
+      label: "Currency",
+      value: loading ? null : currency,
+      sublabel: "Default currency",
+      icon: Globe,
+      iconBg: "bg-violet-50",
+      iconColor: "#8b5cf6",
+    },
+    {
+      id: "upsell-annualised" as SectionId,
+      label: "Upsell Section",
+      value: loading ? null : upsellSection.charAt(0).toUpperCase() + upsellSection.slice(1),
+      sublabel: loading ? "" : enableAnnualised ? "Annualised on" : "Annualised off",
+      icon: TrendingUp,
+      iconBg: "bg-amber-50",
+      iconColor: "#f59e0b",
+    },
+  ] as const;
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -301,311 +370,367 @@ export default function PricingToolPage() {
       <Header />
       <div className="px-6 py-6 space-y-5 max-w-[1600px]">
 
-        {/* Stats cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {/* Revenue Ranges */}
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(59,130,246,0.1)" }}>
-                <BarChart3 className="w-4 h-4 text-blue-600" />
+        {/* ── Stat tiles ─────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {STAT_TILES.map(({ id, label, value, sublabel, icon: Icon, iconBg, iconColor }, i) => (
+            <button
+              key={`${label}-${i}`}
+              onClick={() => setActiveSection(id)}
+              className={cn(
+                "bg-white border rounded-xl p-4 text-left transition-all cursor-pointer hover:border-slate-200",
+                activeSection === id ? "border-[#C8A96E]/40 ring-1 ring-[#C8A96E]/20" : "border-slate-100"
+              )}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 leading-none">{label}</span>
+                <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", iconBg)}>
+                  <Icon className="h-3.5 w-3.5" style={{ color: iconColor }} />
+                </div>
               </div>
-            </div>
-            <div className="text-[24px] font-bold text-slate-900 leading-none tabular-nums mb-1">
-              {annualRanges.length + secondRanges.length}
-            </div>
-            <div className="text-[11px] font-medium text-slate-500">Revenue Ranges</div>
-            <div className="text-[10px] text-slate-400">{annualRanges.length} annual · {secondRanges.length} second</div>
-          </div>
-
-          {/* Tax Rates */}
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(16,185,129,0.1)" }}>
-                <Percent className="w-4 h-4 text-emerald-600" />
-              </div>
-            </div>
-            <div className="text-[24px] font-bold text-slate-900 leading-none tabular-nums mb-1">
-              {taxRates.length}
-            </div>
-            <div className="text-[11px] font-medium text-slate-500">Tax Rates</div>
-            <div className="text-[10px] text-slate-400">{taxRates.find((t) => t.isDefault)?.name ?? "None"} is default</div>
-          </div>
-
-          {/* Min Monthly Fee */}
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(254,93,51,0.1)" }}>
-                <Receipt className="w-4 h-4" style={{ color: "#C8A96E" }} />
-              </div>
-            </div>
-            <div className="text-[24px] font-bold text-slate-900 leading-none tabular-nums mb-1">
-              {applyMinFee ? `R${minMonthlyFee}` : "None"}
-            </div>
-            <div className="text-[11px] font-medium text-slate-500">Min Monthly Fee</div>
-            <div className="text-[10px] text-slate-400">{applyMinFee ? "Applied to proposals" : "No minimum set"}</div>
-          </div>
-
-          {/* Currency */}
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(139,92,246,0.1)" }}>
-                <Globe className="w-4 h-4 text-violet-600" />
-              </div>
-            </div>
-            <div className="text-[24px] font-bold text-slate-900 leading-none tabular-nums mb-1">
-              {currency}
-            </div>
-            <div className="text-[11px] font-medium text-slate-500">Currency</div>
-            <div className="text-[10px] text-slate-400">Default currency</div>
-          </div>
-
-          {/* Upsell Section */}
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.1)" }}>
-                <TrendingUp className="w-4 h-4 text-amber-500" />
-              </div>
-            </div>
-            <div className="text-[24px] font-bold text-slate-900 leading-none tabular-nums mb-1 capitalize">
-              {upsellSection}
-            </div>
-            <div className="text-[11px] font-medium text-slate-500">Upsell Section</div>
-            <div className="text-[10px] text-slate-400">Upsell section label</div>
-          </div>
-
-          {/* Multiple Entities */}
-          <div className="bg-white border border-slate-100 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(100,116,139,0.1)" }}>
-                <Building2 className="w-4 h-4 text-slate-500" />
-              </div>
-            </div>
-            <div className="text-[24px] font-bold text-slate-900 leading-none tabular-nums mb-1">
-              {enableMultipleEntities ? "On" : "Off"}
-            </div>
-            <div className="text-[11px] font-medium text-slate-500">Multiple Entities</div>
-            <div className="text-[10px] text-slate-400">{enableMultipleEntities ? "Enabled for proposals" : "Disabled"}</div>
-          </div>
+              {value === null ? (
+                <Skeleton className="h-7 w-12 mt-1" />
+              ) : (
+                <p className="text-[26px] font-bold text-slate-900 leading-none tabular-nums truncate">{value}</p>
+              )}
+              <p className="text-[11px] text-slate-400 mt-1 leading-tight truncate">{sublabel}</p>
+            </button>
+          ))}
         </div>
 
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-shrink-0">
+        {/* ── Section selector + contextual actions ─────────────────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
             <Select value={activeSection} onValueChange={(v) => setActiveSection(v as SectionId)}>
-              <SelectTrigger className="h-8 w-[180px] min-w-[180px] text-[11px] font-normal text-slate-800 border-slate-200 bg-white hover:bg-slate-50 rounded transition-colors">
-                <SelectValue placeholder="Select section" />
+              <SelectTrigger className="h-9 w-[200px] text-[13px] font-normal text-slate-800 border-slate-200 bg-white hover:bg-slate-50 rounded-lg transition-colors">
+                <SelectValue />
               </SelectTrigger>
-              <SelectContent position="popper" side="bottom" align="start" sideOffset={4} className="bg-white border-slate-200 shadow-lg rounded p-1 min-w-[180px]">
+              <SelectContent position="popper" side="bottom" align="start" sideOffset={4} className="bg-white border-slate-200 shadow-lg rounded-lg p-1 min-w-[200px]">
                 {PRICING_TOOL_SECTIONS.map((s) => (
-                  <SelectItem key={s.id} value={s.id} className="text-[11px] font-normal text-slate-800 rounded cursor-pointer hover:bg-slate-50">
+                  <SelectItem key={s.id} value={s.id} className="text-[13px] font-normal text-slate-800 rounded-md cursor-pointer hover:bg-slate-50">
                     {s.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {activeSection === "tax-rates" && (
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {activeSection === "revenue-ranges" && (
               <>
-                <Select value={currency} onValueChange={(v) => { setCurrency(v); void save({ currency: v }); }}>
-                  <SelectTrigger className="h-8 w-[180px] min-w-[180px] text-[11px] font-normal text-slate-800 border-slate-200 bg-white hover:bg-slate-50 rounded transition-colors">
-                    <SelectValue placeholder="Currency" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" side="bottom" align="start" sideOffset={4} className="bg-white border-slate-200 shadow-lg rounded p-1 min-w-[180px]">
-                    <SelectItem value="ZAR" className="text-[11px] font-normal text-slate-800 rounded cursor-pointer hover:bg-slate-50">ZAR</SelectItem>
-                    <SelectItem value="USD" className="text-[11px] font-normal text-slate-800 rounded cursor-pointer hover:bg-slate-50">USD</SelectItem>
-                    <SelectItem value="GBP" className="text-[11px] font-normal text-slate-800 rounded cursor-pointer hover:bg-slate-50">GBP</SelectItem>
-                    <SelectItem value="EUR" className="text-[11px] font-normal text-slate-800 rounded cursor-pointer hover:bg-slate-50">EUR</SelectItem>
-                  </SelectContent>
-                </Select>
-                <button type="button" className="h-8 w-8 flex items-center justify-center flex-shrink-0 rounded text-slate-500">
-                  <HelpCircle className="w-4 h-4 text-blue-600" />
+                <button
+                  onClick={() => { setAddRangeDialog("annual"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Annual Range
+                </button>
+                <button
+                  onClick={() => { setAddRangeDialog("second"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ background: ACCENT }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Second Range
                 </button>
               </>
             )}
-          </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             {activeSection === "tax-rates" && (
-              <Button
-                size="sm"
-                className="h-8 px-3 text-[11px] font-medium text-white rounded transition-opacity hover:opacity-90" style={{ background: "#C8A96E" }}
-                onClick={() => { setAddTaxOpen(true); setNewTaxName(""); setNewTaxRate("0"); }}
+              <button
+                onClick={() => { setAddTaxOpen(true); setNewTaxName(""); setNewTaxRate("0"); setNewTaxNameError(""); setNewTaxRateError(""); }}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: ACCENT }}
               >
-                <Plus className="w-3.5 h-3.5 mr-1.5" />
-                Add New Tax Rate
-              </Button>
+                <Plus className="h-3.5 w-3.5" />
+                Add Tax Rate
+              </button>
             )}
-            <button
-              className="flex items-center gap-1.5 h-8 px-4 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ background: "#C8A96E" }}
-              onClick={() => toast.info("New proposal")}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              New Proposal
-            </button>
           </div>
         </div>
 
-        {/* Section content */}
-        <div className="w-full">
-
-          {/* ── Revenue Ranges ─────────────────────────────────────────────── */}
-          {activeSection === "revenue-ranges" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Annual ranges */}
-              <section className="space-y-3">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Annual Revenue Ranges</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+        {/* ── Revenue Ranges ─────────────────────────────────────────────── */}
+        {activeSection === "revenue-ranges" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Annual ranges */}
+            <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                  <span className="text-[14px] font-semibold text-slate-900">Annual Revenue Ranges</span>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Used in proposals for annual revenue variation line items</p>
                 </div>
-                <p className="text-xs text-slate-500">
-                  The annual revenue ranges are used in the proposal tool when you add an annual revenue variation line item.
-                </p>
-                <ul className="space-y-2 border border-slate-200 rounded-lg bg-white divide-y divide-slate-200">
-                  {annualRanges.map((r, i) => (
-                    <li key={`annual-${i}`} className="flex items-center justify-between gap-2 py-2 px-3">
-                      <Input
-                        value={r}
-                        onChange={(e) => updateRangeLabel("annual", i, e.target.value)}
-                        onBlur={() => void save({ annualRevenueRanges: annualRanges })}
-                        className="flex-1 min-w-0 h-8 text-sm border-slate-200"
-                      />
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600" onClick={() => removeRange("annual", i)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveRange("annual", i, "up")} disabled={i === 0}>
-                          <ArrowUp className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveRange("annual", i, "down")} disabled={i === annualRanges.length - 1}>
-                          <ArrowDown className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex justify-end">
-                  <Button size="sm" className="text-white transition-opacity hover:opacity-90" style={{ background: "#C8A96E" }} onClick={() => { setAddRangeDialog("annual"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}>
-                    <Plus className="w-3.5 h-3.5 mr-1.5" />
-                    Add Range
-                  </Button>
+                {!loading && <span className="text-[11px] text-slate-400 shrink-0">{annualRanges.length} ranges</span>}
+              </div>
+              {loading ? (
+                <div className="p-5 space-y-2">
+                  {[1, 2, 3].map((i) => <Skeleton key={i} className="h-9 w-full" />)}
                 </div>
-              </section>
-
-              {/* Second ranges */}
-              <section className="space-y-3">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Second Revenue Style Price Ranges</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <p className="text-xs text-slate-500">
-                  If you require a second set of revenue style price ranges then you can add them below.
-                </p>
-                <ul className="space-y-2 border border-slate-200 rounded-lg bg-white divide-y divide-slate-200">
-                  {secondRanges.map((r, i) => (
-                    <li key={`second-${i}`} className="flex items-center justify-between gap-2 py-2 px-3">
-                      <Input
-                        value={r}
-                        onChange={(e) => updateRangeLabel("second", i, e.target.value)}
-                        onBlur={() => void save({ secondStyleRanges: secondRanges })}
-                        className="flex-1 min-w-0 h-8 text-sm border-slate-200"
-                      />
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600" onClick={() => removeRange("second", i)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveRange("second", i, "up")} disabled={i === 0}>
-                          <ArrowUp className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveRange("second", i, "down")} disabled={i === secondRanges.length - 1}>
-                          <ArrowDown className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex justify-end">
-                  <Button size="sm" className="text-white transition-opacity hover:opacity-90" style={{ background: "#C8A96E" }} onClick={() => { setAddRangeDialog("second"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}>
-                    <Plus className="w-3.5 h-3.5 mr-1.5" />
-                    Add Range
-                  </Button>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* ── Fees & Display ─────────────────────────────────────────────── */}
-          {activeSection === "fees-display" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Showing Fees in the Proposal</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <p className="text-xs text-slate-500">In the proposal you can choose to show a full breakdown of the fees for each line item or to only show the proposal total.</p>
-                <Select value={showFees} onValueChange={(v) => { setShowFees(v as "breakdown" | "total-only"); void save({ showFees: v as "breakdown" | "total-only" }); }}>
-                  <SelectTrigger className="w-full max-w-[280px] h-9 border-slate-200">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="breakdown">Show full breakdown in proposal</SelectItem>
-                    <SelectItem value="total-only">Show proposal total only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Section sub totals</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <p className="text-xs text-slate-500">This allows you to show the total for a section, instead of a full breakdown for each line item.</p>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="section-subtotals"
-                    checked={sectionSubTotals}
-                    onCheckedChange={(c) => { setSectionSubTotals(!!c); void save({ sectionSubTotals: !!c }); }}
-                    className="rounded-sm border-slate-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  />
-                  <Label htmlFor="section-subtotals" className="text-sm font-normal cursor-pointer">Enable sub totals per section</Label>
-                </div>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Price Rounding</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <p className="text-xs text-slate-500">As standard, the calculated price for each line item will be rounded to the nearest whole number.</p>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="dont-round"
-                    checked={dontRoundPrices}
-                    onCheckedChange={(c) => { setDontRoundPrices(!!c); void save({ dontRoundPrices: !!c }); }}
-                    className="rounded-sm border-slate-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  />
-                  <Label htmlFor="dont-round" className="text-sm font-normal cursor-pointer">Don&apos;t round prices?</Label>
-                </div>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Minimum Monthly Fee</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <p className="text-xs text-slate-500">The minimum monthly fee will override proposal calculations falling below the set fee.</p>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="min-fee"
-                      checked={applyMinFee}
-                      onCheckedChange={(c) => { setApplyMinFee(!!c); void save({ applyMinFee: !!c }); }}
-                      className="rounded-sm border-slate-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                    />
-                    <Label htmlFor="min-fee" className="text-sm font-normal cursor-pointer">Apply a minimum monthly proposal fee</Label>
+              ) : annualRanges.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                    <BarChart3 className="h-4 w-4 text-slate-300" />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <Input
+                  <p className="text-[13px] font-semibold text-slate-700">No annual ranges yet</p>
+                  <button
+                    onClick={() => { setAddRangeDialog("annual"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                    className="mt-3 flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: ACCENT }}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Range
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="divide-y divide-slate-50">
+                    {annualRanges.map((r, i) => (
+                      <div key={`annual-${i}`} className="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50/60 transition-colors">
+                        <span className="text-[11px] font-medium tabular-nums text-slate-300 w-5 shrink-0 text-center">{i + 1}</span>
+                        <input
+                          value={r}
+                          onChange={(e) => updateRangeLabel("annual", i, e.target.value)}
+                          onBlur={() => void save({ annualRevenueRanges: annualRanges })}
+                          className="flex-1 min-w-0 h-8 px-2 rounded-md border border-transparent bg-transparent text-[13px] text-slate-800 focus:outline-none focus:border-[#C8A96E] focus:bg-white transition-colors"
+                        />
+                        <div className="flex items-center gap-0 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => moveRange("annual", i, "up")}
+                            disabled={i === 0}
+                            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveRange("annual", i, "down")}
+                            disabled={i === annualRanges.length - 1}
+                            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeRange("annual", i)}
+                            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="px-4 py-3 border-t border-slate-100">
+                    <button
+                      onClick={() => { setAddRangeDialog("annual"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                      className="flex items-center gap-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
+                      style={{ color: ACCENT }}
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Range
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Second style ranges */}
+            <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                  <span className="text-[14px] font-semibold text-slate-900">Second Style Ranges</span>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Alternative revenue tiers for proposals</p>
+                </div>
+                {!loading && <span className="text-[11px] text-slate-400 shrink-0">{secondRanges.length} ranges</span>}
+              </div>
+              {loading ? (
+                <div className="p-5 space-y-2">
+                  {[1, 2, 3].map((i) => <Skeleton key={i} className="h-9 w-full" />)}
+                </div>
+              ) : secondRanges.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                    <BarChart3 className="h-4 w-4 text-slate-300" />
+                  </div>
+                  <p className="text-[13px] font-semibold text-slate-700">No second style ranges yet</p>
+                  <button
+                    onClick={() => { setAddRangeDialog("second"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                    className="mt-3 flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: ACCENT }}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Range
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="divide-y divide-slate-50">
+                    {secondRanges.map((r, i) => (
+                      <div key={`second-${i}`} className="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50/60 transition-colors">
+                        <span className="text-[11px] font-medium tabular-nums text-slate-300 w-5 shrink-0 text-center">{i + 1}</span>
+                        <input
+                          value={r}
+                          onChange={(e) => updateRangeLabel("second", i, e.target.value)}
+                          onBlur={() => void save({ secondStyleRanges: secondRanges })}
+                          className="flex-1 min-w-0 h-8 px-2 rounded-md border border-transparent bg-transparent text-[13px] text-slate-800 focus:outline-none focus:border-[#C8A96E] focus:bg-white transition-colors"
+                        />
+                        <div className="flex items-center gap-0 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => moveRange("second", i, "up")}
+                            disabled={i === 0}
+                            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveRange("second", i, "down")}
+                            disabled={i === secondRanges.length - 1}
+                            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeRange("second", i)}
+                            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="px-4 py-3 border-t border-slate-100">
+                    <button
+                      onClick={() => { setAddRangeDialog("second"); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                      className="flex items-center gap-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
+                      style={{ color: ACCENT }}
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Range
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Fees & Display ─────────────────────────────────────────────── */}
+        {activeSection === "fees-display" && (
+          <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <span className="text-[14px] font-semibold text-slate-900">Fees & Display</span>
+              <p className="text-[11px] text-slate-400 mt-0.5">Control how fees are presented in your proposals</p>
+            </div>
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Fee display mode */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Fee display mode</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Choose to show a full fee breakdown or just the proposal total</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {([
+                    { value: "breakdown", label: "Show full breakdown", desc: "All line items with individual fees" },
+                    { value: "total-only", label: "Show total only", desc: "Single total without line-item detail" },
+                  ] as const).map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={cn(
+                        "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                        showFees === opt.value ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="show-fees"
+                        value={opt.value}
+                        checked={showFees === opt.value}
+                        onChange={() => { setShowFees(opt.value); void save({ showFees: opt.value }); }}
+                        className="mt-0.5"
+                        style={{ accentColor: ACCENT }}
+                      />
+                      <div>
+                        <p className="text-[13px] font-medium text-slate-800">{opt.label}</p>
+                        <p className="text-[11px] text-slate-400">{opt.desc}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Section sub totals */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Section sub totals</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Show a subtotal for each service section in the proposal</p>
+                </div>
+                <label className={cn(
+                  "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                  sectionSubTotals ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                )}>
+                  <input
+                    type="checkbox"
+                    checked={sectionSubTotals}
+                    onChange={(e) => { setSectionSubTotals(e.target.checked); void save({ sectionSubTotals: e.target.checked }); }}
+                    className="mt-0.5"
+                    style={{ accentColor: ACCENT }}
+                  />
+                  <div>
+                    <p className="text-[13px] font-medium text-slate-800">Enable section sub totals</p>
+                    <p className="text-[11px] text-slate-400">Sub totals shown per section instead of a full breakdown</p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Price rounding */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Price rounding</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">By default, calculated prices are rounded to the nearest whole number</p>
+                </div>
+                <label className={cn(
+                  "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                  dontRoundPrices ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                )}>
+                  <input
+                    type="checkbox"
+                    checked={dontRoundPrices}
+                    onChange={(e) => { setDontRoundPrices(e.target.checked); void save({ dontRoundPrices: e.target.checked }); }}
+                    className="mt-0.5"
+                    style={{ accentColor: ACCENT }}
+                  />
+                  <div>
+                    <p className="text-[13px] font-medium text-slate-800">Don&apos;t round prices</p>
+                    <p className="text-[11px] text-slate-400">Keep decimal precision in calculated prices</p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Minimum monthly fee */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Minimum monthly fee</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Override proposal calculations that fall below this amount</p>
+                </div>
+                <label className={cn(
+                  "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                  applyMinFee ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                )}>
+                  <input
+                    type="checkbox"
+                    checked={applyMinFee}
+                    onChange={(e) => { setApplyMinFee(e.target.checked); void save({ applyMinFee: e.target.checked }); }}
+                    className="mt-0.5"
+                    style={{ accentColor: ACCENT }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-slate-800">Apply a minimum monthly fee</p>
+                    <p className="text-[11px] text-slate-400">Proposals below this amount are bumped up to the minimum</p>
+                  </div>
+                </label>
+                {applyMinFee && (
+                  <div className="space-y-1">
+                    <p className="text-[12px] font-medium text-slate-700">Minimum amount</p>
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-r-0 border-slate-200 rounded-l-lg text-[13px] text-slate-500 shrink-0">{currency}</span>
+                      <input
                         type="text"
                         value={minMonthlyFee}
                         onChange={(e) => { setMinMonthlyFee(e.target.value); if (minMonthlyFeeError) setMinMonthlyFeeError(null); }}
@@ -620,132 +745,267 @@ export default function PricingToolPage() {
                           setMinMonthlyFee(String(clamped));
                           void save({ minMonthlyFee: clamped });
                         }}
-                        className={cn("w-24 h-9 border-slate-200", minMonthlyFeeError && "border-red-500")}
+                        className={cn(
+                          "w-32 h-10 px-3 rounded-r-lg border text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none transition-colors bg-white",
+                          minMonthlyFeeError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                        )}
+                        placeholder="350"
                       />
-                      <span className="text-sm text-slate-600 px-2 py-1.5 bg-slate-100 rounded-md">{currency}</span>
                     </div>
-                    {minMonthlyFeeError && <p className="text-xs text-red-600">{minMonthlyFeeError}</p>}
+                    {minMonthlyFeeError && <p className="text-[11px] text-red-600">{minMonthlyFeeError}</p>}
                   </div>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* ── Tax & Currency ─────────────────────────────────────────────── */}
-          {activeSection === "tax-rates" && (
-            <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-              <div className="flex items-center gap-1.5">
-                <Label className="text-sm font-medium text-slate-800">Tax Rates</Label>
-                <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+                )}
               </div>
-              <ul className="space-y-2">
-                {taxRates.map((rate) => (
-                  <li key={rate.id} className="flex items-center justify-between gap-2 py-2 px-3 border border-slate-200 rounded-lg bg-white">
-                    {editingTaxId === rate.id ? (
-                      <div className="flex items-center gap-2 flex-1">
-                        <Input value={editingTaxName} onChange={(e) => setEditingTaxName(e.target.value)} className="h-8 flex-1 max-w-[200px]" placeholder="Name" />
-                        <Input type="number" min={0} max={100} value={editingTaxRate} onChange={(e) => setEditingTaxRate(e.target.value)} className="h-8 w-20" placeholder="%" />
-                        <Button size="sm" onClick={() => handleSaveTaxEdit(rate.id)}>Save</Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingTaxId(null)}>Cancel</Button>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="text-sm text-slate-800">{rate.name} — {rate.rate}%</span>
-                        <div className="flex items-center gap-2">
-                          {rate.isDefault ? (
-                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8">✔ Default Rate</Button>
-                          ) : (
-                            <Button size="sm" variant="outline" className="text-xs h-8 border-slate-200" onClick={() => handleSetDefault(rate.id)}>Make Default</Button>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600" onClick={() => { setEditingTaxId(rate.id); setEditingTaxName(rate.name); setEditingTaxRate(String(rate.rate)); }}>
-                            <Pencil className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600" onClick={() => setDeleteTaxId(rate.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+            </div>
+          </div>
+        )}
 
-          {/* ── Upsell & Annualised ────────────────────────────────────────── */}
-          {activeSection === "upsell-annualised" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Upsell Section</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+        {/* ── Tax & Currency ─────────────────────────────────────────────── */}
+        {activeSection === "tax-rates" && (
+          <div className="space-y-4">
+            {/* Currency */}
+            <div className="bg-white border border-slate-100 rounded-xl p-5">
+              <div className="flex flex-wrap items-end gap-8">
+                <div>
+                  <p className="text-[14px] font-semibold text-slate-900">Default Currency</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Used across all proposals and pricing for this firm</p>
                 </div>
-                <p className="text-xs text-slate-500">On the proposal tool, you can choose to call the upsell section either &apos;Consider&apos; or &apos;Roadmap&apos;.</p>
-                <div className="flex gap-6">
+                <div className="space-y-1.5">
+                  <p className="text-[12px] font-medium text-slate-700">Currency</p>
+                  <Select value={currency} onValueChange={(v) => { setCurrency(v); void save({ currency: v }); }}>
+                    <SelectTrigger className="h-10 w-36 text-[13px] border-slate-200 rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["ZAR", "USD", "GBP", "EUR"].map((c) => (
+                        <SelectItem key={c} value={c} className="text-[13px]">{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Tax rates table */}
+            <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                  <span className="text-[14px] font-semibold text-slate-900">Tax Rates</span>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Rates used in proposals and pricing calculations</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {!loading && (
+                    <span className="text-[11px] text-slate-400">{taxRates.length} rate{taxRates.length !== 1 ? "s" : ""}</span>
+                  )}
+                  <button
+                    onClick={() => { setAddTaxOpen(true); setNewTaxName(""); setNewTaxRate("0"); setNewTaxNameError(""); setNewTaxRateError(""); }}
+                    className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: ACCENT }}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add Tax Rate
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[2rem_1fr_5rem_7.5rem_5rem] px-4 py-2.5 border-b border-slate-50 bg-slate-50/60 gap-3">
+                {["#", "Name", "Rate", "Status", ""].map((h, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap",
+                      i === 0 && "text-center",
+                      i === 4 && "text-right"
+                    )}
+                  >
+                    {h}
+                  </span>
+                ))}
+              </div>
+
+              {loading ? (
+                <div className="divide-y divide-slate-50">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="grid grid-cols-[2rem_1fr_5rem_7.5rem_5rem] px-4 py-4 gap-3 items-center">
+                      <Skeleton className="h-3 w-4 mx-auto" />
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-4 w-10" />
+                      <Skeleton className="h-5 w-20 rounded" />
+                      <Skeleton className="h-6 w-14 ml-auto" />
+                    </div>
+                  ))}
+                </div>
+              ) : taxRates.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center mb-3">
+                    <Percent className="h-4 w-4 text-slate-300" />
+                  </div>
+                  <p className="text-[13px] font-semibold text-slate-700">No tax rates yet</p>
+                  <button
+                    onClick={() => { setAddTaxOpen(true); setNewTaxName(""); setNewTaxRate("0"); }}
+                    className="mt-3 flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: ACCENT }}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Tax Rate
+                  </button>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-50">
+                  {taxRates.map((rate, idx) => (
+                    <div
+                      key={rate.id}
+                      className="grid grid-cols-[2rem_1fr_5rem_7.5rem_5rem] px-4 py-3.5 gap-3 items-center hover:bg-slate-50/60 transition-colors"
+                    >
+                      <span className="text-[11px] font-medium tabular-nums text-slate-300 text-center">{idx + 1}</span>
+                      <p className="text-[13px] font-semibold text-slate-900 truncate">{rate.name}</p>
+                      <span className="text-[13px] text-slate-600 tabular-nums">{rate.rate}%</span>
+                      {rate.isDefault ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 border border-emerald-200 text-emerald-700 whitespace-nowrap w-fit">
+                          <CheckCircle2 className="h-3 w-3" /> Default
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleSetDefault(rate.id)}
+                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-500 hover:border-[#C8A96E]/40 hover:text-slate-700 transition-colors whitespace-nowrap w-fit"
+                        >
+                          Set default
+                        </button>
+                      )}
+                      <div className="flex items-center gap-0.5 justify-end">
+                        <button
+                          onClick={() => handleOpenEditTax(rate)}
+                          className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTaxId(rate.id)}
+                          className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Upsell & Annualised ────────────────────────────────────────── */}
+        {activeSection === "upsell-annualised" && (
+          <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <span className="text-[14px] font-semibold text-slate-900">Upsell & Annualised</span>
+              <p className="text-[11px] text-slate-400 mt-0.5">Configure how upsell and annualised costs appear in proposals</p>
+            </div>
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Upsell section label */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Upsell section label</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Name shown for the additional services section in the proposal tool</p>
+                </div>
+                <div className="flex flex-col gap-2">
                   {(["consider", "roadmap"] as const).map((v) => (
-                    <label key={v} className="flex items-center gap-2 cursor-pointer">
+                    <label
+                      key={v}
+                      className={cn(
+                        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                        upsellSection === v ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                      )}
+                    >
                       <input
                         type="radio"
                         name="upsell-section"
                         value={v}
                         checked={upsellSection === v}
                         onChange={() => { setUpsellSection(v); void save({ upsellSection: v }); }}
-                        className="accent-emerald-600"
+                        style={{ accentColor: ACCENT }}
                       />
-                      <span className="text-sm font-normal capitalize">{v}</span>
+                      <span className="text-[13px] font-medium text-slate-800 capitalize">{v}</span>
                     </label>
                   ))}
                 </div>
-              </section>
+              </div>
 
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Display fees in the upsell section</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+              {/* Display fees in upsell */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Display fees in upsell section</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Control whether pricing shows in the additional services area</p>
                 </div>
-                <Select value={displayFeesUpsell} onValueChange={(v) => { setDisplayFeesUpsell(v as "always" | "never" | "optional"); void save({ displayFeesUpsell: v as "always" | "never" | "optional" }); }}>
-                  <SelectTrigger className="w-full max-w-md h-9 border-slate-200">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="always">ALWAYS show fees in the Additional Services section</SelectItem>
-                    <SelectItem value="never">Never show fees</SelectItem>
-                    <SelectItem value="optional">Let user choose per proposal</SelectItem>
-                  </SelectContent>
-                </Select>
-              </section>
-
-              <section className="space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Annualised Costs</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="annualised"
-                    checked={enableAnnualised}
-                    onCheckedChange={(c) => { setEnableAnnualised(!!c); void save({ enableAnnualised: !!c }); }}
-                    className="rounded-sm border-slate-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  />
-                  <Label htmlFor="annualised" className="text-sm font-normal cursor-pointer">Enable Annualised Costs?</Label>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-slate-700">Discount or Price Increase</Label>
-                  <Select value={discountOrIncrease} onValueChange={(v) => { setDiscountOrIncrease(v as "discount" | "increase"); void save({ discountOrIncrease: v as "discount" | "increase" }); }}>
-                    <SelectTrigger className="w-full max-w-[200px] h-9 border-slate-200">
+                <div className="space-y-1.5">
+                  <p className="text-[12px] font-medium text-slate-700">Visibility</p>
+                  <Select
+                    value={displayFeesUpsell}
+                    onValueChange={(v) => { setDisplayFeesUpsell(v as "always" | "never" | "optional"); void save({ displayFeesUpsell: v as "always" | "never" | "optional" }); }}
+                  >
+                    <SelectTrigger className="h-10 w-full text-[13px] border-slate-200 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="discount">Discount</SelectItem>
-                      <SelectItem value="increase">Price Increase</SelectItem>
+                      <SelectItem value="always" className="text-[13px]">Always show fees</SelectItem>
+                      <SelectItem value="never" className="text-[13px]">Never show fees</SelectItem>
+                      <SelectItem value="optional" className="text-[13px]">Let user choose per proposal</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-slate-700">Annualised Costs Discount</Label>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-0">
-                      <Input
+              </div>
+
+              {/* Annualised costs */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[13px] font-medium text-slate-800">Annualised costs</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Allow monthly fees to be annualised with a discount or price increase</p>
+                </div>
+                <label className={cn(
+                  "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+                  enableAnnualised ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                )}>
+                  <input
+                    type="checkbox"
+                    checked={enableAnnualised}
+                    onChange={(e) => { setEnableAnnualised(e.target.checked); void save({ enableAnnualised: e.target.checked }); }}
+                    className="mt-0.5"
+                    style={{ accentColor: ACCENT }}
+                  />
+                  <div>
+                    <p className="text-[13px] font-medium text-slate-800">Enable annualised costs</p>
+                    <p className="text-[11px] text-slate-400">Show an annualised total in proposals</p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Discount / increase (only when annualised is on) */}
+              {enableAnnualised && (
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[13px] font-medium text-slate-800">Annualised adjustment</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Apply a discount or price increase when annualising fees</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-[12px] font-medium text-slate-700">Type</p>
+                    <Select
+                      value={discountOrIncrease}
+                      onValueChange={(v) => { setDiscountOrIncrease(v as "discount" | "increase"); void save({ discountOrIncrease: v as "discount" | "increase" }); }}
+                    >
+                      <SelectTrigger className="h-10 w-44 text-[13px] border-slate-200 rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="discount" className="text-[13px]">Discount</SelectItem>
+                        <SelectItem value="increase" className="text-[13px]">Price Increase</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[12px] font-medium text-slate-700">
+                      {discountOrIncrease === "discount" ? "Discount" : "Increase"} rate
+                    </p>
+                    <div className="flex items-center">
+                      <input
                         type="text"
                         value={annualisedDiscount}
                         onChange={(e) => { setAnnualisedDiscount(e.target.value); if (annualisedDiscountError) setAnnualisedDiscountError(null); }}
@@ -756,276 +1016,281 @@ export default function PricingToolPage() {
                             setAnnualisedDiscount("0");
                             return;
                           }
-                            setAnnualisedDiscountError(null);
+                          setAnnualisedDiscountError(null);
                           void save({ annualisedDiscount: annualisedDiscount.trim() });
                         }}
-                        className={cn("w-20 h-9 rounded-r-none border-slate-200", annualisedDiscountError && "border-red-500")}
+                        className={cn(
+                          "w-20 h-10 px-3 rounded-l-lg border text-[13px] text-slate-800 focus:outline-none transition-colors bg-white",
+                          annualisedDiscountError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                        )}
+                        placeholder="0"
                       />
-                      <span className="inline-flex items-center px-3 h-9 bg-slate-100 border border-l-0 border-slate-200 rounded-r-md text-sm text-slate-600">%</span>
+                      <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg text-[13px] text-slate-500">%</span>
                     </div>
-                    {annualisedDiscountError && <p className="text-xs text-red-600">{annualisedDiscountError}</p>}
+                    {annualisedDiscountError && <p className="text-[11px] text-red-600">{annualisedDiscountError}</p>}
                   </div>
                 </div>
-                <p className="text-xs text-slate-500">Any services not included above will not have tax applied when you annualise costs in the proposal.</p>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <Label className="text-sm font-medium text-slate-700">Apply to which line items</Label>
-                <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg bg-white min-h-10">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded text-sm text-slate-700">
-                    All Lines
-                    <button type="button" className="p-0.5 hover:text-slate-900">×</button>
-                  </span>
-                </div>
-              </section>
+              )}
             </div>
-          )}
-
-          {/* ── Alignment Fee ──────────────────────────────────────────────── */}
-          {activeSection === "alignment-fee" && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-1.5">
-                <Label className="text-sm font-medium text-slate-800">Alignment Fee</Label>
-                <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-              </div>
-              <p className="text-xs text-slate-500">
-                The alignment fee ensures you get paid the full amount, for the services where payments are calculated over 12 months, but where you&apos;re onboarding the client part way through their year.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-slate-700">Apply to which line items:</Label>
-                  <Input
-                    value={alignmentLineItems}
-                    onChange={(e) => setAlignmentLineItems(e.target.value)}
-                    placeholder="Select line items"
-                    className="w-full h-9 border-slate-200"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-slate-700">Apply to which proposals:</Label>
-                  <div className="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg bg-white min-h-10">
-                    {alignmentProposals.map((p, i) => (
-                      <span key={p} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded text-sm text-slate-700">
-                        {p}
-                        <button type="button" className="p-0.5 hover:text-slate-900" onClick={() => setAlignmentProposals((prev) => prev.filter((_, j) => j !== i))}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                  <Select value="" onValueChange={(v) => { if (!v || alignmentProposals.includes(v)) return; setAlignmentProposals((prev) => [...prev, v]); }}>
-                    <SelectTrigger className="w-[200px] h-9 border-slate-200">
-                      <SelectValue placeholder="Add proposal from templates" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["New Client", "Existing Client", "Virtual: New Client"].filter((t) => !alignmentProposals.includes(t)).map((t) => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {[
-                  { title: "Alignment Fee Explanation on Tool", value: alignmentTool, set: setAlignmentTool, key: "alignmentTool" as const },
-                  { title: "Alignment Fee Explanation in PDF (Monthly)", value: alignmentPdfMonthly, set: setAlignmentPdfMonthly, key: "alignmentPdfMonthly" as const },
-                  { title: "Alignment Fee Explanation in PDF (Oneoff)", value: alignmentPdfOneoff, set: setAlignmentPdfOneoff, key: "alignmentPdfOneoff" as const },
-                ].map(({ title, value, set, key }) => (
-                  <div key={title} className="space-y-2">
-                    <div className="flex items-center gap-1.5">
-                      <Label className="text-sm font-medium text-slate-700">{title}</Label>
-                      <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                    </div>
-                    <p className="text-xs text-slate-500">Suggested: Payment for [alignment_fee_services] are calculated over 12 months…</p>
-                    <div className="border border-slate-200 rounded-lg overflow-hidden">
-                      <Textarea
-                        value={value}
-                        onChange={(e) => set(e.target.value)}
-                        onBlur={() => void save({ [key]: value })}
-                        className="min-h-[100px] border-0 rounded-none focus-visible:ring-0 text-sm resize-y w-full"
-                        placeholder="Enter explanation..."
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ── Multiple Entities ──────────────────────────────────────────── */}
-          {activeSection === "multiple-entities" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Multiple Entities</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="multi-entities"
-                    checked={enableMultipleEntities}
-                    onCheckedChange={(c) => { setEnableMultipleEntities(!!c); void save({ enableMultipleEntities: !!c }); }}
-                    className="rounded-sm border-slate-300 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  />
-                  <Label htmlFor="multi-entities" className="text-sm font-normal cursor-pointer">Enable Multiple Entities on the tool</Label>
-                </div>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <div className="flex items-center gap-1.5">
-                  <Label className="text-sm font-medium text-slate-800">Business Types</Label>
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
-                </div>
-                <p className="text-xs text-slate-500">These show on the define entities section. Add one type per line.</p>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <Label className="text-sm font-medium text-slate-800">List of business types</Label>
-                <div className="space-y-1">
-                  <div className={cn("relative flex rounded-lg overflow-hidden bg-white", businessTypesError ? "ring-2 ring-red-500" : "border border-slate-200")}>
-                    <Textarea
-                      value={businessTypes}
-                      onChange={(e) => { setBusinessTypes(e.target.value); if (businessTypesError) setBusinessTypesError(null); }}
-                      onBlur={() => {
-                        const lines = businessTypes.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-                        if (lines.length === 0) {
-                          setBusinessTypesError("Add at least one business type (one per line)");
-                          return;
-                        }
-                        setBusinessTypesError(null);
-                        void save({ businessTypes: businessTypes.trim() });
-                      }}
-                      className="min-h-[100px] border-0 rounded-lg focus-visible:ring-0 text-sm resize-y pr-12 bg-white"
-                      placeholder={"Company\nSole Trader"}
-                    />
-                    <div className="absolute right-2 top-2 flex flex-col gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500"><ArrowUp className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500"><ArrowDown className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500"><Pencil className="w-3.5 h-3.5" /></Button>
-                    </div>
-                  </div>
-                  {businessTypesError && <p className="text-xs text-red-600">{businessTypesError}</p>}
-                </div>
-              </section>
-
-              <section className="space-y-2 p-4 rounded-lg border border-slate-200 bg-white">
-                <Label className="text-sm font-medium text-slate-800">Entity display</Label>
-                <p className="text-xs text-slate-500">Options for how entities are shown in proposals can be added here.</p>
-              </section>
-            </div>
-          )}
-
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ── Add Range Sheet ─────────────────────────────────────────────────── */}
       <Sheet open={addRangeDialog !== null} onOpenChange={(open) => { if (!open) { setAddRangeDialog(null); setNewRangeDropdownValue(""); setNewRangeLabel(""); } }}>
-        <SheetContent side="right" hideClose className="w-full sm:max-w-none sm:w-[520px] p-0 border-l border-slate-200 shadow-2xl overflow-hidden flex flex-col bg-white">
+        <SheetContent side="right" hideClose className="w-full sm:max-w-none sm:w-[460px] p-0 border-l border-slate-200 shadow-2xl overflow-hidden flex flex-col bg-white">
           <SheetTitle className="sr-only">{addRangeDialog === "annual" ? "Add Annual Revenue Range" : "Add Second Style Range"}</SheetTitle>
           <div className="flex flex-col h-full">
             <div className="flex-shrink-0 border-b-2 border-slate-200 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="h-14 w-14 min-h-[3.5rem] min-w-[3.5rem] rounded-xl border-2 border-slate-200 flex items-center justify-center shrink-0" style={{ background: "rgba(254,93,51,0.08)" }}>
-                    <BarChart3 className="h-7 w-7" style={{ color: "#C8A96E" }} />
+                  <div className="h-14 w-14 min-h-[3.5rem] min-w-[3.5rem] rounded-xl border-2 border-slate-200 flex items-center justify-center shrink-0" style={{ background: `${ACCENT}14` }}>
+                    <BarChart3 className="h-7 w-7" style={{ color: ACCENT }} />
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-base font-semibold text-slate-900 leading-tight">Add Range</h2>
                     <p className="text-sm text-slate-500 mt-0.5">
-                      {addRangeDialog === "annual" ? "Add an annual revenue range used in proposals" : "Add a second style range for alternative revenue tiers"}
+                      {addRangeDialog === "annual" ? "Add an annual revenue range" : "Add a second style range"}
                     </p>
                   </div>
                 </div>
-                <button onClick={() => { setAddRangeDialog(null); setNewRangeDropdownValue(""); setNewRangeLabel(""); }} className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0">
+                <button
+                  onClick={() => { setAddRangeDialog(null); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                  className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              <div className="space-y-2">
-                <Label className="text-[13px]">Range</Label>
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">Range <span className="text-red-500">*</span></label>
                 <Select value={newRangeDropdownValue} onValueChange={(v) => { setNewRangeDropdownValue(v); if (v !== RANGE_OTHER_VALUE) setNewRangeLabel(""); }}>
-                  <SelectTrigger className="w-full h-10 text-[13px] border-slate-200 rounded">
+                  <SelectTrigger className="w-full h-10 text-[13px] border-slate-200 rounded-lg">
                     <SelectValue placeholder="Select a range or choose Other" />
                   </SelectTrigger>
-                  <SelectContent position="popper" side="bottom" align="start" sideOffset={4} className="bg-white border-slate-200">
+                  <SelectContent position="popper" side="bottom" align="start" sideOffset={4}>
                     {addRangePredefinedOptions.map((opt) => (
                       <SelectItem key={opt} value={opt} className="text-[13px]">{opt}</SelectItem>
                     ))}
-                    <SelectItem value={RANGE_OTHER_VALUE} className="text-[13px] font-medium">Other</SelectItem>
+                    <SelectItem value={RANGE_OTHER_VALUE} className="text-[13px] font-medium">Other (custom)</SelectItem>
                   </SelectContent>
                 </Select>
                 {newRangeDropdownValue === RANGE_OTHER_VALUE && (
-                  <div className="space-y-1.5 pt-2">
-                    <Label className="text-[13px]">Custom label</Label>
-                    <Input
+                  <div className="space-y-1.5 pt-1">
+                    <label className="text-[13px] font-medium text-slate-700">Custom label <span className="text-red-500">*</span></label>
+                    <input
                       value={newRangeLabel}
                       onChange={(e) => setNewRangeLabel(e.target.value)}
-                      placeholder="e.g. R200M - R500M"
+                      placeholder="e.g. R200M – R500M"
                       onKeyDown={(e) => e.key === "Enter" && handleAddRange()}
-                      className="w-full h-10 text-[13px] border-slate-200 rounded"
+                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] transition-colors bg-white"
                     />
                   </div>
                 )}
-                <p className="text-[11px] text-slate-500">Used in the proposal tool when adding revenue variation line items</p>
+                <p className="text-[11px] text-slate-400">Used in the proposal tool when adding revenue variation line items</p>
               </div>
             </div>
             <SheetFooter className="flex-shrink-0 border-t border-slate-200 px-5 py-4 bg-slate-50 gap-2">
-              <button onClick={() => { setAddRangeDialog(null); setNewRangeDropdownValue(""); setNewRangeLabel(""); }} className="h-9 px-4 rounded-lg border border-red-600 text-red-600 text-[13px] font-medium hover:bg-red-50 transition-colors">Cancel</button>
-              <button onClick={handleAddRange} className="h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "#C8A96E" }}>Add Range</button>
+              <button
+                onClick={() => { setAddRangeDialog(null); setNewRangeDropdownValue(""); setNewRangeLabel(""); }}
+                className="h-9 px-4 rounded-lg border border-red-600 text-red-600 text-[13px] font-medium hover:bg-red-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddRange}
+                className="h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: ACCENT }}
+              >
+                Add Range
+              </button>
             </SheetFooter>
           </div>
         </SheetContent>
       </Sheet>
 
       {/* ── Add Tax Rate Sheet ──────────────────────────────────────────────── */}
-      <Sheet open={addTaxOpen} onOpenChange={setAddTaxOpen}>
-        <SheetContent side="right" hideClose className="w-full sm:max-w-none sm:w-[520px] p-0 border-l border-slate-200 shadow-2xl overflow-hidden flex flex-col bg-white">
-          <SheetTitle className="sr-only">Add New Tax Rate</SheetTitle>
+      <Sheet open={addTaxOpen} onOpenChange={(open) => { if (!open) { setAddTaxOpen(false); setNewTaxName(""); setNewTaxRate("0"); setNewTaxNameError(""); setNewTaxRateError(""); } }}>
+        <SheetContent side="right" hideClose className="w-full sm:max-w-none sm:w-[460px] p-0 border-l border-slate-200 shadow-2xl overflow-hidden flex flex-col bg-white">
+          <SheetTitle className="sr-only">Add Tax Rate</SheetTitle>
           <div className="flex flex-col h-full">
             <div className="flex-shrink-0 border-b-2 border-slate-200 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="h-14 w-14 min-h-[3.5rem] min-w-[3.5rem] rounded-xl border-2 border-slate-200 flex items-center justify-center shrink-0" style={{ background: "rgba(37,99,235,0.08)" }}>
-                    <Percent className="h-7 w-7 text-blue-600" />
+                  <div className="h-14 w-14 min-h-[3.5rem] min-w-[3.5rem] rounded-xl border-2 border-slate-200 flex items-center justify-center shrink-0" style={{ background: `${ACCENT}14` }}>
+                    <Percent className="h-7 w-7" style={{ color: ACCENT }} />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-base font-semibold text-slate-900 leading-tight">Add New Tax Rate</h2>
-                    <p className="text-sm text-slate-500 mt-0.5">Configure a new tax rate for your proposals</p>
+                    <h2 className="text-base font-semibold text-slate-900 leading-tight">Add Tax Rate</h2>
+                    <p className="text-sm text-slate-500 mt-0.5">Create a new tax rate for proposals</p>
                   </div>
                 </div>
-                <button onClick={() => setAddTaxOpen(false)} className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0">
+                <button
+                  onClick={() => setAddTaxOpen(false)}
+                  className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-[13px]">Tax Name <span className="text-red-500">*</span></Label>
-                <Input value={newTaxName} onChange={(e) => setNewTaxName(e.target.value)} placeholder="e.g. VAT" className="w-full h-10 text-[13px] border-slate-200 rounded" />
+                <label className="text-[13px] font-medium text-slate-700">Name <span className="text-red-500">*</span></label>
+                <input
+                  value={newTaxName}
+                  onChange={(e) => { setNewTaxName(e.target.value); if (newTaxNameError) setNewTaxNameError(""); }}
+                  placeholder="e.g. VAT (15%)"
+                  disabled={savingTax}
+                  className={cn(
+                    "w-full h-10 px-3 rounded-lg border text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none transition-colors bg-white",
+                    newTaxNameError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                  )}
+                />
+                {newTaxNameError
+                  ? <p className="text-[11px] text-red-600">{newTaxNameError}</p>
+                  : <p className="text-[11px] text-slate-400">A descriptive name for this tax rate</p>
+                }
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[13px]">Rate (%) <span className="text-red-500">*</span></Label>
-                <div className="flex items-center gap-0">
-                  <Input type="number" min={0} max={100} value={newTaxRate} onChange={(e) => setNewTaxRate(e.target.value)} className="w-24 h-10 text-[13px] border-slate-200 rounded-r-none" />
-                  <span className="inline-flex items-center px-3 h-10 bg-slate-100 border border-l-0 border-slate-200 rounded-r-md text-sm text-slate-600">%</span>
+                <label className="text-[13px] font-medium text-slate-700">Rate <span className="text-red-500">*</span></label>
+                <div className="flex items-center">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                    value={newTaxRate}
+                    onChange={(e) => { setNewTaxRate(e.target.value); if (newTaxRateError) setNewTaxRateError(""); }}
+                    disabled={savingTax}
+                    className={cn(
+                      "w-28 h-10 px-3 rounded-l-lg border text-[13px] text-slate-800 focus:outline-none transition-colors bg-white",
+                      newTaxRateError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                    )}
+                  />
+                  <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg text-[13px] text-slate-500">%</span>
                 </div>
+                {newTaxRateError
+                  ? <p className="text-[11px] text-red-600">{newTaxRateError}</p>
+                  : <p className="text-[11px] text-slate-400">Between 0 and 100</p>
+                }
               </div>
             </div>
             <SheetFooter className="flex-shrink-0 border-t border-slate-200 px-5 py-4 bg-slate-50 gap-2">
-              <button onClick={() => setAddTaxOpen(false)} className="h-9 px-4 rounded-lg border border-red-600 text-red-600 text-[13px] font-medium hover:bg-red-50 transition-colors">Cancel</button>
-              <button onClick={handleAddTax} className="h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "#C8A96E" }}>Add Tax Rate</button>
+              <button
+                onClick={() => setAddTaxOpen(false)}
+                disabled={savingTax}
+                className="h-9 px-4 rounded-lg border border-red-600 text-red-600 text-[13px] font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddTaxRate}
+                disabled={savingTax}
+                className="h-9 px-4 rounded-lg text-[13px] font-semibold text-white disabled:opacity-50 transition-opacity hover:opacity-90 flex items-center gap-1.5"
+                style={{ background: ACCENT }}
+              >
+                {savingTax ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Adding…</> : "Add Tax Rate"}
+              </button>
             </SheetFooter>
           </div>
         </SheetContent>
       </Sheet>
 
-      {/* ── Delete Tax Rate Confirm ─────────────────────────────────────────── */}
-      <AlertDialog open={!!deleteTaxId} onOpenChange={(o) => !o && setDeleteTaxId(null)}>
+      {/* ── Edit Tax Rate Sheet ─────────────────────────────────────────────── */}
+      <Sheet open={editTaxSheetId !== null} onOpenChange={(open) => { if (!open) setEditTaxSheetId(null); }}>
+        <SheetContent side="right" hideClose className="w-full sm:max-w-none sm:w-[460px] p-0 border-l border-slate-200 shadow-2xl overflow-hidden flex flex-col bg-white">
+          <SheetTitle className="sr-only">Edit Tax Rate</SheetTitle>
+          <div className="flex flex-col h-full">
+            <div className="flex-shrink-0 border-b-2 border-slate-200 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="h-14 w-14 min-h-[3.5rem] min-w-[3.5rem] rounded-xl border-2 border-slate-200 flex items-center justify-center shrink-0" style={{ background: `${ACCENT}14` }}>
+                    <Pencil className="h-7 w-7" style={{ color: ACCENT }} />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-base font-semibold text-slate-900 leading-tight">Edit Tax Rate</h2>
+                    <p className="text-sm text-slate-500 mt-0.5">Update the name or percentage rate</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEditTaxSheetId(null)}
+                  className="h-9 w-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">Name <span className="text-red-500">*</span></label>
+                <input
+                  value={editingTaxName}
+                  onChange={(e) => { setEditingTaxName(e.target.value); if (editTaxNameError) setEditTaxNameError(""); }}
+                  disabled={savingEditTax}
+                  className={cn(
+                    "w-full h-10 px-3 rounded-lg border text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none transition-colors bg-white",
+                    editTaxNameError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                  )}
+                />
+                {editTaxNameError && <p className="text-[11px] text-red-600">{editTaxNameError}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">Rate <span className="text-red-500">*</span></label>
+                <div className="flex items-center">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                    value={editingTaxRate}
+                    onChange={(e) => { setEditingTaxRate(e.target.value); if (editTaxRateError) setEditTaxRateError(""); }}
+                    disabled={savingEditTax}
+                    className={cn(
+                      "w-28 h-10 px-3 rounded-l-lg border text-[13px] text-slate-800 focus:outline-none transition-colors bg-white",
+                      editTaxRateError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                    )}
+                  />
+                  <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg text-[13px] text-slate-500">%</span>
+                </div>
+                {editTaxRateError && <p className="text-[11px] text-red-600">{editTaxRateError}</p>}
+              </div>
+            </div>
+            <SheetFooter className="flex-shrink-0 border-t border-slate-200 px-5 py-4 bg-slate-50 gap-2">
+              <button
+                onClick={() => setEditTaxSheetId(null)}
+                disabled={savingEditTax}
+                className="h-9 px-4 rounded-lg border border-red-600 text-red-600 text-[13px] font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveTaxEdit}
+                disabled={savingEditTax}
+                className="h-9 px-4 rounded-lg text-[13px] font-semibold text-white disabled:opacity-50 transition-opacity hover:opacity-90 flex items-center gap-1.5"
+                style={{ background: ACCENT }}
+              >
+                {savingEditTax ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Saving…</> : "Save Changes"}
+              </button>
+            </SheetFooter>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* ── Delete Tax Rate Alert ───────────────────────────────────────────── */}
+      <AlertDialog open={!!deleteTaxId} onOpenChange={(open) => { if (!open) setDeleteTaxId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Tax Rate</AlertDialogTitle>
-            <AlertDialogDescription>Are you sure you want to delete this tax rate? This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>Remove tax rate?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This tax rate will be permanently removed. You must keep at least one tax rate.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white" onClick={() => deleteTaxId && handleDeleteTax(deleteTaxId)}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteTax} className="bg-red-600 hover:bg-red-700">
+              Remove
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

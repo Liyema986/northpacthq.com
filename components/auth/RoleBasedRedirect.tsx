@@ -31,6 +31,8 @@ function isFirmAdminPath(pathname: string | null): boolean {
     pathname.endsWith("/") && pathname.length > 1
       ? pathname.slice(0, -1)
       : pathname;
+  // Same shell as administrator: sidebar + Convex firm-admin gate in (admin)/layout.
+  if (n === "/super/support") return true;
   return n === ADMIN_PANEL_PATH || n.startsWith(`${ADMIN_PANEL_PATH}/`);
 }
 

@@ -50,7 +50,13 @@ function AdminContentSkeleton() {
 }
 
 // ── Nav links ─────────────────────────────────────────────────────────────────
-function AdminNavLinks({ collapsed }: { collapsed: boolean }) {
+function AdminNavLinks({
+  collapsed,
+  supportUnreadCount,
+}: {
+  collapsed: boolean;
+  supportUnreadCount: number;
+}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const activeTab = searchParams.get("tab") ?? "overview";
@@ -66,7 +72,7 @@ function AdminNavLinks({ collapsed }: { collapsed: boolean }) {
           <Link
             href={href}
             className={cn(
-              "w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-[13px] transition-colors",
+              "w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-[13px] transition-colors relative",
               collapsed && "justify-center",
               isActive
                 ? "bg-[#C8A96E]/[0.08] text-[#C8A96E] font-semibold"
@@ -75,6 +81,16 @@ function AdminNavLinks({ collapsed }: { collapsed: boolean }) {
           >
             <Icon className="h-[15px] w-[15px] shrink-0" />
             {!collapsed && <span className="truncate">{label}</span>}
+            {tab === "support" && supportUnreadCount > 0 && (
+              <span
+                className={cn(
+                  "inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold",
+                  collapsed && "absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] text-[9px]"
+                )}
+              >
+                {supportUnreadCount > 99 ? "99+" : supportUnreadCount}
+              </span>
+            )}
           </Link>
         );
 
@@ -96,6 +112,7 @@ function AdminNavLinks({ collapsed }: { collapsed: boolean }) {
 function AdminSidebar() {
   const { collapsed, toggle } = useSidebar();
   const { user, signOut } = useNorthPactAuth();
+  const supportUnreadCount = useQuery(api.supportChat.adminUnreadCount) ?? 0;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -120,11 +137,8 @@ function AdminSidebar() {
             </button>
           ) : (
             <>
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex min-w-0 items-center">
                 <Image src="/logo3.png" alt="NorthPact" width={110} height={36} className="h-7 w-auto object-contain object-left" priority />
-                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
-                  Admin
-                </span>
               </div>
               <button
                 onClick={toggle}
@@ -140,7 +154,7 @@ function AdminSidebar() {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           <Suspense fallback={null}>
-            <AdminNavLinks collapsed={collapsed} />
+            <AdminNavLinks collapsed={collapsed} supportUnreadCount={supportUnreadCount} />
           </Suspense>
         </nav>
 
@@ -194,12 +208,22 @@ function AdminSidebar() {
 
 // ── Shell ─────────────────────────────────────────────────────────────────────
 function AdminShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isSupportRoute = pathname === "/super/support";
+
   return (
     <div className="flex h-screen overflow-hidden">
       <AdminSidebar />
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-slate-50/40">{children}</main>
+        <main
+          className={cn(
+            "min-h-0 flex-1 bg-slate-50/40",
+            isSupportRoute ? "relative flex flex-col overflow-hidden" : "overflow-y-auto"
+          )}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

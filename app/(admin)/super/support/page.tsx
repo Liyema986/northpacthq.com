@@ -1,247 +1,332 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  MessageCircle, Send, Trash2, Loader2, ChevronLeft, User,
-} from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft, MessageCircle, Send, Loader2, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
-  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
-function timeAgo(ts: number) {
-  const diff = Date.now() - ts;
-  if (diff < 60_000) return "just now";
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
-  return new Date(ts).toLocaleDateString("en-ZA", { month: "short", day: "numeric" });
-}
 
 export default function AdminSupportPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [replyInput, setReplyInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const conversations = useQuery(api.supportChat.adminListConversations);
+  const unreadCount = useQuery(api.supportChat.adminUnreadCount) ?? 0;
   const messages = useQuery(
     api.supportChat.adminListForUser,
     selectedUserId ? { userId: selectedUserId } : "skip"
   );
-  const adminReply = useMutation(api.supportChat.adminReply);
-  const deleteConversation = useMutation(api.supportChat.adminDeleteConversation);
+  const replyMutation = useMutation(api.supportChat.adminReply);
+  const deleteMessageMutation = useMutation(api.supportChat.adminDeleteMessage);
+  const deleteConversationMutation = useMutation(api.supportChat.adminDeleteConversation);
 
-  const selectedConvo = conversations?.find((c) => c.userId === selectedUserId);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  async function handleReply() {
+  async function handleSendReply() {
     if (!selectedUserId || !replyInput.trim() || isSending) return;
     setIsSending(true);
     try {
-      await adminReply({ userId: selectedUserId, content: replyInput.trim() });
+      await replyMutation({ userId: selectedUserId, content: replyInput.trim() });
       setReplyInput("");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send reply");
+      toast.success("Reply sent");
+    } catch {
+      toast.error("Failed to send reply");
     } finally {
       setIsSending(false);
     }
   }
 
-  async function handleDelete(userId: string) {
+  async function handleDeleteConversation(userId: string) {
+    if (deletingConversationId) return;
+    setDeletingConversationId(userId);
     try {
-      await deleteConversation({ userId });
+      await deleteConversationMutation({ userId });
       if (selectedUserId === userId) setSelectedUserId(null);
       toast.success("Conversation deleted");
     } catch {
       toast.error("Failed to delete conversation");
+    } finally {
+      setDeletingConversationId(null);
     }
   }
 
+  async function handleDeleteMessage(messageId: Id<"support_messages">) {
+    if (deletingMessageId) return;
+    setDeletingMessageId(messageId);
+    try {
+      await deleteMessageMutation({ messageId });
+      toast.success("Message deleted");
+    } catch {
+      toast.error("Failed to delete message");
+    } finally {
+      setDeletingMessageId(null);
+    }
+  }
+
+  const selectedConv = selectedUserId
+    ? conversations?.find((c) => c.userId === selectedUserId)
+    : null;
+
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Conversation list */}
-      <div className={cn(
-        "w-full lg:w-[300px] border-r shrink-0 flex flex-col",
-        selectedUserId ? "hidden lg:flex" : "flex"
-      )}>
-        <div className="px-4 py-3 border-b shrink-0">
-          <h1 className="text-base font-semibold text-slate-800">Support Inbox</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {conversations?.filter((c) => c.unreadBySupport).length ?? 0} awaiting reply
-          </p>
-        </div>
-
-        <ScrollArea className="flex-1">
-          {conversations === undefined ? (
-            <div className="p-4 space-y-3">
-              {[1,2,3].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}
-            </div>
-          ) : conversations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-              <MessageCircle className="h-10 w-10 text-slate-200 mb-3" />
-              <p className="text-sm font-medium text-slate-600">No conversations yet</p>
-              <p className="text-xs text-slate-400 mt-1">Support messages will appear here.</p>
-            </div>
-          ) : (
-            <div className="p-2 space-y-1">
-              {conversations.map((c) => (
-                <button
-                  key={c.userId}
-                  type="button"
-                  onClick={() => setSelectedUserId(c.userId)}
-                  className={cn(
-                    "w-full text-left rounded-lg px-3 py-2.5 transition-colors",
-                    selectedUserId === c.userId
-                      ? "bg-[#C8A96E]/10 border border-[#C8A96E]/30"
-                      : "hover:bg-slate-50"
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-[#C8A96E]/20 flex items-center justify-center shrink-0">
-                        <User className="h-3.5 w-3.5 text-[#C8A96E]" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[12.5px] font-semibold text-slate-800 truncate">
-                          {c.userName ?? c.userEmail ?? "Unknown user"}
-                        </p>
-                        <p className="text-[11px] text-slate-400 truncate">{c.lastMessagePreview}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-[10px] text-slate-400">{timeAgo(c.lastMessageAt)}</span>
-                      {c.unreadBySupport && (
-                        <span className="h-2 w-2 rounded-full bg-[#C8A96E]" aria-label="Unread" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+    <div className="absolute inset-0 flex flex-col overflow-hidden bg-white dark:bg-slate-900">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <aside
+          className={cn(
+            "flex shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900",
+            "w-full lg:w-[28rem] xl:w-[32rem]",
+            selectedUserId ? "hidden lg:flex" : "flex"
           )}
-        </ScrollArea>
-      </div>
-
-      {/* Thread view */}
-      <div className={cn(
-        "flex-1 flex flex-col min-w-0",
-        selectedUserId ? "flex" : "hidden lg:flex"
-      )}>
-        {!selectedUserId ? (
-          <div className="flex-1 flex items-center justify-center text-center p-8">
+        >
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
             <div>
-              <MessageCircle className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-500">Select a conversation</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Conversations</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {conversations?.length ?? 0} {(conversations?.length ?? 0) === 1 ? "thread" : "threads"}
+              </p>
             </div>
+            {unreadCount > 0 && (
+              <span className="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </div>
-        ) : (
-          <>
-            {/* Thread header */}
-            <div className="px-4 py-3 border-b flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
+
+          <ScrollArea className="flex-1">
+            <div className="space-y-0.5 p-2">
+              {conversations === undefined ? (
+                <div className="space-y-2 p-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+                  ))}
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="py-10 text-center">
+                  <MessageCircle className="mx-auto mb-2 h-8 w-8 opacity-50 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">No conversations yet</p>
+                  <p className="mt-1 text-xs text-muted-foreground/70">User messages will appear here</p>
+                </div>
+              ) : (
+                conversations.map((c) => (
+                  <div
+                    key={c.userId}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedUserId(c.userId)}
+                    onKeyDown={(e) => e.key === "Enter" && setSelectedUserId(c.userId)}
+                    className={cn(
+                      "group relative w-full cursor-pointer rounded-lg px-3 py-3 text-left transition-colors",
+                      selectedUserId === c.userId
+                        ? "bg-primary/10 text-primary dark:bg-primary/20"
+                        : "hover:bg-slate-50 dark:hover:bg-slate-800/60",
+                      c.unreadBySupport && "border-l-2 border-l-primary"
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-medium text-slate-900 dark:text-white">
+                          {c.userName || c.userEmail || "Unknown user"}
+                        </p>
+                        <p className="mt-0.5 line-clamp-2 break-words text-xs text-muted-foreground">
+                          {c.lastMessagePreview}
+                        </p>
+                      </div>
+                      <span className="shrink-0 pt-0.5 text-[10px] text-muted-foreground">
+                        {new Date(c.lastMessageAt).toLocaleDateString("en-ZA", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    {c.unreadBySupport && (
+                      <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                        Awaiting reply
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteConversation(c.userId);
+                      }}
+                      disabled={!!deletingConversationId}
+                      aria-label="Delete conversation"
+                      className={cn(
+                        "absolute bottom-2 right-2",
+                        "flex h-5 w-5 items-center justify-center rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100",
+                        "border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800",
+                        "text-slate-400 hover:border-destructive/40 hover:text-destructive dark:hover:text-destructive",
+                        "disabled:cursor-not-allowed disabled:opacity-30"
+                      )}
+                    >
+                      {deletingConversationId === c.userId ? (
+                        <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-2.5 w-2.5" />
+                      )}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </aside>
+
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col bg-slate-50 dark:bg-slate-950",
+            selectedUserId ? "flex" : "hidden lg:flex"
+          )}
+        >
+          {selectedUserId ? (
+            <>
+              <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-ml-1 h-10 w-10 shrink-0 text-muted-foreground lg:hidden"
                   onClick={() => setSelectedUserId(null)}
-                  className="lg:hidden p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                  aria-label="Back to conversations"
                 >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">
-                    {selectedConvo?.userName ?? selectedConvo?.userEmail ?? "Unknown user"}
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                    {selectedConv?.userName || selectedConv?.userEmail || "User"}
                   </p>
-                  {selectedConvo?.userEmail && selectedConvo.userName && (
-                    <p className="text-xs text-slate-400">{selectedConvo.userEmail}</p>
+                  {selectedConv?.userEmail && selectedConv?.userName && (
+                    <p className="truncate text-xs text-muted-foreground">{selectedConv.userEmail}</p>
                   )}
                 </div>
               </div>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-500">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      All messages in this conversation will be permanently deleted.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDelete(selectedUserId)}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-
-            {/* Messages */}
-            <ScrollArea className="flex-1 px-4">
-              <div className="py-4 space-y-4">
-                {messages === undefined ? (
-                  <div className="space-y-3 animate-pulse">
-                    {[1,2,3].map(i => (
-                      <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                        <div className={`h-9 rounded-lg bg-muted ${i % 2 === 0 ? "w-2/3" : "w-1/2"}`} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  messages.map((m) => (
-                    <div key={m._id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                      <div className={cn(
-                        "max-w-[80%] rounded-lg px-3 py-2 text-sm space-y-1",
-                        m.role === "user" ? "bg-[#243E63] text-white" : "bg-muted"
-                      )}>
-                        <p>{m.content}</p>
-                        <p className={cn("text-[10px]", m.role === "user" ? "text-white/60" : "text-muted-foreground")}>
-                          {timeAgo(m.createdAt)}
-                          {m.isAutoReply && " · auto-reply"}
-                        </p>
-                      </div>
+              <ScrollArea className="flex-1">
+                <div className="space-y-4 px-5 py-4">
+                  {messages === undefined ? (
+                    <div className="space-y-3 animate-pulse">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                          <div
+                            className={cn(
+                              "h-10 rounded-2xl bg-slate-200 dark:bg-slate-700",
+                              i % 2 === 0 ? "w-2/3" : "w-1/2"
+                            )}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
+                  ) : (
+                    messages.map((m) => (
+                      <div
+                        key={m._id}
+                        className={cn("group flex", m.role === "user" ? "justify-start" : "justify-end")}
+                      >
+                        <div className="relative max-w-[75%]">
+                          <div
+                            className={cn(
+                              "rounded-2xl px-4 py-2.5 text-sm shadow-sm",
+                              m.role === "user"
+                                ? "border border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                                : "bg-primary text-white"
+                            )}
+                          >
+                            <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                            <p
+                              className={cn(
+                                "mt-1 text-[10px]",
+                                m.role === "user"
+                                  ? "text-muted-foreground"
+                                  : "text-white/80"
+                              )}
+                            >
+                              {new Date(m.createdAt).toLocaleString("en-ZA", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                              {m.role === "support" && !m.isAutoReply && " • You"}
+                              {m.role === "support" && m.isAutoReply && " • auto-reply"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMessage(m._id)}
+                            disabled={!!deletingMessageId}
+                            aria-label="Delete message"
+                            className={cn(
+                              "absolute -bottom-2.5",
+                              m.role === "user" ? "right-1" : "left-1",
+                              "flex h-5 w-5 items-center justify-center rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100",
+                              "border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800",
+                              "text-slate-400 hover:border-destructive/40 hover:text-destructive dark:hover:text-destructive",
+                              "disabled:cursor-not-allowed disabled:opacity-30"
+                            )}
+                          >
+                            {deletingMessageId === m._id ? (
+                              <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-2.5 w-2.5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
 
-            {/* Reply input */}
-            <div className="p-4 border-t shrink-0">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Reply as support..."
-                  value={replyInput}
-                  onChange={(e) => setReplyInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleReply()}
-                  disabled={isSending}
-                  className="flex-1"
-                />
-                <Button
-                  size="icon"
-                  onClick={handleReply}
-                  disabled={!replyInput.trim() || isSending}
-                  className="bg-[#243E63] hover:bg-[#1a2f4b]"
-                >
-                  {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
+              <div className="shrink-0 border-t border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900">
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Type your reply..."
+                    value={replyInput}
+                    onChange={(e) => setReplyInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendReply()}
+                    disabled={isSending}
+                    className="flex-1 border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
+                  />
+                  <Button
+                    size="icon"
+                    onClick={handleSendReply}
+                    disabled={!replyInput.trim() || isSending}
+                    className="shrink-0 bg-primary text-white hover:bg-primary/90 hover:text-white disabled:text-white/70 [&_svg]:text-white"
+                  >
+                    {isSending ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    ) : (
+                      <Send className="h-4 w-4 text-white" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-1 items-center justify-center p-8">
+              <div className="max-w-sm text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                  <MessageCircle className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <p className="text-base font-medium text-slate-900 dark:text-white">Select a conversation</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Choose a conversation from the list to view messages and reply.
+                </p>
               </div>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

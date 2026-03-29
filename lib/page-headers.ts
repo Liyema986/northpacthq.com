@@ -82,6 +82,9 @@ export function getPageHeader(
   if (base === ADMIN_PANEL_PATH || base === "/administrator") {
     return { title: "Admin", description: "Firm administration, team, and permissions." };
   }
+  if (base === "/super/support") {
+    return { title: "Support", description: "Reply to team members who messaged support from the dashboard." };
+  }
 
   return { title: "NorthPact", description: "" };
 }

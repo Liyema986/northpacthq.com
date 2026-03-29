@@ -1,6 +1,7 @@
 // convex/signatures.ts
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { api } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 
 /**
@@ -185,6 +186,11 @@ export const submitSignature = mutation({
         relatedType: "engagement-letter",
         isRead: false,
         createdAt: signedAt,
+      });
+
+      // Email the firm to notify them of the signed letter
+      await ctx.scheduler.runAfter(0, api.email.sendEngagementLetterSignedEmail, {
+        letterId: session.letterId,
       });
     }
 

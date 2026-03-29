@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { Header } from "@/components/layout/header";
@@ -182,6 +182,8 @@ function ProposalDetailPageInner() {
   const updateProposal = useMutation(api.proposals.updateProposal);
   const deleteProposal = useMutation(api.proposals.deleteProposal);
   const generateScopeLibraryLetter = useMutation(api.engagementLetters.generateLetterFromScopeLibrary);
+  const sendProposalEmail = useAction(api.email.sendProposalEmail);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const generatedLetter = useQuery(
     api.engagementLetters.getLetterByProposal,
     userId && id ? { userId, proposalId: id as Id<"proposals"> } : "skip"
@@ -490,6 +492,15 @@ function ProposalDetailPageInner() {
               <Button variant="outline" size="sm" onClick={() => updateStatus("viewed")}>
                 Mark as Viewed
               </Button>
+            )}
+            {proposal.status === "rejected" && (
+              <button
+                onClick={() => updateStatus("draft")}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: "#C8A96E" }}
+              >
+                <ArrowRight className="h-3.5 w-3.5" />Revise Proposal
+              </button>
             )}
 
             <DropdownMenu>
@@ -993,11 +1004,27 @@ function ProposalDetailPageInner() {
                   <Copy className="h-3.5 w-3.5 mr-1.5" />Copy Subject
                 </Button>
                 <button
-                  onClick={() => toast.info("Email sending available in production")}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                  disabled={isSendingEmail || !userId}
+                  onClick={async () => {
+                    if (!userId) return;
+                    setIsSendingEmail(true);
+                    try {
+                      await sendProposalEmail({ userId, proposalId: id as Id<"proposals"> });
+                      toast.success("Proposal email sent to client");
+                    } catch (err) {
+                      toast.error(err instanceof Error ? err.message : "Failed to send email");
+                    } finally {
+                      setIsSendingEmail(false);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ background: "#C8A96E" }}
                 >
-                  <Send className="h-3.5 w-3.5" />Send Email
+                  {isSendingEmail ? (
+                    <><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />Sending…</>
+                  ) : (
+                    <><Send className="h-3.5 w-3.5" />Send Email</>
+                  )}
                 </button>
               </div>
             </div>

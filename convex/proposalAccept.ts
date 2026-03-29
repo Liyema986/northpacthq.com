@@ -234,6 +234,11 @@ export const acceptProposal = mutation({
         proposalId: session.proposalId,
         templateType,
       });
+
+      // Auto-generate the engagement letter and email the signing link to the client
+      await ctx.scheduler.runAfter(0, api.email.sendEngagementLetterEmail, {
+        proposalId: session.proposalId,
+      });
     }
 
     return { success: true };

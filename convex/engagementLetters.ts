@@ -1,6 +1,6 @@
 // convex/engagementLetters.ts
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation, internalQuery } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { requirePermission, getUserFirmIdSafe } from "./lib/permissions";
@@ -1427,5 +1427,201 @@ export const getEngagementLetterheadForUi = query({
       footerText: firm.pdfFooterText ?? "",
       directorsList: firm.letterheadDirectorsList ?? "",
     };
+  },
+});
+
+/**
+ * [Internal] Fetch a letter by ID without user context — used by email actions.
+ */
+export const getLetterByIdInternal = internalQuery({
+  args: { letterId: v.id("engagementLetters") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.letterId);
+  },
+});
+
+/**
+ * [Internal] Auto-generate an engagement letter from the scope library for a
+ * proposal (if none exists yet) and create a signing session for it.
+ * Called automatically when a client accepts a proposal.
+ *
+ * Returns the signing URL for the first letter created/found, or null if no
+ * scope-library templates are linked to the proposal's service sections.
+ */
+export const generateAndLinkSigningSession = internalMutation({
+  args: {
+    proposalId: v.id("proposals"),
+    createdByUserId: v.id("users"),
+  },
+  returns: v.union(
+    v.object({
+      signingUrl: v.string(),
+      letterId: v.id("engagementLetters"),
+      letterNumber: v.string(),
+      isNew: v.boolean(),
+    }),
+    v.null()
+  ),
+  handler: async (ctx, args) => {
+    const proposal = await ctx.db.get(args.proposalId);
+    if (!proposal) throw new Error("Proposal not found");
+
+    const firm = await ctx.db.get(proposal.firmId);
+    if (!firm) throw new Error("Firm not found");
+
+    const client = await ctx.db.get(proposal.clientId);
+    if (!client) throw new Error("Client not found");
+
+    const createdBy = await ctx.db.get(args.createdByUserId);
+    if (!createdBy) throw new Error("User not found");
+
+    // Check if a letter already exists for this proposal
+    const existing = await ctx.db
+      .query("engagementLetters")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", args.proposalId))
+      .first();
+
+    let letterId: Id<"engagementLetters">;
+    let letterNumber: string;
+    let isNew = false;
+
+    if (existing) {
+      letterId = existing._id;
+      letterNumber = existing.letterNumber;
+    } else {
+      // Generate from scope library templates (same logic as generateLetterFromScopeLibrary)
+      const grouped = await collectSectionResponsibilities(ctx, proposal, proposal.firmId);
+
+      if (grouped.size === 0) {
+        // No scope-library links on this proposal — nothing to generate
+        return null;
+      }
+
+      const existingLetters = await ctx.db
+        .query("engagementLetters")
+        .withIndex("by_firm", (q) => q.eq("firmId", proposal.firmId))
+        .collect();
+      let nextNum = existingLetters.length + 1;
+
+      let firstLetterId: Id<"engagementLetters"> | null = null;
+      let firstLetterNumber = "";
+
+      for (const [tplIdStr, { our, your }] of grouped) {
+        const tplId = tplIdStr as Id<"engagementLetterVersions">;
+        const version = await ctx.db.get(tplId);
+        if (!version) continue;
+
+        const clientAddress = [
+          client.addressLine1,
+          client.city,
+          client.region,
+          client.postalCode,
+          client.country,
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+        const yearEndDate = [
+          proposal.financialYearEndMonth ?? "",
+          proposal.financialYearEndYear ?? "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+
+        const vars: Record<string, string> = {
+          COMPANY_NAME: client.companyName,
+          COMPANY_ADDRESS: clientAddress,
+          YEAR_END_DATE: yearEndDate,
+          ENGAGEMENT_DATE: new Date().toLocaleDateString("en-ZA", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+          OUR_RESPONSIBILITIES: our,
+          YOUR_RESPONSIBILITIES: your,
+        };
+
+        const rawIntro = version.introduction ?? "";
+        const rawScope = version.scope ?? "";
+        let body = [rawIntro, rawScope].filter(Boolean).join("\n\n");
+        body = body.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
+          key in vars ? vars[key] : match
+        );
+
+        const num = `ENG-${new Date().getFullYear()}-${String(nextNum).padStart(3, "0")}`;
+        nextNum++;
+
+        const lid = await ctx.db.insert("engagementLetters", {
+          firmId: proposal.firmId,
+          proposalId: args.proposalId,
+          clientId: proposal.clientId,
+          letterNumber: num,
+          scopeLibraryVersionId: tplId,
+          jurisdiction: firm.jurisdiction || "ZA",
+          serviceType: version.name,
+          content: body,
+          status: "draft",
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+
+        await ctx.db.insert("activities", {
+          firmId: proposal.firmId,
+          userId: args.createdByUserId,
+          entityType: "engagement-letter",
+          entityId: lid,
+          action: "created",
+          metadata: { letterNumber: num, proposalId: args.proposalId, autoGenerated: true },
+          timestamp: Date.now(),
+        });
+
+        if (!firstLetterId) {
+          firstLetterId = lid;
+          firstLetterNumber = num;
+        }
+      }
+
+      if (!firstLetterId) return null;
+      letterId = firstLetterId;
+      letterNumber = firstLetterNumber;
+      isNew = true;
+    }
+
+    // Create signing session (same logic as signatures.generateSigningLink)
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let token = "";
+    for (let i = 0; i < 64; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+
+    await ctx.db.insert("signingSessions", {
+      firmId: proposal.firmId,
+      letterId,
+      token,
+      status: "pending",
+      createdBy: args.createdByUserId,
+      expiresAt,
+      createdAt: Date.now(),
+    });
+
+    // Mark letter as sent
+    await ctx.db.patch(letterId, {
+      status: "sent",
+      sentAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    await ctx.db.insert("activities", {
+      firmId: proposal.firmId,
+      userId: args.createdByUserId,
+      entityType: "engagement-letter",
+      entityId: letterId,
+      action: "sent",
+      metadata: { letterNumber, proposalId: args.proposalId, autoSent: true },
+      timestamp: Date.now(),
+    });
+
+    return { signingUrl: `/sign/${token}`, letterId, letterNumber, isNew };
   },
 });

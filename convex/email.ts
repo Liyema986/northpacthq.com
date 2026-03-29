@@ -758,3 +758,226 @@ export const sendTeamInviteEmail = internalAction({
     return null;
   },
 });
+
+/**
+ * [Internal] Send the engagement letter signing link to the client after they
+ * accept a proposal. Calls generateAndLinkSigningSession to create the letter
+ * (if not yet generated) and the signing session, then emails the link via Resend.
+ * Scheduled automatically from proposalAccept.acceptProposal.
+ */
+export const sendEngagementLetterEmail = action({
+  args: {
+    proposalId: v.id("proposals"),
+  },
+  returns: v.object({ success: v.boolean(), error: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    const proposal = await ctx.runQuery(internal.emailHelpers.getProposalForEmail, {
+      proposalId: args.proposalId,
+    });
+    if (!proposal) return { success: false, error: "Proposal not found" };
+
+    const client = await ctx.runQuery(internal.emailHelpers.getClientForEmail, {
+      clientId: proposal.clientId,
+    });
+    if (!client?.email) return { success: false, error: "Client email not set" };
+
+    const firm = await ctx.runQuery(internal.emailHelpers.getFirmForEmail, {
+      firmId: proposal.firmId,
+    });
+    if (!firm) return { success: false, error: "Firm not found" };
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendDomain = process.env.RESEND_DOMAIN || "";
+    if (!resendApiKey || !resendDomain || resendDomain === "yourdomain.com") {
+      return { success: false, error: "Email (Resend) not configured" };
+    }
+
+    // Generate (or reuse) engagement letter + signing session
+    const result = await ctx.runMutation(
+      internal.engagementLetters.generateAndLinkSigningSession,
+      { proposalId: args.proposalId, createdByUserId: proposal.createdBy }
+    );
+
+    if (!result) {
+      // No scope-library templates linked — skip silently (not an error)
+      return { success: true };
+    }
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.CONVEX_SITE_URL ?? "";
+    const signingUrl = `${siteUrl}${result.signingUrl}`;
+    const primaryColor = firm.brandColors?.primary ?? "#C8A96E";
+    const secondaryColor = firm.brandColors?.secondary ?? "#243E63";
+    const clientName =
+      (client as any).contactName || (client as any).companyName || "Client";
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f8fafc;color:#1e293b;line-height:1.6;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;background:#fff;">
+    <tr>
+      <td style="background:linear-gradient(135deg,${primaryColor} 0%,${secondaryColor} 100%);padding:36px 32px;border-radius:12px 12px 0 0;">
+        <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;">${firm.name}</h1>
+        <p style="margin:6px 0 0;font-size:14px;color:rgba(255,255,255,0.9);">Engagement Letter — ready to sign</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:32px;">
+        <p style="margin:0 0 16px;font-size:16px;color:#334155;">Dear ${clientName},</p>
+        <p style="margin:0 0 24px;font-size:15px;color:#475569;">
+          Thank you for accepting our proposal. Please review and sign your engagement letter at your earliest convenience.
+        </p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+          <tr><td style="padding:20px 24px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${primaryColor};letter-spacing:0.05em;text-transform:uppercase;">Letter details</p>
+            <p style="margin:0;font-size:14px;color:#334155;"><strong>Letter number:</strong> ${result.letterNumber}</p>
+            <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Proposal:</strong> ${proposal.title}</p>
+          </td></tr>
+        </table>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 24px;">
+          <tr><td align="center">
+            <a href="${signingUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">Sign Engagement Letter</a>
+          </td></tr>
+        </table>
+        <p style="margin:0 0 8px;font-size:13px;color:#94a3b8;text-align:center;">Or copy this link:<br>${signingUrl}</p>
+        <p style="margin:24px 0 0;font-size:15px;color:#334155;">Kind regards,<br><strong>${firm.name}</strong></p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px;background:linear-gradient(135deg,#e0f2fe 0%,#f3e8ff 50%,#e0e7ff 100%);border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:12px;color:#64748b;">Powered by NorthPact</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const text = `Dear ${clientName},\n\nThank you for accepting our proposal. Please sign your engagement letter (${result.letterNumber}) using the link below:\n\n${signingUrl}\n\nKind regards,\n${firm.name}`;
+
+    const resend = new Resend(resendApiKey);
+    try {
+      await resend.emails.send({
+        from: `${firm.name} <proposals@${resendDomain}>`,
+        to: [client.email],
+        subject: `Please sign your Engagement Letter — ${result.letterNumber}`,
+        html,
+        text,
+      });
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? "Failed to send engagement letter email" };
+    }
+  },
+});
+
+/**
+ * [Internal] Notify the firm by email when a client signs their engagement letter.
+ * Scheduled automatically from signatures.submitSignature.
+ */
+export const sendEngagementLetterSignedEmail = action({
+  args: {
+    letterId: v.id("engagementLetters"),
+  },
+  returns: v.object({ success: v.boolean(), error: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    const letter = await ctx.runQuery(internal.engagementLetters.getLetterByIdInternal, {
+      letterId: args.letterId,
+    });
+    if (!letter) return { success: false, error: "Letter not found" };
+
+    const client = await ctx.runQuery(internal.emailHelpers.getClientForEmail, {
+      clientId: letter.clientId,
+    });
+
+    const firm = await ctx.runQuery(internal.emailHelpers.getFirmForEmail, {
+      firmId: letter.firmId,
+    });
+    if (!firm) return { success: false, error: "Firm not found" };
+
+    // Look up the proposal to find its creator (engagement letters don't store createdBy)
+    const proposal = await ctx.runQuery(internal.emailHelpers.getProposalForEmail, {
+      proposalId: letter.proposalId,
+    });
+    const staffUserId = proposal?.createdBy;
+    if (!staffUserId) return { success: false, error: "Could not resolve staff user" };
+
+    const staffUser = await ctx.runQuery(internal.emailHelpers.getUserForEmail, {
+      userId: staffUserId,
+    });
+    if (!staffUser?.email) return { success: false, error: "Staff user email not set" };
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendDomain = process.env.RESEND_DOMAIN || "";
+    if (!resendApiKey || !resendDomain || resendDomain === "yourdomain.com") {
+      return { success: false, error: "Email (Resend) not configured" };
+    }
+
+    const primaryColor = firm.brandColors?.primary ?? "#C8A96E";
+    const clientName = (client as any)?.companyName ?? "Client";
+    const signerName = letter.signatureData?.signerName ?? clientName;
+    const signedAt = letter.signedAt
+      ? new Date(letter.signedAt).toLocaleString("en-ZA", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "just now";
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f8fafc;color:#1e293b;line-height:1.6;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;background:#fff;">
+    <tr>
+      <td style="background:${primaryColor};padding:36px 32px;border-radius:12px 12px 0 0;">
+        <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;">Engagement Letter Signed</h1>
+        <p style="margin:6px 0 0;font-size:14px;color:rgba(255,255,255,0.9);">${letter.letterNumber}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:32px;">
+        <p style="margin:0 0 24px;font-size:15px;color:#475569;">
+          <strong>${signerName}</strong> from <strong>${clientName}</strong> has signed engagement letter <strong>${letter.letterNumber}</strong>.
+        </p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+          <tr><td style="padding:20px 24px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#16a34a;letter-spacing:0.05em;text-transform:uppercase;">Signature confirmed</p>
+            <p style="margin:0;font-size:14px;color:#334155;"><strong>Signer:</strong> ${signerName}</p>
+            <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Client:</strong> ${clientName}</p>
+            <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Signed at:</strong> ${signedAt}</p>
+            <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Letter:</strong> ${letter.letterNumber}</p>
+          </td></tr>
+        </table>
+        <p style="margin:0;font-size:14px;color:#64748b;">Log in to NorthPact to view the signed document.</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px 32px;background:linear-gradient(135deg,#e0f2fe 0%,#f3e8ff 50%,#e0e7ff 100%);border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:12px;color:#64748b;">Powered by NorthPact</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const text = `Engagement Letter Signed\n\n${signerName} from ${clientName} has signed engagement letter ${letter.letterNumber}.\n\nSigned at: ${signedAt}\n\nLog in to NorthPact to view the signed document.`;
+
+    const resend = new Resend(resendApiKey);
+    try {
+      await resend.emails.send({
+        from: `NorthPact <proposals@${resendDomain}>`,
+        to: [staffUser.email],
+        subject: `Engagement letter signed — ${letter.letterNumber} (${clientName})`,
+        html,
+        text,
+      });
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? "Failed to send signed notification" };
+    }
+  },
+});
