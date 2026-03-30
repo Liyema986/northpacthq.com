@@ -289,11 +289,12 @@ export default defineSchema({
     category: v.string(), // "Bookkeeping", "Tax", "Payroll", "Advisory" (kept for backward compat)
     billingFrequency: v.optional(v.union(v.literal("monthly"), v.literal("one_off"))),
     pricingType: v.union(
-      v.literal("fixed"),      // Fixed price
-      v.literal("hourly"),     // Hourly rate
-      v.literal("tiered"),     // Small/Medium/Large tiers
-      v.literal("recurring"),  // Monthly subscription
-      v.literal("variation")   // Variation price (dropdown options)
+      v.literal("fixed"),        // Fixed price
+      v.literal("hourly"),       // Hourly rate
+      v.literal("tiered"),       // Number Range Price (custom from/to ranges)
+      v.literal("recurring"),    // Annual Revenue Price (predefined SA revenue brackets)
+      v.literal("variation"),    // Variation Price (dropdown options)
+      v.literal("income_range")  // Income Tax Range Price (predefined SA income brackets)
     ),
     taxRate: v.optional(v.string()),    // e.g. "default" | "vat15" | "exempt" | "zero"
     fieldLabel: v.optional(v.string()), // Label shown on variation dropdown in proposals

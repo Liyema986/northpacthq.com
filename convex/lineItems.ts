@@ -282,7 +282,8 @@ export const createLineItem = mutation({
       v.literal("hourly"),
       v.literal("tiered"),
       v.literal("recurring"),
-      v.literal("variation")
+      v.literal("variation"),
+      v.literal("income_range")
     ),
     taxRate: v.optional(v.string()),
     fieldLabel: v.optional(v.string()),
@@ -370,7 +371,8 @@ export const updateLineItem = mutation({
         v.literal("hourly"),
         v.literal("tiered"),
         v.literal("recurring"),
-        v.literal("variation")
+        v.literal("variation"),
+        v.literal("income_range")
       )
     ),
     taxRate: v.optional(v.string()),
