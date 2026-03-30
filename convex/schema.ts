@@ -287,12 +287,16 @@ export default defineSchema({
     name: v.string(),
     description: v.optional(v.string()),
     category: v.string(), // "Bookkeeping", "Tax", "Payroll", "Advisory" (kept for backward compat)
+    billingFrequency: v.optional(v.union(v.literal("monthly"), v.literal("one_off"))),
     pricingType: v.union(
-      v.literal("fixed"), // Fixed price
-      v.literal("hourly"), // Hourly rate
-      v.literal("tiered"), // Small/Medium/Large tiers
-      v.literal("recurring") // Monthly subscription
+      v.literal("fixed"),      // Fixed price
+      v.literal("hourly"),     // Hourly rate
+      v.literal("tiered"),     // Small/Medium/Large tiers
+      v.literal("recurring"),  // Monthly subscription
+      v.literal("variation")   // Variation price (dropdown options)
     ),
+    taxRate: v.optional(v.string()),    // e.g. "default" | "vat15" | "exempt" | "zero"
+    fieldLabel: v.optional(v.string()), // Label shown on variation dropdown in proposals
     pricingTiers: v.optional(
       v.array(
         v.object({
@@ -321,7 +325,7 @@ export default defineSchema({
           id: v.string(),
           valueType: v.optional(v.union(v.literal("quantity"), v.literal("static"), v.literal("variations"))),
           label: v.optional(v.string()),
-          operation: v.union(v.literal("add"), v.literal("multiply")),
+          operation: v.union(v.literal("add"), v.literal("multiply"), v.literal("divide"), v.literal("subtract")),
           options: v.optional(v.array(v.object({ label: v.string(), value: v.number() }))),
           staticValue: v.optional(v.number()),
           quantityFieldLabel: v.optional(v.string()),

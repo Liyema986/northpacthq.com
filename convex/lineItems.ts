@@ -8,7 +8,7 @@ const calculationVariation = v.object({
   id: v.string(),
   valueType: v.optional(v.union(v.literal("quantity"), v.literal("static"), v.literal("variations"))),
   label: v.optional(v.string()),
-  operation: v.union(v.literal("add"), v.literal("multiply")),
+  operation: v.union(v.literal("add"), v.literal("multiply"), v.literal("divide"), v.literal("subtract")),
   options: v.optional(v.array(calculationVariationOption)),
   staticValue: v.optional(v.number()),
   quantityFieldLabel: v.optional(v.string()),
@@ -18,7 +18,10 @@ const lineItemReturn = v.object({
   name: v.string(),
   description: v.optional(v.string()),
   serviceSchedule: v.optional(v.string()),
+  billingFrequency: v.optional(v.union(v.literal("monthly"), v.literal("one_off"))),
   pricingType: v.string(),
+  taxRate: v.optional(v.string()),
+  fieldLabel: v.optional(v.string()),
   fixedPrice: v.optional(v.number()),
   hourlyRate: v.optional(v.number()),
   pricingTiers: v.optional(
@@ -105,7 +108,10 @@ export const listSectionsWithItems = query({
             name: s.name,
             description: s.description,
             serviceSchedule: s.serviceSchedule,
+            billingFrequency: s.billingFrequency,
             pricingType: s.pricingType,
+            taxRate: s.taxRate,
+            fieldLabel: s.fieldLabel,
             fixedPrice: s.fixedPrice,
             hourlyRate: s.hourlyRate,
             pricingTiers: s.pricingTiers,
@@ -270,12 +276,16 @@ export const createLineItem = mutation({
     name: v.string(),
     description: v.optional(v.string()),
     serviceSchedule: v.optional(v.string()),
+    billingFrequency: v.optional(v.union(v.literal("monthly"), v.literal("one_off"))),
     pricingType: v.union(
       v.literal("fixed"),
       v.literal("hourly"),
       v.literal("tiered"),
-      v.literal("recurring")
+      v.literal("recurring"),
+      v.literal("variation")
     ),
+    taxRate: v.optional(v.string()),
+    fieldLabel: v.optional(v.string()),
     fixedPrice: v.optional(v.number()),
     hourlyRate: v.optional(v.number()),
     pricingTiers: v.optional(
@@ -319,7 +329,10 @@ export const createLineItem = mutation({
       description: args.description,
       serviceSchedule: args.serviceSchedule,
       category: section.name,
+      ...(args.billingFrequency !== undefined && { billingFrequency: args.billingFrequency }),
       pricingType: args.pricingType,
+      ...(args.taxRate !== undefined && { taxRate: args.taxRate }),
+      ...(args.fieldLabel !== undefined && { fieldLabel: args.fieldLabel }),
       pricingTiers: args.pricingTiers,
       fixedPrice: args.fixedPrice,
       hourlyRate: args.hourlyRate,
@@ -350,14 +363,18 @@ export const updateLineItem = mutation({
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     serviceSchedule: v.optional(v.string()),
+    billingFrequency: v.optional(v.union(v.literal("monthly"), v.literal("one_off"))),
     pricingType: v.optional(
       v.union(
         v.literal("fixed"),
         v.literal("hourly"),
         v.literal("tiered"),
-        v.literal("recurring")
+        v.literal("recurring"),
+        v.literal("variation")
       )
     ),
+    taxRate: v.optional(v.string()),
+    fieldLabel: v.optional(v.string()),
     fixedPrice: v.optional(v.number()),
     hourlyRate: v.optional(v.number()),
     pricingTiers: v.optional(
@@ -392,7 +409,10 @@ export const updateLineItem = mutation({
     if (args.name !== undefined) updates.name = args.name;
     if (args.description !== undefined) updates.description = args.description;
     if (args.serviceSchedule !== undefined) updates.serviceSchedule = args.serviceSchedule;
+    if (args.billingFrequency !== undefined) updates.billingFrequency = args.billingFrequency;
     if (args.pricingType !== undefined) updates.pricingType = args.pricingType;
+    if (args.taxRate !== undefined) updates.taxRate = args.taxRate;
+    if (args.fieldLabel !== undefined) updates.fieldLabel = args.fieldLabel;
     if (args.fixedPrice !== undefined) updates.fixedPrice = args.fixedPrice;
     if (args.hourlyRate !== undefined) updates.hourlyRate = args.hourlyRate;
     if (args.pricingTiers !== undefined) updates.pricingTiers = args.pricingTiers;
