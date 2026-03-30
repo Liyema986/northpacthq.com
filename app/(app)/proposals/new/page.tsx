@@ -46,14 +46,24 @@ import {
   ChevronLeft, Save, Send,
 } from "lucide-react";
 
-// Map Convex pricingType → mock PricingMethod (closest match)
+// Map Convex pricingType → PricingMethod (closest match)
 function mapPricingType(pt: string): ServiceTemplate["pricingMethod"] {
   switch (pt) {
-    case "hourly":    return "hourly";
-    case "tiered":    return "tiered";
-    case "recurring": return "fixed_monthly";
-    default:          return "fixed_monthly"; // "fixed" and anything else
+    case "hourly":       return "hourly";
+    case "tiered":       return "tiered";
+    case "variation":    return "fixed_monthly"; // variation: use selected option price (defaults to first)
+    case "recurring":    return "fixed_monthly"; // annual revenue bracket → fixed monthly at proposal level
+    case "income_range": return "fixed_monthly"; // income bracket → fixed monthly at proposal level
+    default:             return "fixed_monthly"; // "fixed" and anything else
   }
+}
+
+// Extract a representative unit price from any pricing type
+function extractUnitPrice(row: { fixedPrice?: number; hourlyRate?: number; pricingTiers?: { price: number }[] }): number {
+  if (row.fixedPrice != null)  return row.fixedPrice;
+  if (row.hourlyRate != null)  return row.hourlyRate;
+  if (row.pricingTiers?.length) return row.pricingTiers[0].price; // first variation/tier as default
+  return 0;
 }
 
 // ─── Inner (needs searchParams) ──────────────────────────────────────────────
@@ -168,9 +178,9 @@ function NewProposalInner() {
           categoryId:        sec._id as string,
           name:              row.name,
           description:       stripHtml(row.description),
-          billingCategory:   "monthly" as BillingCategory,
+          billingCategory:   (row.billingFrequency === "one_off" ? "onceoff" : "monthly") as BillingCategory,
           pricingMethod:     mapPricingType(row.pricingType),
-          unitPrice:         row.fixedPrice ?? row.hourlyRate ?? 0,
+          unitPrice:         extractUnitPrice(row),
           quantity:          1,
           discount:          0,
           taxRate:           15,

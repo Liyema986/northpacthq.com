@@ -18,9 +18,10 @@ export type LineItemForDuplicate = {
   name: string;
   description?: string;
   category: string;
-  pricingType: "fixed" | "hourly" | "tiered" | "recurring";
+  pricingType: "fixed" | "hourly" | "tiered" | "recurring" | "variation" | "income_range";
   hourlyRate?: number;
   fixedPrice?: number;
+  pricingTiers?: { name: string; price: number; description: string; criteria?: string }[];
   isActive: boolean;
   sortOrder: number;
 };
@@ -77,7 +78,7 @@ export function DuplicateServiceSheet({ open, onOpenChange, service, sectionId, 
     }
   }
 
-  const price = service?.fixedPrice ?? service?.hourlyRate ?? 0;
+  const price = service?.fixedPrice ?? service?.hourlyRate ?? service?.pricingTiers?.[0]?.price ?? 0;
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && handleClose()}>

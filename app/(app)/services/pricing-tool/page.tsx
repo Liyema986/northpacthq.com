@@ -709,52 +709,54 @@ export default function PricingToolPage() {
                   <p className="text-[13px] font-medium text-slate-800">Minimum monthly fee</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Override proposal calculations that fall below this amount</p>
                 </div>
-                <label className={cn(
-                  "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                  applyMinFee ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
-                )}>
-                  <input
-                    type="checkbox"
-                    checked={applyMinFee}
-                    onChange={(e) => { setApplyMinFee(e.target.checked); void save({ applyMinFee: e.target.checked }); }}
-                    className="mt-0.5"
-                    style={{ accentColor: ACCENT }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-slate-800">Apply a minimum monthly fee</p>
-                    <p className="text-[11px] text-slate-400">Proposals below this amount are bumped up to the minimum</p>
-                  </div>
-                </label>
-                {applyMinFee && (
-                  <div className="space-y-1">
-                    <p className="text-[12px] font-medium text-slate-700">Minimum amount</p>
-                    <div className="flex items-center">
-                      <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-r-0 border-slate-200 rounded-l-lg text-[13px] text-slate-500 shrink-0">{currency}</span>
-                      <input
-                        type="text"
-                        value={minMonthlyFee}
-                        onChange={(e) => { setMinMonthlyFee(e.target.value); if (minMonthlyFeeError) setMinMonthlyFeeError(null); }}
-                        onBlur={() => {
-                          const parsed = parseInt(minMonthlyFee.trim(), 10);
-                          if (minMonthlyFee.trim() !== "" && (isNaN(parsed) || parsed < 0 || parsed > 999999)) {
-                            setMinMonthlyFeeError("Enter a number between 0 and 999,999");
-                            return;
-                          }
-                          setMinMonthlyFeeError(null);
-                          const clamped = Math.max(0, Math.min(999999, parsed || 0));
-                          setMinMonthlyFee(String(clamped));
-                          void save({ minMonthlyFee: clamped });
-                        }}
-                        className={cn(
-                          "w-32 h-10 px-3 rounded-r-lg border text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none transition-colors bg-white",
-                          minMonthlyFeeError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
-                        )}
-                        placeholder="350"
-                      />
+                <div className="flex items-start gap-3">
+                  <label className={cn(
+                    "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors flex-1 min-w-0",
+                    applyMinFee ? "border-[#C8A96E]/40 bg-[#C8A96E]/5" : "border-slate-200 hover:border-slate-300"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={applyMinFee}
+                      onChange={(e) => { setApplyMinFee(e.target.checked); void save({ applyMinFee: e.target.checked }); }}
+                      className="mt-0.5"
+                      style={{ accentColor: ACCENT }}
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium text-slate-800">Apply a minimum monthly fee</p>
+                      <p className="text-[11px] text-slate-400">Proposals below this amount are bumped up to the minimum</p>
                     </div>
-                    {minMonthlyFeeError && <p className="text-[11px] text-red-600">{minMonthlyFeeError}</p>}
-                  </div>
-                )}
+                  </label>
+                  {applyMinFee && (
+                    <div className="space-y-1 shrink-0">
+                      <p className="text-[12px] font-medium text-slate-700">Minimum amount</p>
+                      <div className="flex items-center">
+                        <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-r-0 border-slate-200 rounded-l-lg text-[13px] text-slate-500 shrink-0">{currency}</span>
+                        <input
+                          type="text"
+                          value={minMonthlyFee}
+                          onChange={(e) => { setMinMonthlyFee(e.target.value); if (minMonthlyFeeError) setMinMonthlyFeeError(null); }}
+                          onBlur={() => {
+                            const parsed = parseInt(minMonthlyFee.trim(), 10);
+                            if (minMonthlyFee.trim() !== "" && (isNaN(parsed) || parsed < 0 || parsed > 999999)) {
+                              setMinMonthlyFeeError("Enter a number between 0 and 999,999");
+                              return;
+                            }
+                            setMinMonthlyFeeError(null);
+                            const clamped = Math.max(0, Math.min(999999, parsed || 0));
+                            setMinMonthlyFee(String(clamped));
+                            void save({ minMonthlyFee: clamped });
+                          }}
+                          className={cn(
+                            "w-24 h-10 px-3 rounded-r-lg border text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none transition-colors bg-white",
+                            minMonthlyFeeError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                          )}
+                          placeholder="350"
+                        />
+                      </div>
+                      {minMonthlyFeeError && <p className="text-[11px] text-red-600">{minMonthlyFeeError}</p>}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -765,18 +767,18 @@ export default function PricingToolPage() {
           <div className="space-y-4">
             {/* Currency */}
             <div className="bg-white border border-slate-100 rounded-xl p-5">
-              <div className="flex flex-wrap items-end gap-8">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[14px] font-semibold text-slate-900">Default Currency</p>
                   <p className="text-[11px] text-slate-400 mt-0.5">Used across all proposals and pricing for this firm</p>
                 </div>
-                <div className="space-y-1.5">
-                  <p className="text-[12px] font-medium text-slate-700">Currency</p>
+                <div className="space-y-1.5 shrink-0">
+                  <p className="text-[12px] font-medium text-slate-700 text-right">Currency</p>
                   <Select value={currency} onValueChange={(v) => { setCurrency(v); void save({ currency: v }); }}>
-                    <SelectTrigger className="h-10 w-36 text-[13px] border-slate-200 rounded-lg">
+                    <SelectTrigger className="h-10 w-32 text-[13px] border-slate-200 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent align="end">
                       {["ZAR", "USD", "GBP", "EUR"].map((c) => (
                         <SelectItem key={c} value={c} className="text-[13px]">{c}</SelectItem>
                       ))}
@@ -985,49 +987,52 @@ export default function PricingToolPage() {
                     <p className="text-[13px] font-medium text-slate-800">Annualised adjustment</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">Apply a discount or price increase when annualising fees</p>
                   </div>
-                  <div className="space-y-1.5">
-                    <p className="text-[12px] font-medium text-slate-700">Type</p>
-                    <Select
-                      value={discountOrIncrease}
-                      onValueChange={(v) => { setDiscountOrIncrease(v as "discount" | "increase"); void save({ discountOrIncrease: v as "discount" | "increase" }); }}
-                    >
-                      <SelectTrigger className="h-10 w-44 text-[13px] border-slate-200 rounded-lg">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="discount" className="text-[13px]">Discount</SelectItem>
-                        <SelectItem value="increase" className="text-[13px]">Price Increase</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[12px] font-medium text-slate-700">
-                      {discountOrIncrease === "discount" ? "Discount" : "Increase"} rate
-                    </p>
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        value={annualisedDiscount}
-                        onChange={(e) => { setAnnualisedDiscount(e.target.value); if (annualisedDiscountError) setAnnualisedDiscountError(null); }}
-                        onBlur={() => {
-                          const s = annualisedDiscount.trim();
-                          if (s && isNaN(parseFloat(s))) {
-                            setAnnualisedDiscountError("Enter a valid number");
-                            setAnnualisedDiscount("0");
-                            return;
-                          }
-                          setAnnualisedDiscountError(null);
-                          void save({ annualisedDiscount: annualisedDiscount.trim() });
-                        }}
-                        className={cn(
-                          "w-20 h-10 px-3 rounded-l-lg border text-[13px] text-slate-800 focus:outline-none transition-colors bg-white",
-                          annualisedDiscountError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
-                        )}
-                        placeholder="0"
-                      />
-                      <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg text-[13px] text-slate-500">%</span>
+                  {/* Type + Rate side-by-side */}
+                  <div className="grid grid-cols-2 gap-3 items-end">
+                    <div className="space-y-1.5">
+                      <p className="text-[12px] font-medium text-slate-700">Type</p>
+                      <Select
+                        value={discountOrIncrease}
+                        onValueChange={(v) => { setDiscountOrIncrease(v as "discount" | "increase"); void save({ discountOrIncrease: v as "discount" | "increase" }); }}
+                      >
+                        <SelectTrigger className="h-10 w-full text-[13px] border-slate-200 rounded-lg">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="discount" className="text-[13px]">Discount</SelectItem>
+                          <SelectItem value="increase" className="text-[13px]">Price Increase</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    {annualisedDiscountError && <p className="text-[11px] text-red-600">{annualisedDiscountError}</p>}
+                    <div className="space-y-1">
+                      <p className="text-[12px] font-medium text-slate-700">
+                        {discountOrIncrease === "discount" ? "Discount" : "Increase"} rate
+                      </p>
+                      <div className="flex items-center">
+                        <input
+                          type="text"
+                          value={annualisedDiscount}
+                          onChange={(e) => { setAnnualisedDiscount(e.target.value); if (annualisedDiscountError) setAnnualisedDiscountError(null); }}
+                          onBlur={() => {
+                            const s = annualisedDiscount.trim();
+                            if (s && isNaN(parseFloat(s))) {
+                              setAnnualisedDiscountError("Enter a valid number");
+                              setAnnualisedDiscount("0");
+                              return;
+                            }
+                            setAnnualisedDiscountError(null);
+                            void save({ annualisedDiscount: annualisedDiscount.trim() });
+                          }}
+                          className={cn(
+                            "flex-1 min-w-0 h-10 px-3 rounded-l-lg border text-[13px] text-slate-800 focus:outline-none transition-colors bg-white",
+                            annualisedDiscountError ? "border-red-500" : "border-slate-200 focus:border-[#C8A96E]"
+                          )}
+                          placeholder="0"
+                        />
+                        <span className="inline-flex items-center px-3 h-10 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg text-[13px] text-slate-500 shrink-0">%</span>
+                      </div>
+                      {annualisedDiscountError && <p className="text-[11px] text-red-600">{annualisedDiscountError}</p>}
+                    </div>
                   </div>
                 </div>
               )}
