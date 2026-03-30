@@ -23,9 +23,10 @@ import {
 interface NavItem {
   label: string;
   href: string;
-  section?: boolean;  // renders as a non-clickable section header
-  proOnly?: boolean;  // hidden on starter plan — shown on pro/business
-  starterOnly?: boolean; // hidden on pro/business — shown on starter
+  section?: boolean;     // renders as a non-clickable section header
+  proOnly?: boolean;     // hidden on starter — shown on pro/business
+  starterOnly?: boolean; // hidden on pro/business — shown on starter only
+  businessOnly?: boolean; // hidden on starter/pro — shown on business (enterprise) only
 }
 
 interface NavGroup {
@@ -88,28 +89,28 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Settings",
     icon: Settings,
     items: [
-      { label: "Workspace",     href: "",                            section: true, proOnly: true },
-      { label: "Org profile", href: "/settings?tab=org",                            proOnly: true },
-      { label: "People",        href: "/settings?tab=people",                       proOnly: true },
-      { label: "Billing",       href: "/settings?tab=billing",                      proOnly: true },
-      { label: "Apps Map",      href: "/appsmap",                                   proOnly: true },
-      { label: "Account",       href: "",                            section: true, proOnly: true },
-      { label: "Profile",       href: "/settings?tab=account" },
-      { label: "Billing",       href: "/settings?tab=billing",      starterOnly: true },
-      { label: "Apps Map",      href: "/appsmap",                   starterOnly: true },
+      { label: "Workspace",   href: "",                           section: true, businessOnly: true },
+      { label: "Org profile", href: "/settings?tab=org",                           businessOnly: true },
+      { label: "People",      href: "/settings?tab=people",                        proOnly: true },
+      { label: "Billing",     href: "/settings?tab=billing",                       proOnly: true },
+      { label: "Apps Map",    href: "/appsmap",                                    proOnly: true },
+      { label: "Account",     href: "",                           section: true, businessOnly: true },
+      { label: "Profile",     href: "/settings?tab=account" },
+      { label: "Billing",     href: "/settings?tab=billing",     starterOnly: true },
+      { label: "Apps Map",    href: "/appsmap",                   starterOnly: true },
     ],
   },
 ];
 
 // ── Sub-nav with tree connector lines ─────────────────────────────────────────
 
-function GroupSubNav({ items, open, isPro }: { items: NavItem[]; open: boolean; isPro: boolean }) {
+function GroupSubNav({ items, open, isPro, isBusiness }: { items: NavItem[]; open: boolean; isPro: boolean; isBusiness: boolean }) {
   const pathname     = usePathname();
   const searchParams = useSearchParams();
 
   if (!open) return null;
 
-  const visibleItems   = items.filter((i) => (!i.proOnly || isPro) && (!i.starterOnly || !isPro));
+  const visibleItems   = items.filter((i) => (!i.proOnly || isPro) && (!i.starterOnly || !isPro) && (!i.businessOnly || isBusiness));
   const clickableItems = visibleItems.filter((i) => !i.section);
 
   return (
@@ -185,7 +186,8 @@ export function Sidebar() {
   const userAvatar = convexCurrentUser?.avatar ?? undefined;
   const firmLogoUrl = firmSettings?.firmLogoUrl ?? null;
   const firmNameForLogo = firmSettings?.name ?? "Firm";
-  const isPro = firmSettings?.subscriptionPlan === "professional" || firmSettings?.subscriptionPlan === "enterprise";
+  const isPro      = firmSettings?.subscriptionPlan === "professional" || firmSettings?.subscriptionPlan === "enterprise";
+  const isBusiness = firmSettings?.subscriptionPlan === "enterprise";
   const [firmLogoFailed, setFirmLogoFailed] = useState(false);
 
   useEffect(() => {
@@ -216,7 +218,8 @@ export function Sidebar() {
       setExpandedGroup(null);
     } else {
       setExpandedGroup(group.id);
-      const firstClickable = group.items.find((i) => !i.section && i.href);
+      const visibleGroupItems = group.items.filter((i) => (!i.proOnly || isPro) && (!i.starterOnly || !isPro) && (!i.businessOnly || isBusiness));
+      const firstClickable = visibleGroupItems.find((i) => !i.section && i.href);
       if (firstClickable) router.push(firstClickable.href);
     }
   };
@@ -359,7 +362,7 @@ export function Sidebar() {
                 </button>
 
                 <Suspense fallback={null}>
-                  <GroupSubNav items={group.items} open={expanded} isPro={isPro} />
+                  <GroupSubNav items={group.items} open={expanded} isPro={isPro} isBusiness={isBusiness} />
                 </Suspense>
               </div>
             );

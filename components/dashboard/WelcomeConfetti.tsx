@@ -39,6 +39,11 @@ export function WelcomeConfetti() {
         confetti({ ...opts, particleCount: 18, angle: 60,  spread: 80, origin: { x: 0, y: 0.65 } });
         confetti({ ...opts, particleCount: 18, angle: 120, spread: 80, origin: { x: 1, y: 0.65 } });
       }, 120);
+
+      // After confetti finishes, open the setup guide
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("open-setup-guide"));
+      }, 4500);
     });
   }, []);
 

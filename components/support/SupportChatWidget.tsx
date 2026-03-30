@@ -146,47 +146,64 @@ const DISMISSED_KEY = (userId?: string) => `northpact_setup_dismissed_${userId ?
 function buildSections(opts: {
   isPro: boolean;
   isBusiness: boolean;
+  hasCustomAvatar: boolean;
+  hasServices: boolean;
   hasLogo: boolean;
   hasContact: boolean;
   hasClients: boolean;
   hasProposals: boolean;
   hasTeamMember: boolean;
 }): GuideSection[] {
-  const { isPro, isBusiness, hasLogo, hasContact, hasClients, hasProposals, hasTeamMember } = opts;
+  const { isPro, isBusiness, hasCustomAvatar, hasServices, hasLogo, hasContact, hasClients, hasProposals, hasTeamMember } = opts;
 
-  const teamLocked = !isPro && !isBusiness;
+  const teamLocked     = !isPro && !isBusiness;
   const advancedLocked = !isBusiness;
 
-  const s1Steps: GuideStep[] = [
-    { id: "logo",    label: "Upload your firm logo",  href: "/settings?tab=org", done: hasLogo,    locked: false },
-    { id: "contact", label: "Add contact details",    href: "/settings?tab=org", done: hasContact, locked: false },
+  // ── Steps ──────────────────────────────────────────────────────────────────
+  const profileSteps: GuideStep[] = [
+    { id: "avatar", label: "Upload a profile photo", href: "/settings?tab=account", done: hasCustomAvatar, locked: false },
   ];
-  const s2Steps: GuideStep[] = [
-    { id: "client",   label: "Add your first client",        href: "/clients",        done: hasClients,   locked: false },
-    { id: "proposal", label: "Send your first proposal",     href: "/proposals/new",  done: hasProposals, locked: false },
+  const pricingSteps: GuideStep[] = [
+    { id: "service",      label: "Add your first service",  href: "/services",                done: hasServices, locked: false },
+    { id: "pricing-tool", label: "Build a pricing scenario", href: "/services/pricing-tool",  done: hasServices && hasProposals, locked: false },
   ];
-  const s3Steps: GuideStep[] = [
-    { id: "upgrade", label: "Upgrade to Pro or Business", href: "/settings?tab=billing", done: isPro || isBusiness, locked: false },
+  const firmSteps: GuideStep[] = [
+    { id: "logo",    label: "Upload your firm logo", href: "/settings?tab=org", done: hasLogo,    locked: false },
+    { id: "contact", label: "Add contact details",   href: "/settings?tab=org", done: hasContact, locked: false },
   ];
-  const s4Steps: GuideStep[] = [
-    { id: "team-invite",   label: "Invite a team member",      href: "/settings?tab=people", done: hasTeamMember, locked: teamLocked },
-    { id: "integration",   label: "Connect an integration",    href: "/appsmap",             done: false,         locked: teamLocked },
+  const clientSteps: GuideStep[] = [
+    { id: "client",   label: "Add your first client",    href: "/clients",       done: hasClients,   locked: false },
+    { id: "proposal", label: "Send your first proposal", href: "/proposals/new", done: hasProposals, locked: false },
   ];
-  const s5Steps: GuideStep[] = [
-    { id: "approvals",   label: "Configure approval workflow",  href: "/settings?tab=workflow",            done: false, locked: advancedLocked },
-    { id: "engagement",  label: "Set up engagement letters",    href: "/workflow/engagement-letters",       done: false, locked: advancedLocked },
-    { id: "work-plan",   label: "Enable work planning",         href: "/workflow/work-planning",            done: false, locked: advancedLocked },
+  const upgradeSteps: GuideStep[] = [
+    { id: "upgrade", label: isPro ? "Upgrade to Business" : "Upgrade to Pro or Business", href: "/settings?tab=billing", done: isBusiness, locked: false },
+  ];
+  const teamSteps: GuideStep[] = [
+    { id: "team-invite", label: "Invite a team member",   href: "/settings?tab=people", done: hasTeamMember, locked: teamLocked },
+    { id: "integration", label: "Connect an integration", href: "/appsmap",             done: false,         locked: teamLocked },
+  ];
+  const advancedSteps: GuideStep[] = [
+    { id: "approvals",  label: "Configure approval workflow", href: "/settings?tab=workflow",       done: false, locked: advancedLocked },
+    { id: "engagement", label: "Set up engagement letters",   href: "/workflow/engagement-letters", done: false, locked: advancedLocked },
+    { id: "work-plan",  label: "Enable work planning",        href: "/workflow/work-planning",      done: false, locked: advancedLocked },
   ];
 
-  const sections: GuideSection[] = [
-    { id: "firm",     title: "Set up your firm",   steps: s1Steps, locked: false,        allDone: s1Steps.every(s => s.done) },
-    { id: "clients",  title: "Win clients",         steps: s2Steps, locked: false,        allDone: s2Steps.every(s => s.done) },
-    { id: "billing",  title: "Upgrade your plan",   steps: s3Steps, locked: false,        allDone: s3Steps.every(s => s.done) },
-    { id: "team",     title: "Team & integrations", steps: s4Steps, locked: teamLocked,     lockedPlan: "Pro",      allDone: !teamLocked && s4Steps.every(s => s.done) },
-    { id: "advanced", title: "Advanced features",   steps: s5Steps, locked: advancedLocked, lockedPlan: "Business", allDone: !advancedLocked && s5Steps.every(s => s.done) },
-  ];
+  // ── Sections ───────────────────────────────────────────────────────────────
+  const profileSection: GuideSection = { id: "profile",  title: "Set up your profile",  steps: profileSteps,  locked: false,          allDone: profileSteps.every(s => s.done) };
+  const pricingSection: GuideSection = { id: "pricing",  title: "Set up your pricing",   steps: pricingSteps,  locked: false,          allDone: pricingSteps.every(s => s.done) };
+  const firmSection:    GuideSection = { id: "firm",     title: "Set up your firm",       steps: firmSteps,     locked: !isBusiness,    lockedPlan: "Business", allDone: isBusiness && firmSteps.every(s => s.done) };
+  const clientsSection: GuideSection = { id: "clients",  title: "Win clients",            steps: clientSteps,   locked: false,          allDone: clientSteps.every(s => s.done) };
+  const billingSection: GuideSection = { id: "billing",  title: "Upgrade your plan",      steps: upgradeSteps,  locked: false,          allDone: upgradeSteps.every(s => s.done) };
+  const teamSection:    GuideSection = { id: "team",     title: "Team & integrations",    steps: teamSteps,     locked: teamLocked,     lockedPlan: "Pro",      allDone: !teamLocked && teamSteps.every(s => s.done) };
+  const advSection:     GuideSection = { id: "advanced", title: "Advanced features",      steps: advancedSteps, locked: advancedLocked, lockedPlan: "Business", allDone: !advancedLocked && advancedSteps.every(s => s.done) };
 
-  return sections;
+  // Order: actionable (unlocked) first, upgrade prompts in the middle, locked features last
+  if (isBusiness) {
+    // Business: firm setup → pricing → win clients → team → advanced
+    return [firmSection, pricingSection, clientsSection, teamSection, advSection];
+  }
+  // Pro & Starter: profile → pricing → win clients → upgrade → team (locked on starter) → firm (locked) → advanced (locked)
+  return [profileSection, pricingSection, clientsSection, billingSection, teamSection, firmSection, advSection];
 }
 
 // ── Main widget ──────────────────────────────────────────────────────────────
@@ -245,6 +262,7 @@ export function SupportChatWidget() {
   const clientCounts  = useQuery(api.clients.getClientCounts, userId ? { userId } : "skip");
   const proposals     = useQuery(api.proposals.listProposals, userId ? { userId } : "skip");
   const convexUsers   = useQuery(api.users.listUsers, userId ? { userId } : "skip");
+  const services      = useQuery(api.services.listServices, userId ? { userId } : "skip");
 
   useEffect(() => {
     if (open) ensureSeeded({}).catch(() => {});
@@ -256,11 +274,14 @@ export function SupportChatWidget() {
       const slug = (e as CustomEvent).detail?.slug;
       if (slug) { setOpen(true); setTab("help"); setActiveArticleSlug(slug); }
     }
+    function handleOpenSetupGuide() { setOpen(true); setTab("setup"); }
     window.addEventListener("open-support-chat", handleOpen);
     window.addEventListener("open-support-article", handleOpenArticle);
+    window.addEventListener("open-setup-guide", handleOpenSetupGuide);
     return () => {
       window.removeEventListener("open-support-chat", handleOpen);
       window.removeEventListener("open-support-article", handleOpenArticle);
+      window.removeEventListener("open-setup-guide", handleOpenSetupGuide);
     };
   }, []);
 
@@ -286,6 +307,10 @@ export function SupportChatWidget() {
   const sections = buildSections({
     isPro,
     isBusiness,
+    // Only count as uploaded if the URL is from our own Convex storage,
+    // not the Clerk-synced avatar that's set automatically on every signup.
+    hasCustomAvatar: Boolean(user?.avatar && user.avatar.includes(".convex.cloud")),
+    hasServices:   (services?.length ?? 0) > 0,
     hasLogo:       Boolean(firmSettings?.firmLogoUrl),
     hasContact:    Boolean(firmSettings?.billingEmail || firmSettings?.phone),
     hasClients:    (clientCounts?.total ?? 0) > 0,

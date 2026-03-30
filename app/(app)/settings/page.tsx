@@ -189,6 +189,16 @@ function SettingsPageInner() {
   const members = convexUsers ?? [];
   const firmId = firmSettings?._id;
   const currentPlan: SubscriptionPlan = (firmSettings?.subscriptionPlan as SubscriptionPlan | undefined) ?? "starter";
+  const isPro      = currentPlan === "professional" || currentPlan === "enterprise";
+  const isBusiness = currentPlan === "enterprise";
+
+  // Redirect non-business users away from the org tab (business-only) to account
+  useEffect(() => {
+    if (firmSettings === undefined) return;
+    if (!isBusiness && activeTab === "org") {
+      router.replace("/settings?tab=account", { scroll: false });
+    }
+  }, [firmSettings, isBusiness, activeTab, router]);
 
   const [saving, setSaving] = useState(false);
   const [defaultTaxRate, setDefaultTaxRate] = useState("15");
@@ -213,7 +223,6 @@ function SettingsPageInner() {
   const [avatarNeedsApply, setAvatarNeedsApply] = useState(false);
   const avatarDirtyRef = useRef(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const [profilePassword, setProfilePassword] = useState("");
   const [savingFirm, setSavingFirm] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState("");
@@ -821,7 +830,7 @@ function SettingsPageInner() {
                 </div>
               </div>
 
-              {/* Row 2 — Email | Password */}
+              {/* Row 2 — Email | Delete account */}
               <div className="border-b border-slate-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-slate-100">
                   <div className="px-6 py-5 flex flex-col gap-3 border-b md:border-b-0 border-slate-100">
@@ -841,17 +850,17 @@ function SettingsPageInner() {
                   </div>
                   <div className="px-6 py-5 flex flex-col gap-3">
                     <div>
-                      <p className="text-[13px] font-medium text-slate-800">Password</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Set a new password for this account.</p>
+                      <p className="text-[13px] font-medium text-red-600">Delete account</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Permanently delete your account and associated data. This cannot be undone.</p>
                     </div>
                     <div className="w-full max-w-md md:ml-auto md:max-w-[280px]">
-                      <Input
-                        type="password"
-                        value={profilePassword}
-                        onChange={(e) => setProfilePassword(e.target.value)}
-                        placeholder="New password"
-                        className="h-9 text-[13px] border-slate-200"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => toast.error("Please contact support to delete your account.")}
+                        className="h-9 px-4 rounded-lg text-[12px] font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+                      >
+                        Delete account
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -901,26 +910,6 @@ function SettingsPageInner() {
               </div>
             </div>
 
-            {/* Danger zone — same card chrome as workflow secondary actions */}
-            <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-slate-100">
-                <div className="px-6 py-5">
-                  <p className="text-[13px] font-medium text-red-600">Delete account</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5 max-w-md">
-                    Permanently delete your account and associated data. This cannot be undone.
-                  </p>
-                </div>
-                <div className="px-6 py-5 flex items-center md:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => toast.error("Please contact support to delete your account.")}
-                    className="h-9 px-4 rounded-lg text-[12px] font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors shrink-0"
-                  >
-                    Delete account
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
