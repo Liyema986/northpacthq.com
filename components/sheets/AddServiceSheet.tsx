@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, X, Loader2, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Package, X, Loader2, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown, GripHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
@@ -13,17 +13,16 @@ import type { Id } from "@/convex/_generated/dataModel";
 
 const ACCENT = "#C8A96E";
 
-type PricingType = "fixed" | "hourly" | "tiered" | "recurring" | "variation" | "income_range";
+type PricingType = "fixed" | "tiered" | "recurring" | "variation" | "income_range";
 type CalcOperation = "multiply" | "divide" | "subtract" | "add";
-type CalcByType = "quantity" | "static" | "variations";
+type CalcByType = "none" | "quantity" | "static" | "variations";
 
 const PRICING_TYPES: { value: PricingType; label: string }[] = [
   { value: "fixed",        label: "Fixed Price" },
   { value: "variation",    label: "Variation Price" },
-  { value: "hourly",       label: "Hourly Rate" },
-  { value: "tiered",       label: "Number Range Price" },
   { value: "recurring",    label: "Annual Revenue Price" },
-  { value: "income_range", label: "Income Tax Range Price" },
+  { value: "income_range", label: "Income tax total Income ranges Price" },
+  { value: "tiered",       label: "Number Range Price" },
 ];
 
 const TAX_RATES = [
@@ -41,10 +40,13 @@ const CALC_OPERATIONS = [
 ] as const;
 
 const CALC_BY_TYPES = [
+  { value: "none",       label: "by what?" },
   { value: "quantity",   label: "by quantity field" },
   { value: "static",     label: "by static value" },
   { value: "variations", label: "by variations" },
 ] as const;
+
+type PriceMode = "fixed" | "formula";
 
 // ── Predefined SA brackets ─────────────────────────────────────────────────
 
@@ -72,18 +74,28 @@ const INCOME_TAX_BRACKETS = [
 
 // ── Interfaces ─────────────────────────────────────────────────────────────
 
+interface CalcVariation {
+  id: string;
+  name: string;
+  value: string;
+}
+
 interface Calculation {
   id: string;
   operation: CalcOperation;
   valueType: CalcByType;
   staticValue: string;
   quantityLabel: string;
+  calcVariationLabel: string;
+  calcVariations: CalcVariation[];
 }
 
 interface Variation {
   id: string;
   name: string;
+  priceMode: PriceMode;
   price: string;
+  formula: string;
 }
 
 interface TierRange {
@@ -96,7 +108,9 @@ interface TierRange {
 interface PredefinedTier {
   id: string;
   label: string;
+  priceMode: PriceMode;
   price: string;
+  formula: string;
 }
 
 interface AddServiceSheetProps {
@@ -110,20 +124,23 @@ interface AddServiceSheetProps {
 
 // ── Factory helpers ────────────────────────────────────────────────────────
 
+function newCalcVariation(): CalcVariation {
+  return { id: crypto.randomUUID(), name: "", value: "" };
+}
 function newCalc(): Calculation {
-  return { id: crypto.randomUUID(), operation: "multiply", valueType: "quantity", staticValue: "", quantityLabel: "" };
+  return { id: crypto.randomUUID(), operation: "multiply", valueType: "none", staticValue: "", quantityLabel: "", calcVariationLabel: "", calcVariations: [newCalcVariation()] };
 }
 function newVariation(): Variation {
-  return { id: crypto.randomUUID(), name: "", price: "" };
+  return { id: crypto.randomUUID(), name: "", priceMode: "fixed", price: "", formula: "" };
 }
 function newTierRange(): TierRange {
   return { id: crypto.randomUUID(), from: "0", to: "", price: "" };
 }
 function defaultAnnualRevenueTiers(): PredefinedTier[] {
-  return ANNUAL_REVENUE_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, price: "" }));
+  return ANNUAL_REVENUE_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, priceMode: "fixed", price: "", formula: "" }));
 }
 function defaultIncomeTiers(): PredefinedTier[] {
-  return INCOME_TAX_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, price: "" }));
+  return INCOME_TAX_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, priceMode: "fixed", price: "", formula: "" }));
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -139,6 +156,8 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   const [pricingType,        setPricingType]        = useState<PricingType>("fixed");
   const [price,              setPrice]              = useState("0");
   const [taxRate,            setTaxRate]            = useState("default");
+  const [openModeDropdown,   setOpenModeDropdown]   = useState<string | null>(null);
+  const [openActionsDropdown, setOpenActionsDropdown] = useState<string | null>(null);
   const [fieldLabel,         setFieldLabel]         = useState("");
   const [variations,         setVariations]         = useState<Variation[]>([newVariation()]);
   const [tierRanges,         setTierRanges]         = useState<TierRange[]>([newTierRange()]);
@@ -157,6 +176,20 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
     }
   }, [open, sectionId, sectionOptions]);
 
+  useEffect(() => {
+    if (!openModeDropdown) return;
+    function handleClick() { setOpenModeDropdown(null); }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [openModeDropdown]);
+
+  useEffect(() => {
+    if (!openActionsDropdown) return;
+    function handleClick() { setOpenActionsDropdown(null); }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [openActionsDropdown]);
+
   const effectiveSectionId    = sectionId ?? pickedSectionId;
   const effectiveSectionLabel = sectionId != null
     ? sectionName
@@ -166,7 +199,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
     setPickedSectionId(null);
     setName(""); setDesc(""); setSchedule("");
     setBillingFreq("monthly"); setPricingType("fixed");
-    setPrice("0"); setTaxRate("default");
+    setPrice("0"); setTaxRate("default"); setOpenModeDropdown(null); setOpenActionsDropdown(null);
     setFieldLabel(""); setVariations([newVariation()]);
     setTierRanges([newTierRange()]);
     setAnnualRevenueTiers(defaultAnnualRevenueTiers());
@@ -180,7 +213,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   // ── Variation helpers ──────────────────────────────────────────────────
   function addVariation()                                                    { setVariations(v => [...v, newVariation()]); }
   function removeVariation(id: string)                                       { setVariations(v => v.filter(x => x.id !== id)); }
-  function updateVariation(id: string, field: "name" | "price", val: string) {
+  function updateVariation(id: string, field: "name" | "priceMode" | "price" | "formula", val: string) {
     setVariations(v => v.map(x => x.id === id ? { ...x, [field]: val } : x));
   }
   function moveVariation(id: string, dir: -1 | 1) {
@@ -201,11 +234,16 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   }
 
   // ── Predefined tier helpers ────────────────────────────────────────────
-  function updateAnnualTier(id: string, price: string) {
-    setAnnualRevenueTiers(t => t.map(x => x.id === id ? { ...x, price } : x));
+  function updateAnnualTier(id: string, field: "priceMode" | "price" | "formula", val: string) {
+    setAnnualRevenueTiers(t => t.map(x => x.id === id ? { ...x, [field]: val } : x));
   }
-  function updateIncomeTier(id: string, price: string) {
-    setIncomeTiers(t => t.map(x => x.id === id ? { ...x, price } : x));
+  function updateIncomeTier(id: string, field: "priceMode" | "price" | "formula", val: string) {
+    setIncomeTiers(t => t.map(x => x.id === id ? { ...x, [field]: val } : x));
+  }
+
+  function toggleModeDropdown(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setOpenModeDropdown(prev => prev === id ? null : id);
   }
 
   // ── Calculation helpers ────────────────────────────────────────────────
@@ -222,6 +260,34 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
       if (next < 0 || next >= c.length) return c;
       const arr = [...c]; [arr[idx], arr[next]] = [arr[next], arr[idx]]; return arr;
     });
+  }
+  function addCalcVariation(calcId: string) {
+    setCalculations(c => c.map(x => x.id === calcId ? { ...x, calcVariations: [...x.calcVariations, newCalcVariation()] } : x));
+  }
+  function removeCalcVariation(calcId: string, varId: string) {
+    setCalculations(c => c.map(x => x.id === calcId ? { ...x, calcVariations: x.calcVariations.filter(v => v.id !== varId) } : x));
+  }
+  function updateCalcVariation(calcId: string, varId: string, field: "name" | "value", val: string) {
+    setCalculations(c => c.map(x => x.id === calcId
+      ? { ...x, calcVariations: x.calcVariations.map(v => v.id === varId ? { ...v, [field]: val } : v) }
+      : x));
+  }
+  function moveCalcVariation(calcId: string, varId: string, dir: -1 | 1 | "bottom") {
+    setCalculations(c => c.map(x => {
+      if (x.id !== calcId) return x;
+      const vars = [...x.calcVariations];
+      const idx = vars.findIndex(v => v.id === varId);
+      if (idx < 0) return x;
+      if (dir === "bottom") { const [item] = vars.splice(idx, 1); return { ...x, calcVariations: [...vars, item] }; }
+      const next = idx + (dir as number);
+      if (next < 0 || next >= vars.length) return x;
+      [vars[idx], vars[next]] = [vars[next], vars[idx]];
+      return { ...x, calcVariations: vars };
+    }));
+  }
+  function toggleActionsDropdown(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setOpenActionsDropdown(prev => prev === id ? null : id);
   }
 
   // ── Build pricingTiers payload ─────────────────────────────────────────
@@ -250,13 +316,94 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   }
 
   async function handleSubmit() {
+    // ── Required ────────────────────────────────────────────────────────
     if (!name.trim()) { setNameError("Service name is required"); return; }
-    if (!effectiveSectionId) { toast.error("Choose a section"); return; }
+    if (!effectiveSectionId) { toast.error("Choose a section for this service"); return; }
+
+    // ── Pricing validation ───────────────────────────────────────────────
+    const errors: string[] = [];
+
+    if (pricingType === "fixed") {
+      const p = parseFloat(price);
+      if (isNaN(p) || p < 0) errors.push("Price must be 0 or a positive number");
+    }
+
+    if (pricingType === "variation") {
+      const named = variations.filter((v) => v.name.trim());
+      if (named.length === 0) {
+        errors.push("Add at least one variation with a name");
+      } else {
+        const invalid = named.filter((v) => {
+          if (v.priceMode === "formula") return !v.formula.trim();
+          return v.price === "" || isNaN(parseFloat(v.price)) || parseFloat(v.price) < 0;
+        });
+        if (invalid.length > 0)
+          errors.push(`${invalid.length} variation${invalid.length > 1 ? "s are" : " is"} missing a valid ${invalid.some(v => v.priceMode === "formula") ? "formula" : "price"}`);
+      }
+    }
+
+    if (pricingType === "tiered") {
+      if (tierRanges.length === 0) {
+        errors.push("Add at least one number range");
+      } else {
+        const badRange = tierRanges.some((r) => {
+          const f = parseFloat(r.from); const t = parseFloat(r.to);
+          return isNaN(f) || isNaN(t) || t <= f;
+        });
+        if (badRange) errors.push("Each range: the To value must be greater than the From value");
+        const noPrice = tierRanges.filter((r) => r.price === "" || isNaN(parseFloat(r.price)) || parseFloat(r.price) < 0);
+        if (noPrice.length > 0)
+          errors.push(`${noPrice.length} range${noPrice.length > 1 ? "s are" : " is"} missing a price`);
+      }
+    }
+
+    if (pricingType === "recurring") {
+      const priced = annualRevenueTiers.filter((t) =>
+        (t.priceMode === "fixed" && t.price !== "" && parseFloat(t.price) > 0) ||
+        (t.priceMode === "formula" && t.formula.trim())
+      );
+      if (priced.length === 0) errors.push("Set a price for at least one annual revenue bracket");
+    }
+
+    if (pricingType === "income_range") {
+      const priced = incomeTiers.filter((t) =>
+        (t.priceMode === "fixed" && t.price !== "" && parseFloat(t.price) > 0) ||
+        (t.priceMode === "formula" && t.formula.trim())
+      );
+      if (priced.length === 0) errors.push("Set a price for at least one income tax bracket");
+    }
+
+    // ── Calculation validation ───────────────────────────────────────────
+    if (addCalc) {
+      for (const [i, calc] of calculations.entries()) {
+        if (calc.valueType === "none") {
+          errors.push(`Calculation ${i + 1}: select a calculation type`); break;
+        }
+        if (calc.valueType === "static") {
+          const v = parseFloat(calc.staticValue);
+          if (!calc.staticValue.trim() || isNaN(v) || v <= 0) {
+            errors.push("Static calculations need a value greater than 0"); break;
+          }
+        }
+        if (calc.valueType === "quantity" && !calc.quantityLabel.trim()) {
+          errors.push("Quantity-based calculations need a field label"); break;
+        }
+        if (calc.valueType === "variations" && !calc.calcVariations.some(v => v.name.trim())) {
+          errors.push(`Calculation ${i + 1}: add at least one variation`); break;
+        }
+      }
+    }
+
+    // ── Min fee validation ───────────────────────────────────────────────
+    if (billingFreq === "monthly" && applyMinFee) {
+      const fee = parseFloat(minFee);
+      if (isNaN(fee) || fee <= 0) errors.push("Minimum monthly fee must be greater than R0.00");
+    }
+
+    if (errors.length > 0) { errors.forEach((e) => toast.error(e)); return; }
+
     setSaving(true);
     try {
-      const isHourly = pricingType === "hourly";
-      const isFixed  = pricingType === "fixed";
-
       const result = await createLineItem({
         userId,
         sectionId: effectiveSectionId,
@@ -267,15 +414,21 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
         pricingType,
         taxRate: taxRate === "default" ? undefined : taxRate,
         fieldLabel: pricingType === "variation" ? (fieldLabel.trim() || undefined) : undefined,
-        fixedPrice: isFixed  ? (parseFloat(price) || 0) : undefined,
-        hourlyRate: isHourly ? (parseFloat(price) || 0) : undefined,
+        fixedPrice: pricingType === "fixed" ? (parseFloat(price) || 0) : undefined,
         pricingTiers: buildPricingTiers(),
         addCalculation: addCalc,
         calculationVariations: addCalc
           ? calculations.map(c => ({
-              id: c.id, operation: c.operation, valueType: c.valueType,
+              id: c.id, operation: c.operation,
+              valueType: c.valueType === "none" ? undefined : c.valueType as "quantity" | "static" | "variations",
               staticValue:        c.valueType === "static"   ? (parseFloat(c.staticValue) || 0) : undefined,
               quantityFieldLabel: c.valueType === "quantity" ? (c.quantityLabel || undefined)   : undefined,
+              label: c.valueType === "quantity" ? (c.quantityLabel || undefined)
+                   : c.valueType === "variations" ? (c.calcVariationLabel || undefined)
+                   : undefined,
+              options: c.valueType === "variations"
+                ? c.calcVariations.filter(v => v.name.trim()).map(v => ({ label: v.name.trim(), value: parseFloat(v.value) || 0 }))
+                : undefined,
             }))
           : [],
         applyMinimumFee: billingFreq === "monthly" ? applyMinFee : false,
@@ -292,7 +445,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
     }
   }
 
-  const showSinglePrice = pricingType === "fixed" || pricingType === "hourly";
+  const showSinglePrice = pricingType === "fixed";
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && handleClose()}>
@@ -399,10 +552,10 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
               </div>
             </div>
 
-            {/* Fixed / Hourly: single price */}
+            {/* Fixed: single price */}
             {showSinglePrice && (
               <div className="space-y-1.5">
-                <Label className="text-[13px]">{pricingType === "hourly" ? "Hourly rate" : "Price"}</Label>
+                <Label className="text-[13px]">Price</Label>
                 <div className="flex h-10 rounded-lg border border-slate-200 overflow-hidden">
                   <span className="px-3 flex items-center text-[12px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">ZAR</span>
                   <input type="number" min="0" step="0.01" value={price}
@@ -427,27 +580,64 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                     <span className="text-[11px] text-slate-400">Set the price for each variation below.</span>
                   </div>
                   {variations.map((v, idx) => (
-                    <div key={v.id} className="flex items-center gap-2">
-                      <div className="flex flex-col gap-0.5 shrink-0 opacity-40">
-                        <div className="w-3 h-0.5 bg-slate-400 rounded" />
-                        <div className="w-3 h-0.5 bg-slate-400 rounded" />
-                        <div className="w-3 h-0.5 bg-slate-400 rounded" />
+                    <div key={v.id} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-col gap-0.5 shrink-0 opacity-40">
+                          <div className="w-3 h-0.5 bg-slate-400 rounded" />
+                          <div className="w-3 h-0.5 bg-slate-400 rounded" />
+                          <div className="w-3 h-0.5 bg-slate-400 rounded" />
+                        </div>
+                        <input value={v.name} onChange={(e) => updateVariation(v.id, "name", e.target.value)}
+                          placeholder="Variation name" disabled={saving}
+                          className="flex-1 h-9 px-3 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] bg-white" />
+                        {/* Price mode toggle + input (joined) */}
+                        <div className="relative flex h-9 rounded-lg border border-slate-200 overflow-visible flex-1 min-w-0">
+                          <button type="button" disabled={saving}
+                            onClick={(e) => toggleModeDropdown(v.id, e)}
+                            className="flex items-center gap-1 px-2.5 bg-slate-50 border-r border-slate-200 text-[11px] font-medium text-slate-600 hover:bg-slate-100 transition-colors shrink-0 rounded-l-lg">
+                            {v.priceMode === "fixed" ? "ZAR" : <GripHorizontal className="h-3.5 w-3.5" />}
+                            <ChevronDown className="h-3 w-3 opacity-50" />
+                          </button>
+                          {openModeDropdown === v.id && (
+                            <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[130px]" onClick={e => e.stopPropagation()}>
+                              <button type="button" onClick={() => { updateVariation(v.id, "priceMode", "fixed"); setOpenModeDropdown(null); }}
+                                className="w-full text-left px-3 py-1.5 text-[12px] text-slate-700 hover:bg-slate-50">Fixed Price</button>
+                              <button type="button" onClick={() => { updateVariation(v.id, "priceMode", "formula"); setOpenModeDropdown(null); }}
+                                className="w-full text-left px-3 py-1.5 text-[12px] text-[#1a73e8] hover:bg-slate-50">Calculation</button>
+                            </div>
+                          )}
+                          {v.priceMode === "fixed" ? (
+                            <input type="number" min="0" step="0.01" value={v.price}
+                              onChange={(e) => updateVariation(v.id, "price", e.target.value)} disabled={saving}
+                              placeholder="Variation Price"
+                              className="flex-1 px-3 text-[13px] text-slate-800 placeholder-slate-300 focus:outline-none bg-white min-w-0" />
+                          ) : (
+                            <input type="text" value={v.formula}
+                              onChange={(e) => updateVariation(v.id, "formula", e.target.value)} disabled={saving}
+                              placeholder="[previous]*1.35"
+                              className="flex-1 px-3 text-[13px] text-slate-800 placeholder-slate-300 focus:outline-none bg-white min-w-0" />
+                          )}
+                        </div>
+                        <button type="button" disabled={saving || idx === 0} onClick={() => moveVariation(v.id, -1)}
+                          className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30"><ChevronUp className="h-3.5 w-3.5" /></button>
+                        <button type="button" disabled={saving || idx === variations.length - 1} onClick={() => moveVariation(v.id, 1)}
+                          className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30"><ChevronDown className="h-3.5 w-3.5" /></button>
+                        <button type="button" disabled={saving || variations.length <= 1} onClick={() => removeVariation(v.id)}
+                          className="p-1 text-red-400 hover:text-red-600 disabled:opacity-30"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
-                      <input value={v.name} onChange={(e) => updateVariation(v.id, "name", e.target.value)}
-                        placeholder="Variation name" disabled={saving}
-                        className="flex-1 h-9 px-3 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] bg-white" />
-                      <div className="flex h-9 rounded-lg border border-slate-200 overflow-hidden w-[130px]">
-                        <span className="px-2 flex items-center text-[11px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200 whitespace-nowrap">ZAR</span>
-                        <input type="number" min="0" step="0.01" value={v.price}
-                          onChange={(e) => updateVariation(v.id, "price", e.target.value)} disabled={saving}
-                          className="flex-1 px-2 text-[13px] text-slate-800 focus:outline-none bg-white min-w-0" />
-                      </div>
-                      <button type="button" disabled={saving || idx === 0} onClick={() => moveVariation(v.id, -1)}
-                        className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30"><ChevronUp className="h-3.5 w-3.5" /></button>
-                      <button type="button" disabled={saving || idx === variations.length - 1} onClick={() => moveVariation(v.id, 1)}
-                        className="p-1 text-slate-400 hover:text-slate-600 disabled:opacity-30"><ChevronDown className="h-3.5 w-3.5" /></button>
-                      <button type="button" disabled={saving || variations.length <= 1} onClick={() => removeVariation(v.id)}
-                        className="p-1 text-red-400 hover:text-red-600 disabled:opacity-30"><Trash2 className="h-3.5 w-3.5" /></button>
+                      {v.priceMode === "formula" && (
+                        <div className="flex items-center gap-1.5 flex-wrap pl-5">
+                          <span className="text-[11px] text-slate-500 mr-1">You can use the following options</span>
+                          <button type="button" onClick={() => updateVariation(v.id, "formula", v.formula + "[previous]")}
+                            className="h-6 px-2.5 rounded-full text-[10px] font-medium text-white bg-[#1a6b3c] hover:bg-[#145530]">Previous Price</button>
+                          {(["+", "-", "/", "*"] as const).map((op, i) => (
+                            <button key={op} type="button" onClick={() => updateVariation(v.id, "formula", v.formula + op)}
+                              className="h-6 w-6 rounded-full text-[12px] font-medium text-white bg-[#1a6b3c] hover:bg-[#145530] flex items-center justify-center">
+                              {["+", "-", "÷", "×"][i]}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                   <button type="button" disabled={saving} onClick={addVariation}
@@ -502,14 +692,48 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                   <span className="text-[11px] text-slate-400">Set the price for each annual revenue range below.</span>
                 </div>
                 {annualRevenueTiers.map((t) => (
-                  <div key={t.id} className="flex items-center gap-2">
-                    <span className="text-[12px] text-slate-600 text-right shrink-0 w-32">{t.label}</span>
-                    <div className="flex h-9 rounded-lg border border-slate-200 overflow-hidden flex-1">
-                      <span className="px-2 flex items-center text-[11px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">ZAR</span>
-                      <input type="number" min="0" step="0.01" value={t.price} placeholder="Price"
-                        onChange={(e) => updateAnnualTier(t.id, e.target.value)} disabled={saving}
-                        className="flex-1 px-2 text-[13px] text-slate-800 focus:outline-none bg-white min-w-0 placeholder-slate-300" />
+                  <div key={t.id} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] text-slate-600 text-right shrink-0 w-32">{t.label}</span>
+                      <div className="relative flex h-9 rounded-lg border border-slate-200 overflow-visible flex-1">
+                        <button type="button" disabled={saving}
+                          onClick={(e) => toggleModeDropdown(t.id, e)}
+                          className="flex items-center gap-1 px-2.5 bg-slate-50 border-r border-slate-200 text-[11px] font-medium text-slate-600 hover:bg-slate-100 transition-colors shrink-0 rounded-l-lg">
+                          {t.priceMode === "fixed" ? "ZAR" : <GripHorizontal className="h-3.5 w-3.5" />}
+                          <ChevronDown className="h-3 w-3 opacity-50" />
+                        </button>
+                        {openModeDropdown === t.id && (
+                          <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[130px]" onClick={e => e.stopPropagation()}>
+                            <button type="button" onClick={() => { updateAnnualTier(t.id, "priceMode", "fixed"); setOpenModeDropdown(null); }}
+                              className="w-full text-left px-3 py-1.5 text-[12px] text-slate-700 hover:bg-slate-50">Fixed Price</button>
+                            <button type="button" onClick={() => { updateAnnualTier(t.id, "priceMode", "formula"); setOpenModeDropdown(null); }}
+                              className="w-full text-left px-3 py-1.5 text-[12px] text-[#1a73e8] hover:bg-slate-50">Calculation</button>
+                          </div>
+                        )}
+                        {t.priceMode === "fixed" ? (
+                          <input type="number" min="0" step="0.01" value={t.price} placeholder="Variation Price"
+                            onChange={(e) => updateAnnualTier(t.id, "price", e.target.value)} disabled={saving}
+                            className="flex-1 px-3 text-[13px] text-slate-800 placeholder-slate-300 focus:outline-none bg-white" />
+                        ) : (
+                          <input type="text" value={t.formula} placeholder="[previous]*1.35"
+                            onChange={(e) => updateAnnualTier(t.id, "formula", e.target.value)} disabled={saving}
+                            className="flex-1 px-3 text-[13px] text-slate-800 placeholder-slate-300 focus:outline-none bg-white" />
+                        )}
+                      </div>
                     </div>
+                    {t.priceMode === "formula" && (
+                      <div className="flex items-center gap-1.5 flex-wrap pl-36">
+                        <span className="text-[11px] text-slate-500 mr-1">You can use the following options</span>
+                        <button type="button" onClick={() => updateAnnualTier(t.id, "formula", t.formula + "[previous]")}
+                          className="h-6 px-2.5 rounded-full text-[10px] font-medium text-white bg-[#1a6b3c] hover:bg-[#145530]">Previous Price</button>
+                        {(["+", "-", "/", "*"] as const).map((op, i) => (
+                          <button key={op} type="button" onClick={() => updateAnnualTier(t.id, "formula", t.formula + op)}
+                            className="h-6 w-6 rounded-full text-[12px] font-medium text-white bg-[#1a6b3c] hover:bg-[#145530] flex items-center justify-center">
+                            {["+", "-", "÷", "×"][i]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -523,14 +747,48 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                   <span className="text-[11px] text-slate-400">Set the price for each income range below.</span>
                 </div>
                 {incomeTiers.map((t) => (
-                  <div key={t.id} className="flex items-center gap-2">
-                    <span className="text-[12px] text-slate-600 text-right shrink-0 w-36">{t.label}</span>
-                    <div className="flex h-9 rounded-lg border border-slate-200 overflow-hidden flex-1">
-                      <span className="px-2 flex items-center text-[11px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">ZAR</span>
-                      <input type="number" min="0" step="0.01" value={t.price} placeholder="Price"
-                        onChange={(e) => updateIncomeTier(t.id, e.target.value)} disabled={saving}
-                        className="flex-1 px-2 text-[13px] text-slate-800 focus:outline-none bg-white min-w-0 placeholder-slate-300" />
+                  <div key={t.id} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] text-slate-600 text-right shrink-0 w-36">{t.label}</span>
+                      <div className="relative flex h-9 rounded-lg border border-slate-200 overflow-visible flex-1">
+                        <button type="button" disabled={saving}
+                          onClick={(e) => toggleModeDropdown(t.id, e)}
+                          className="flex items-center gap-1 px-2.5 bg-slate-50 border-r border-slate-200 text-[11px] font-medium text-slate-600 hover:bg-slate-100 transition-colors shrink-0 rounded-l-lg">
+                          {t.priceMode === "fixed" ? "ZAR" : <GripHorizontal className="h-3.5 w-3.5" />}
+                          <ChevronDown className="h-3 w-3 opacity-50" />
+                        </button>
+                        {openModeDropdown === t.id && (
+                          <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[130px]" onClick={e => e.stopPropagation()}>
+                            <button type="button" onClick={() => { updateIncomeTier(t.id, "priceMode", "fixed"); setOpenModeDropdown(null); }}
+                              className="w-full text-left px-3 py-1.5 text-[12px] text-slate-700 hover:bg-slate-50">Fixed Price</button>
+                            <button type="button" onClick={() => { updateIncomeTier(t.id, "priceMode", "formula"); setOpenModeDropdown(null); }}
+                              className="w-full text-left px-3 py-1.5 text-[12px] text-[#1a73e8] hover:bg-slate-50">Calculation</button>
+                          </div>
+                        )}
+                        {t.priceMode === "fixed" ? (
+                          <input type="number" min="0" step="0.01" value={t.price} placeholder="Variation Price"
+                            onChange={(e) => updateIncomeTier(t.id, "price", e.target.value)} disabled={saving}
+                            className="flex-1 px-3 text-[13px] text-slate-800 placeholder-slate-300 focus:outline-none bg-white" />
+                        ) : (
+                          <input type="text" value={t.formula} placeholder="[previous]*1.35"
+                            onChange={(e) => updateIncomeTier(t.id, "formula", e.target.value)} disabled={saving}
+                            className="flex-1 px-3 text-[13px] text-slate-800 placeholder-slate-300 focus:outline-none bg-white" />
+                        )}
+                      </div>
                     </div>
+                    {t.priceMode === "formula" && (
+                      <div className="flex items-center gap-1.5 flex-wrap pl-40">
+                        <span className="text-[11px] text-slate-500 mr-1">You can use the following options</span>
+                        <button type="button" onClick={() => updateIncomeTier(t.id, "formula", t.formula + "[previous]")}
+                          className="h-6 px-2.5 rounded-full text-[10px] font-medium text-white bg-[#1a6b3c] hover:bg-[#145530]">Previous Price</button>
+                        {(["+", "-", "/", "*"] as const).map((op, i) => (
+                          <button key={op} type="button" onClick={() => updateIncomeTier(t.id, "formula", t.formula + op)}
+                            className="h-6 w-6 rounded-full text-[12px] font-medium text-white bg-[#1a6b3c] hover:bg-[#145530] flex items-center justify-center">
+                            {["+", "-", "÷", "×"][i]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -559,16 +817,16 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
               {addCalc && (
                 <div className="space-y-3">
                   {calculations.map((calc, idx) => (
-                    <div key={calc.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2">
+                    <div key={calc.id} className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Calculation {idx + 1}</span>
-                        <div className="flex items-center gap-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">Calculation {idx + 1}</span>
+                        <div className="flex items-center gap-1.5">
                           <button type="button" disabled={saving || idx === 0} onClick={() => moveCalc(calc.id, -1)}
-                            className="h-7 w-7 rounded border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30"><ChevronUp className="h-3 w-3" /></button>
+                            className="h-7 w-7 rounded-full border border-slate-300 bg-white flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30"><ChevronUp className="h-3.5 w-3.5" /></button>
                           <button type="button" disabled={saving || idx === calculations.length - 1} onClick={() => moveCalc(calc.id, 1)}
-                            className="h-7 w-7 rounded border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 disabled:opacity-30"><ChevronDown className="h-3 w-3" /></button>
+                            className="h-7 w-7 rounded-full border border-slate-300 bg-white flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30"><ChevronDown className="h-3.5 w-3.5" /></button>
                           <button type="button" disabled={saving} onClick={() => removeCalculation(calc.id)}
-                            className="h-7 w-7 rounded border border-red-200 bg-white flex items-center justify-center text-red-400 hover:text-red-600 disabled:opacity-30"><Trash2 className="h-3 w-3" /></button>
+                            className="h-7 w-7 rounded-full border border-slate-300 bg-white flex items-center justify-center text-slate-500 hover:text-red-600 disabled:opacity-30"><Trash2 className="h-3.5 w-3.5" /></button>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -588,20 +846,62 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                       {calc.valueType === "static" && (
                         <input type="number" min="0" step="0.01" value={calc.staticValue}
                           onChange={(e) => updateCalc(calc.id, "staticValue", e.target.value)}
-                          placeholder="Static value" disabled={saving}
-                          className="w-full h-9 px-3 rounded-lg border border-slate-200 text-[13px] bg-white focus:outline-none focus:border-[#C8A96E]" />
+                          placeholder="Enter a number" disabled={saving}
+                          className="w-full h-9 px-3 rounded-lg border border-slate-200 text-[13px] bg-white focus:outline-none focus:border-[#C8A96E] placeholder-slate-400" />
                       )}
                       {calc.valueType === "quantity" && (
                         <input type="text" value={calc.quantityLabel}
                           onChange={(e) => updateCalc(calc.id, "quantityLabel", e.target.value)}
-                          placeholder="Quantity field label (e.g. Number of employees)" disabled={saving}
+                          placeholder="label to show" disabled={saving}
                           className="w-full h-9 px-3 rounded-lg border border-slate-200 text-[13px] bg-white focus:outline-none focus:border-[#C8A96E] placeholder-slate-400" />
+                      )}
+                      {calc.valueType === "variations" && (
+                        <div className="space-y-2">
+                          <input type="text" value={calc.calcVariationLabel}
+                            onChange={(e) => updateCalc(calc.id, "calcVariationLabel", e.target.value)}
+                            placeholder="label to show" disabled={saving}
+                            className="w-full h-9 px-3 rounded-lg border border-slate-200 text-[13px] bg-white focus:outline-none focus:border-[#C8A96E] placeholder-slate-400" />
+                          {calc.calcVariations.map((v) => (
+                            <div key={v.id} className="flex items-center gap-2">
+                              <div className="flex flex-col gap-0.5 shrink-0 opacity-40">
+                                <div className="w-3 h-0.5 bg-slate-400 rounded" /><div className="w-3 h-0.5 bg-slate-400 rounded" /><div className="w-3 h-0.5 bg-slate-400 rounded" />
+                              </div>
+                              <input value={v.name} onChange={(e) => updateCalcVariation(calc.id, v.id, "name", e.target.value)}
+                                placeholder="Variation name" disabled={saving}
+                                className="flex-1 h-9 px-3 rounded-lg border border-slate-200 text-[13px] bg-white focus:outline-none focus:border-[#C8A96E] placeholder-slate-400" />
+                              <input value={v.value} onChange={(e) => updateCalcVariation(calc.id, v.id, "value", e.target.value)}
+                                placeholder="Value" disabled={saving}
+                                className="w-24 h-9 px-3 rounded-lg border border-slate-200 text-[13px] bg-white focus:outline-none focus:border-[#C8A96E] placeholder-slate-400" />
+                              <div className="relative">
+                                <button type="button" disabled={saving}
+                                  onClick={(e) => toggleActionsDropdown(v.id, e)}
+                                  className="flex items-center gap-1 h-9 px-2 text-[#1a6b3c] font-medium text-[12px] hover:opacity-80">
+                                  Actions <span className="text-slate-400">⋮</span>
+                                </button>
+                                {openActionsDropdown === v.id && (
+                                  <div className="absolute z-50 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[140px]" onClick={e => e.stopPropagation()}>
+                                    <button type="button" onClick={() => { removeCalcVariation(calc.id, v.id); setOpenActionsDropdown(null); }}
+                                      className="w-full text-left px-3 py-1.5 text-[12px] text-red-600 hover:bg-red-50">Delete</button>
+                                    <button type="button" onClick={() => { moveCalcVariation(calc.id, v.id, 1); setOpenActionsDropdown(null); }}
+                                      className="w-full text-left px-3 py-1.5 text-[12px] text-[#1a6b3c] hover:bg-slate-50">Move down</button>
+                                    <button type="button" onClick={() => { moveCalcVariation(calc.id, v.id, "bottom"); setOpenActionsDropdown(null); }}
+                                      className="w-full text-left px-3 py-1.5 text-[12px] text-[#1a6b3c] hover:bg-slate-50">Move to bottom</button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          <button type="button" disabled={saving} onClick={() => addCalcVariation(calc.id)}
+                            className="flex items-center gap-1.5 text-[12px] font-medium text-slate-600 border border-slate-300 rounded-full px-3 py-1 hover:bg-slate-50 transition-colors">
+                            Add Variation
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))}
                   {calculations.length < 5 && (
                     <button type="button" disabled={saving} onClick={addCalculation}
-                      className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 hover:text-slate-800 transition-colors">
+                      className="flex items-center gap-1.5 text-[12px] font-medium border border-slate-300 rounded-full px-3 py-1.5 text-slate-600 hover:bg-slate-50 transition-colors">
                       <Plus className="h-3.5 w-3.5" /> Add Calculation
                     </button>
                   )}
@@ -619,7 +919,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                 </label>
                 {applyMinFee && (
                   <div className="flex h-10 rounded-lg border border-slate-200 overflow-hidden">
-                    <span className="px-3 flex items-center text-[12px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">Min (ZAR)</span>
+                    <span className="px-3 flex items-center text-[12px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">Min</span>
                     <input type="number" min="0" step="0.01" value={minFee}
                       onChange={(e) => setMinFee(e.target.value)} disabled={saving}
                       className="flex-1 px-3 text-[13px] text-slate-800 focus:outline-none bg-white" />

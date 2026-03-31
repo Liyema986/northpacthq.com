@@ -59,8 +59,8 @@ export interface ProposalReviewPDFPreviewProps {
   proposalData?: ProposalDataForPDF | null;
 }
 
-const GREEN_LINE = [34, 197, 94] as [number, number, number]; // #22C55E
-const SECTION_BLUE = [59, 130, 246] as [number, number, number];
+const GOLD_LINE = [200, 169, 110] as [number, number, number]; // #C8A96E
+const NAVY_HEADING = [36, 62, 99] as [number, number, number]; // #243E63
 
 function getServicePrice(item: LineItemWithPrice): number {
   if (item.fixedPrice != null && item.fixedPrice > 0) return item.fixedPrice;
@@ -135,14 +135,14 @@ export function ProposalReviewPDFPreview({
       if (!proposalData.coverImageUrl) {
         void loadLocalAsset("/images/coverpage.png")
           .then((c) => c ?? loadLocalAsset("/coverpage.png"))
-          .then((c) => c && setCoverPageDataUrl(c));
+          .then((c) => setCoverPageDataUrl(c ?? null));
       }
       if (proposalData.lastPageImageUrl) {
         setClosingPageDataUrl(proposalData.lastPageImageUrl);
       } else {
         void loadLocalAsset("/images/closingpage.png")
           .then((c) => c ?? loadLocalAsset("/closingpage.png"))
-          .then((c) => c && setClosingPageDataUrl(c));
+          .then((c) => setClosingPageDataUrl(c ?? null));
       }
       return;
     }
@@ -153,14 +153,14 @@ export function ProposalReviewPDFPreview({
       if (!proposalData.coverImageUrl) {
         void loadLocalAsset("/images/coverpage.png")
           .then((c) => c ?? loadLocalAsset("/coverpage.png"))
-          .then((c) => c && setCoverPageDataUrl(c));
+          .then((c) => setCoverPageDataUrl(c ?? null));
       }
       if (proposalData.lastPageImageUrl) {
         setClosingPageDataUrl(proposalData.lastPageImageUrl);
       } else {
         void loadLocalAsset("/images/closingpage.png")
           .then((c) => c ?? loadLocalAsset("/closingpage.png"))
-          .then((c) => c && setClosingPageDataUrl(c));
+          .then((c) => setClosingPageDataUrl(c ?? null));
       }
       return;
     }
@@ -226,7 +226,7 @@ export function ProposalReviewPDFPreview({
     if (!logoData) {
       const lineY = logoY + 5;
       doc.setLineWidth(0.3);
-      doc.setDrawColor(...GREEN_LINE);
+      doc.setDrawColor(...GOLD_LINE);
       doc.line(margin, lineY, pageWidth - margin, lineY);
       return lineY + 8;
     }
@@ -254,13 +254,13 @@ export function ProposalReviewPDFPreview({
       const lineY = logoY + logoHeight * 0.7;
       const lineStartX = logoX + logoWidth - 10;
       doc.setLineWidth(0.3);
-      doc.setDrawColor(...GREEN_LINE);
+      doc.setDrawColor(...GOLD_LINE);
       doc.line(lineStartX, lineY, pageWidth, lineY);
       return logoY + logoHeight + 10;
     } catch {
       const lineY = logoY + 5;
       doc.setLineWidth(0.3);
-      doc.setDrawColor(...GREEN_LINE);
+      doc.setDrawColor(...GOLD_LINE);
       doc.line(margin, lineY, pageWidth - margin, lineY);
       return lineY + 8;
     }
@@ -371,7 +371,7 @@ export function ProposalReviewPDFPreview({
         ],
         theme: "grid",
         headStyles: {
-          fillColor: SECTION_BLUE,
+          fillColor: NAVY_HEADING,
           textColor: [255, 255, 255],
           fontStyle: "bold",
           halign: "left",
@@ -394,7 +394,7 @@ export function ProposalReviewPDFPreview({
       // CONTENTS section
       const tocY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
       doc.setFontSize(16);
-      doc.setTextColor(...SECTION_BLUE);
+      doc.setTextColor(...NAVY_HEADING);
       doc.setFont("helvetica", "bold");
       doc.text("CONTENTS", margin, tocY);
 
@@ -427,7 +427,7 @@ export function ProposalReviewPDFPreview({
       currentY = await addBranding(doc, logoDataUrl, pageWidth, margin);
 
       doc.setFontSize(14);
-      doc.setTextColor(...SECTION_BLUE);
+      doc.setTextColor(...NAVY_HEADING);
       doc.setFont("helvetica", "bold");
       doc.text("INTRODUCTION", margin, currentY);
       doc.setDrawColor(0, 0, 0);
@@ -456,7 +456,7 @@ export function ProposalReviewPDFPreview({
 
       // FEES section
       doc.setFontSize(14);
-      doc.setTextColor(...SECTION_BLUE);
+      doc.setTextColor(...NAVY_HEADING);
       doc.setFont("helvetica", "bold");
       doc.text("FEES", margin, currentY);
       doc.setDrawColor(0, 0, 0);
@@ -474,7 +474,7 @@ export function ProposalReviewPDFPreview({
       currentY += splitSubtext.length * 5 + 5;
 
       doc.setFontSize(12);
-      doc.setTextColor(...SECTION_BLUE);
+      doc.setTextColor(...NAVY_HEADING);
       doc.setFont("helvetica", "bold");
       doc.text("One-Off Costs", margin, currentY);
       currentY += 6;
@@ -494,7 +494,7 @@ export function ProposalReviewPDFPreview({
         body: feeRows,
         theme: "striped",
         headStyles: {
-          fillColor: SECTION_BLUE,
+          fillColor: NAVY_HEADING,
           textColor: [255, 255, 255],
           fontStyle: "bold",
           halign: "left",
@@ -539,7 +539,7 @@ export function ProposalReviewPDFPreview({
       currentY = await addBranding(doc, logoDataUrl, pageWidth, margin);
 
       doc.setFontSize(14);
-      doc.setTextColor(...SECTION_BLUE);
+      doc.setTextColor(...NAVY_HEADING);
       doc.setFont("helvetica", "bold");
       doc.text("WHAT HAPPENS NEXT?", margin, currentY);
       doc.setDrawColor(0, 0, 0);
@@ -571,7 +571,7 @@ export function ProposalReviewPDFPreview({
       const buttonWidth = 80;
       const buttonHeight = 15;
       const buttonX = (pageWidth - buttonWidth) / 2;
-      doc.setFillColor(...SECTION_BLUE);
+      doc.setFillColor(...NAVY_HEADING);
       doc.roundedRect(buttonX, currentY, buttonWidth, buttonHeight, 2, 2, "F");
       doc.setFontSize(12);
       doc.setTextColor(255, 255, 255);
@@ -593,7 +593,7 @@ export function ProposalReviewPDFPreview({
       currentY += 20;
 
       doc.setFontSize(14);
-      doc.setTextColor(...SECTION_BLUE);
+      doc.setTextColor(...NAVY_HEADING);
       doc.setFont("helvetica", "bold");
       doc.text("ALL THE SERVICES WE PROVIDE", margin, currentY);
       doc.setDrawColor(0, 0, 0);
@@ -666,7 +666,7 @@ export function ProposalReviewPDFPreview({
 
             if (proposalData?.signOffBlock) {
               doc.setFontSize(12);
-              doc.setTextColor(...SECTION_BLUE);
+              doc.setTextColor(...NAVY_HEADING);
               doc.setFont("helvetica", "bold");
               doc.text("Sign-off", margin + 8, closeY);
               closeY += 8;
@@ -685,7 +685,7 @@ export function ProposalReviewPDFPreview({
             }
             if (proposalData?.bankingDetails) {
               doc.setFontSize(12);
-              doc.setTextColor(...SECTION_BLUE);
+              doc.setTextColor(...NAVY_HEADING);
               doc.setFont("helvetica", "bold");
               doc.text("Banking details", margin + 8, closeY);
               closeY += 8;
@@ -819,7 +819,8 @@ export function ProposalReviewPDFPreview({
           onClick={handleDownload}
           disabled={!pdfDataUrl || isGenerating}
           size="sm"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md h-9 px-4 text-[13px] font-medium rounded-lg"
+          className="text-white shadow-md h-9 px-4 text-[13px] font-medium rounded-lg"
+          style={{ backgroundColor: "#C8A96E", color: "#243E63" }}
         >
           {isGenerating ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -831,7 +832,7 @@ export function ProposalReviewPDFPreview({
       </div>
       {isGenerating ? (
         <div className="flex flex-col items-center justify-center flex-1 min-h-[500px]">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+          <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#C8A96E" }} />
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Generating PDF preview...</p>
         </div>
       ) : pdfDataUrl ? (

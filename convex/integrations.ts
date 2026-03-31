@@ -972,3 +972,236 @@ export const getXeroEntitiesForClient = action({
     }
   },
 });
+
+// ── Push a newly-created client to Xero as a Contact ─────────────────────
+
+export const pushClientToXero = action({
+  args: {
+    userId: v.id("users"),
+    clientId: v.id("clients"),
+    name: v.string(),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    contactType: v.optional(v.union(v.literal("organisation"), v.literal("individual"))),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    xeroContactId: v.optional(v.string()),
+    error: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    // 1. Resolve firm
+    const user = await ctx.runQuery(internal.internal.getUserInternal, { userId: args.userId });
+    if (!user) return { success: false, error: "User not found" };
+
+    const firmId = user.firmId;
+
+    // 2. Get Xero connection
+    let conn = await ctx.runQuery(internal.integrations.getXeroConnectionWithTokens, { firmId });
+    if (!conn) return { success: false, error: "Xero not connected" };
+
+    // 3. Refresh token if expiring soon
+    const now = Date.now();
+    if (conn.expiresAt < now + 60_000) {
+      const clientIdEnv = process.env.XERO_CLIENT_ID;
+      const clientSecret = process.env.XERO_CLIENT_SECRET;
+      if (!clientIdEnv || !clientSecret) return { success: false, error: "Xero credentials not configured" };
+
+      const basic = base64Encode(new TextEncoder().encode(`${clientIdEnv}:${clientSecret}`));
+      const tokenRes = await fetch(XERO_TOKEN_URL, {
+        method: "POST",
+        headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: conn.refreshToken }).toString(),
+      });
+      if (!tokenRes.ok) return { success: false, error: "Token refresh failed" };
+      const tokenJson = (await tokenRes.json()) as { access_token: string; refresh_token: string; expires_in: number };
+      const expiresAt = now + tokenJson.expires_in * 1000;
+      await ctx.runMutation(internal.integrations.setXeroConnection, {
+        firmId, accessToken: tokenJson.access_token, refreshToken: tokenJson.refresh_token, expiresAt, tenantId: conn.tenantId,
+      });
+      conn = { ...conn, accessToken: tokenJson.access_token, refreshToken: tokenJson.refresh_token, expiresAt };
+    }
+
+    const tenantId = conn.tenantId ?? "";
+    if (!tenantId) return { success: false, error: "No Xero tenant selected" };
+
+    // 4. Build Xero contact payload
+    const contact: Record<string, unknown> = { Name: args.name.trim() };
+    if (args.email?.trim()) contact.EmailAddress = args.email.trim();
+
+    const phones: Array<{ PhoneType: string; PhoneNumber: string }> = [];
+    if (args.phone?.trim()) phones.push({ PhoneType: "DEFAULT", PhoneNumber: args.phone.trim() });
+    if (phones.length > 0) contact.Phones = phones;
+
+    // Xero distinguishes contact types via IsCustomer / IsSupplier — we just create them as a contact
+    const payload = { Contacts: [contact] };
+
+    // 5. POST to Xero
+    const doPost = (token: string) =>
+      fetch(XERO_CONTACTS_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "xero-tenant-id": tenantId,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+    let res = await doPost(conn.accessToken);
+
+    // Retry once on 401
+    if (res.status === 401) {
+      const clientIdEnv = process.env.XERO_CLIENT_ID;
+      const clientSecret = process.env.XERO_CLIENT_SECRET;
+      if (!clientIdEnv || !clientSecret) return { success: false, error: "Xero credentials not configured" };
+      const basic = base64Encode(new TextEncoder().encode(`${clientIdEnv}:${clientSecret}`));
+      const tokenRes = await fetch(XERO_TOKEN_URL, {
+        method: "POST",
+        headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: conn.refreshToken }).toString(),
+      });
+      if (!tokenRes.ok) return { success: false, error: "Xero re-auth failed" };
+      const tokenJson = (await tokenRes.json()) as { access_token: string; refresh_token: string; expires_in: number };
+      await ctx.runMutation(internal.integrations.setXeroConnection, {
+        firmId, accessToken: tokenJson.access_token, refreshToken: tokenJson.refresh_token,
+        expiresAt: Date.now() + tokenJson.expires_in * 1000, tenantId: conn.tenantId,
+      });
+      res = await doPost(tokenJson.access_token);
+    }
+
+    const responseText = await res.text();
+
+    if (!res.ok) {
+      let detail = "";
+      try {
+        const errJson = JSON.parse(responseText) as Record<string, unknown>;
+        const contacts = errJson?.Contacts as Array<Record<string, unknown>> | undefined;
+        const validationErrors = contacts?.[0]?.ValidationErrors as Array<{ Message?: string }> | undefined;
+        detail = (validationErrors ?? []).map(e => e.Message ?? "").filter(Boolean).join("; ");
+      } catch { /* ignore */ }
+      if (detail.toLowerCase().includes("duplicate") || detail.toLowerCase().includes("already exist")) {
+        return { success: false, error: "A contact with this name or email already exists in Xero" };
+      }
+      return { success: false, error: `Xero rejected the contact.${detail ? " " + detail : ""}` };
+    }
+
+    // 6. Parse response
+    let data: { Contacts?: Array<{ ContactID?: string; StatusAttributeString?: string; ValidationErrors?: Array<{ Message?: string }> }> };
+    try {
+      data = JSON.parse(responseText) as typeof data;
+    } catch {
+      return { success: false, error: "Xero returned an unexpected response" };
+    }
+
+    const xeroContact = data.Contacts?.[0];
+    if (xeroContact?.StatusAttributeString === "ERROR") {
+      const errs = (xeroContact.ValidationErrors ?? []).map(e => e.Message ?? "").filter(Boolean);
+      return { success: false, error: errs.join("; ") || "Xero rejected the contact" };
+    }
+
+    const xeroContactId = xeroContact?.ContactID;
+    if (!xeroContactId) return { success: false, error: "Xero did not return a ContactID" };
+
+    // 7. Store xeroContactId on the local client record
+    await ctx.runMutation(internal.clients.setXeroContactId, { clientId: args.clientId, xeroContactId });
+
+    return { success: true, xeroContactId };
+  },
+});
+
+// ── Archive a contact in Xero (Xero doesn't support deletion) ────────────
+
+export const archiveXeroContact = action({
+  args: {
+    userId: v.id("users"),
+    xeroContactId: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    error: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const user = await ctx.runQuery(internal.internal.getUserInternal, { userId: args.userId });
+    if (!user) return { success: false, error: "User not found" };
+
+    const firmId = user.firmId;
+    let conn = await ctx.runQuery(internal.integrations.getXeroConnectionWithTokens, { firmId });
+    if (!conn) return { success: false, error: "Xero not connected" };
+
+    // Refresh token if expiring
+    const now = Date.now();
+    if (conn.expiresAt < now + 60_000) {
+      const clientIdEnv = process.env.XERO_CLIENT_ID;
+      const clientSecret = process.env.XERO_CLIENT_SECRET;
+      if (!clientIdEnv || !clientSecret) return { success: false, error: "Xero credentials not configured" };
+      const basic = base64Encode(new TextEncoder().encode(`${clientIdEnv}:${clientSecret}`));
+      const tokenRes = await fetch(XERO_TOKEN_URL, {
+        method: "POST",
+        headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: conn.refreshToken }).toString(),
+      });
+      if (!tokenRes.ok) return { success: false, error: "Token refresh failed" };
+      const tokenJson = (await tokenRes.json()) as { access_token: string; refresh_token: string; expires_in: number };
+      const expiresAt = now + tokenJson.expires_in * 1000;
+      await ctx.runMutation(internal.integrations.setXeroConnection, {
+        firmId, accessToken: tokenJson.access_token, refreshToken: tokenJson.refresh_token, expiresAt, tenantId: conn.tenantId,
+      });
+      conn = { ...conn, accessToken: tokenJson.access_token, refreshToken: tokenJson.refresh_token, expiresAt };
+    }
+
+    const tenantId = conn.tenantId ?? "";
+    if (!tenantId) return { success: false, error: "No Xero tenant selected" };
+
+    // Archive the contact in Xero by setting ContactStatus to ARCHIVED
+    const payload = { Contacts: [{ ContactID: args.xeroContactId, ContactStatus: "ARCHIVED" }] };
+
+    const doPost = (token: string) =>
+      fetch(XERO_CONTACTS_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "xero-tenant-id": tenantId,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+    let res = await doPost(conn.accessToken);
+
+    if (res.status === 401) {
+      const clientIdEnv = process.env.XERO_CLIENT_ID;
+      const clientSecret = process.env.XERO_CLIENT_SECRET;
+      if (!clientIdEnv || !clientSecret) return { success: false, error: "Xero credentials not configured" };
+      const basic = base64Encode(new TextEncoder().encode(`${clientIdEnv}:${clientSecret}`));
+      const tokenRes = await fetch(XERO_TOKEN_URL, {
+        method: "POST",
+        headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: conn.refreshToken }).toString(),
+      });
+      if (!tokenRes.ok) return { success: false, error: "Xero re-auth failed" };
+      const tokenJson = (await tokenRes.json()) as { access_token: string; refresh_token: string; expires_in: number };
+      await ctx.runMutation(internal.integrations.setXeroConnection, {
+        firmId, accessToken: tokenJson.access_token, refreshToken: tokenJson.refresh_token,
+        expiresAt: Date.now() + tokenJson.expires_in * 1000, tenantId: conn.tenantId,
+      });
+      res = await doPost(tokenJson.access_token);
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      let detail = "";
+      try {
+        const errJson = JSON.parse(text) as Record<string, unknown>;
+        const contacts = errJson?.Contacts as Array<Record<string, unknown>> | undefined;
+        const validationErrors = contacts?.[0]?.ValidationErrors as Array<{ Message?: string }> | undefined;
+        detail = (validationErrors ?? []).map(e => e.Message ?? "").filter(Boolean).join("; ");
+      } catch { /* ignore */ }
+      return { success: false, error: detail || "Failed to archive contact in Xero" };
+    }
+
+    return { success: true };
+  },
+});

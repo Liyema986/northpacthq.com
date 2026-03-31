@@ -2,19 +2,23 @@
 
 import { useState, useMemo } from "react";
 import { Header } from "@/components/layout/header";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useNorthPactAuth } from "@/lib/use-northpact-auth";
 import { getInitials } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddClientSheet } from "@/components/sheets/AddClientSheet";
-import { Plus, Search, Users, Archive, MoreHorizontal, Building2, RefreshCw } from "lucide-react";
+import { Plus, Search, Users, Archive, MoreHorizontal, Building2, RefreshCw, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 type ConvexClient = {
@@ -26,6 +30,7 @@ type ConvexClient = {
   industry?: string;
   status: string;
   tags: string[];
+  xeroContactId?: string;
   createdAt: number;
   updatedAt: number;
 };
@@ -37,19 +42,46 @@ export default function ClientsPage() {
   const clients = useQuery(api.clients.listClients, uid ? { userId: uid, includeArchived: true } : "skip");
   const loading = clients === undefined;
 
-  const archiveClientMut = useMutation(api.clients.archiveClient);
-  const updateClientMut  = useMutation(api.clients.updateClient);
+  const archiveClientMut  = useMutation(api.clients.archiveClient);
+  const deleteClientMut   = useMutation(api.clients.deleteClient);
+  const updateClientMut   = useMutation(api.clients.updateClient);
+  const syncXeroContacts  = useAction(api.integrations.syncXeroContactsToClients);
+  const archiveXeroContact = useAction(api.integrations.archiveXeroContact);
 
   const [search,  setSearch]  = useState("");
   const [tab,     setTab]     = useState<"active" | "archived">("active");
   const [addOpen, setAddOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ConvexClient | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleSync() {
+    if (!uid) return;
     setSyncing(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    toast.success("Synced from Xero");
-    setSyncing(false);
+    try {
+      const result = await syncXeroContacts({ userId: uid });
+      if (result.error) {
+        if (result.error === "Xero not connected") {
+          toast.error("Xero is not connected. Go to Apps Map to connect first.");
+        } else {
+          toast.error(result.error);
+        }
+      } else {
+        const parts: string[] = [];
+        if (result.imported > 0) parts.push(`${result.imported} imported`);
+        if (result.updated > 0)  parts.push(`${result.updated} updated`);
+        if (result.skipped > 0)  parts.push(`${result.skipped} skipped`);
+        toast.success(
+          parts.length > 0
+            ? `Synced from Xero — ${parts.join(", ")}`
+            : "Xero sync complete — everything is up to date"
+        );
+      }
+    } catch {
+      toast.error("Sync failed. Please try again.");
+    } finally {
+      setSyncing(false);
+    }
   }
 
   const allClients = clients ?? [];
@@ -86,6 +118,33 @@ export default function ClientsPage() {
       }
     } catch {
       toast.error("Action failed");
+    }
+  }
+
+  async function handleDelete() {
+    if (!uid || !deleteTarget) return;
+    setDeleting(true);
+    try {
+      // Archive in Xero first (if linked)
+      if (deleteTarget.xeroContactId) {
+        const xeroResult = await archiveXeroContact({ userId: uid, xeroContactId: deleteTarget.xeroContactId });
+        if (!xeroResult.success && xeroResult.error !== "Xero not connected") {
+          toast.error(`Xero: ${xeroResult.error}`);
+          // Continue with local delete even if Xero fails
+        }
+      }
+      // Permanently delete locally
+      const result = await deleteClientMut({ userId: uid, clientId: deleteTarget._id });
+      if (result.success) {
+        toast.success(`"${deleteTarget.companyName}" permanently deleted`);
+        setDeleteTarget(null);
+      } else {
+        toast.error(result.error ?? "Delete failed");
+      }
+    } catch {
+      toast.error("Delete failed");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -225,6 +284,11 @@ export default function ClientsPage() {
                         <Archive className="mr-2 h-3.5 w-3.5" />
                         {client.status === "archived" ? "Restore" : "Archive"}
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => setDeleteTarget(client)}>
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -252,6 +316,30 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete client permanently?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{deleteTarget?.companyName}</strong> from NorthPact
+              {deleteTarget?.xeroContactId ? " and archive the contact in Xero" : ""}.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleting ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />Deleting…</> : "Delete permanently"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Plus, Search, Package, MoreHorizontal, Trash2, ChevronDown,
-  Pencil, Copy, TrendingUp, Download, Layers, FileText,
+  Pencil, Copy, TrendingUp, Layers, FileText,
   CheckCircle, AlertTriangle, XCircle, ToggleLeft, ToggleRight, Loader2,
   ChevronLeft, ChevronRight, ChevronUp, ArrowDown,
 } from "lucide-react";
@@ -33,7 +33,6 @@ import { AddServiceSheet, getCategoryColor } from "@/components/sheets/AddServic
 import { EditServiceSheet, type LineItemForEdit } from "@/components/sheets/EditServiceSheet";
 import { DuplicateServiceSheet, type LineItemForDuplicate } from "@/components/sheets/DuplicateServiceSheet";
 import { GlobalPriceAdjustmentSheet } from "@/components/sheets/GlobalPriceAdjustmentSheet";
-import { ImportSectionsSheet }        from "@/components/sheets/ImportSectionsSheet";
 import { ServiceLetterConfigSheet, type SectionLetterConfig } from "@/components/sheets/ServiceLetterConfigSheet";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -182,7 +181,6 @@ export default function ServicesPage() {
   const [sectionOpen, setSectionOpen] = useState(false);
   const [globalPriceOpen, setGlobalPriceOpen] = useState(false);
   const [priceSectionMode, setPriceSectionMode] = useState<{ sectionId: Id<"serviceSections">; sectionName: string } | null>(null);
-  const [importOpen, setImportOpen] = useState(false);
 
   const [editCtx, setEditCtx] = useState<{ item: LineItemForEdit; sectionName: string } | null>(null);
   const [dupCtx, setDupCtx] = useState<{ item: LineItemForDuplicate; sectionId: Id<"serviceSections">; sectionName: string } | null>(null);
@@ -544,9 +542,6 @@ export default function ServicesPage() {
                   onClick={() => { setPriceSectionMode(null); setGlobalPriceOpen(true); }}
                 >
                   <TrendingUp className="h-4 w-4 mr-2 text-emerald-500" />Global Price Adjustment
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-[13px]" onClick={() => setImportOpen(true)}>
-                  <Download className="h-4 w-4 mr-2 text-blue-500" />Import Sections
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -937,7 +932,6 @@ export default function ServicesPage() {
             }
             sectionMode={priceSectionMode}
           />
-          <ImportSectionsSheet open={importOpen} onOpenChange={setImportOpen} userId={userId} />
           <ServiceLetterConfigSheet
             open={!!letterConfigCtx}
             onOpenChange={(v) => { if (!v) setLetterConfigCtx(null); }}

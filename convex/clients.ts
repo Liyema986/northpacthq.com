@@ -1073,6 +1073,22 @@ const xeroContactBatchItem = v.object({
 });
 
 /**
+ * Internal: Store the Xero ContactID on a client after pushing to Xero.
+ */
+export const setXeroContactId = internalMutation({
+  args: {
+    clientId: v.id("clients"),
+    xeroContactId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.clientId, {
+      xeroContactId: args.xeroContactId,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
  * Internal: Bulk upsert clients from Xero (batch of pre-transformed contacts).
  * Used by syncXeroContactsToClients action. Uses DB lookups to avoid Convex 1024-field arg limit.
  */

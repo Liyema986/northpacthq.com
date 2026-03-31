@@ -37,7 +37,6 @@ import {
   AlertTriangle,
   Link2,
   Plus,
-  Upload,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -64,6 +63,7 @@ interface ContactGroup {
   contactName: string;
   createdAt: number;
   fromXero: boolean;
+  xeroContactId?: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -121,6 +121,7 @@ export default function ContactsPage() {
   const convexClients = useQuery(api.clients.listClients, userId ? { userId, includeArchived: true } : "skip");
   const deleteClientMutation = useMutation(api.clients.deleteClient);
   const syncXeroContacts = useAction(api.integrations.syncXeroContactsToClients);
+  const archiveXeroContact = useAction(api.integrations.archiveXeroContact);
 
   const groups: ContactGroup[] = useMemo(
     () => (convexClients ?? []).map((c) => ({
@@ -133,6 +134,7 @@ export default function ContactsPage() {
       contactName: c.contactName,
       createdAt: c.createdAt,
       fromXero: !!c.xeroContactId,
+      xeroContactId: c.xeroContactId,
     })),
     [convexClients]
   );
@@ -143,12 +145,14 @@ export default function ContactsPage() {
   /** Contact shape: organisations vs individuals (replaces unused renewal placeholder). */
   const [typeFilter, setTypeFilter] = useState<"any" | "organisation" | "individual">("any");
   const [page, setPage]                     = useState(0);
-  const [deleteTarget, setDeleteTarget]     = useState<{ id: string; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget]     = useState<{ id: string; name: string; xeroContactId?: string } | null>(null);
+  const [deleting, setDeleting]             = useState(false);
   const [orgOpen, setOrgOpen]               = useState(false);
   const [indOpen, setIndOpen]               = useState(false);
   const [syncing, setSyncing]               = useState(false);
   const [editOpen, setEditOpen]             = useState(false);
   const [editClientId, setEditClientId]     = useState<Id<"clients"> | null>(null);
+  const [selected, setSelected]             = useState<Set<string>>(new Set());
 
   // ─── Stats ──────────────────────────────────────────────────────────────
 
@@ -191,19 +195,31 @@ export default function ContactsPage() {
       const maxP = Math.max(0, totalPages - 1);
       return p > maxP ? maxP : p;
     });
+    setSelected(new Set());
   }, [totalPages, filtered.length]);
 
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const hasFilters = categoryFilter !== "any" || typeFilter !== "any";
 
-  async function handleDelete(id: string) {
+  async function handleDelete() {
+    if (!userId || !deleteTarget) return;
+    setDeleting(true);
     try {
-      await deleteClientMutation({ userId: userId!, clientId: id as Id<"clients"> });
-      toast.success("Contact deleted");
+      // Archive in Xero first if linked
+      if (deleteTarget.xeroContactId) {
+        const xeroResult = await archiveXeroContact({ userId, xeroContactId: deleteTarget.xeroContactId });
+        if (!xeroResult.success && xeroResult.error !== "Xero not connected") {
+          toast.error(`Xero: ${xeroResult.error}`);
+        }
+      }
+      await deleteClientMutation({ userId, clientId: deleteTarget.id as Id<"clients"> });
+      toast.success(`"${deleteTarget.name}" permanently deleted`);
+      setDeleteTarget(null);
     } catch {
       toast.error("Failed to delete contact");
+    } finally {
+      setDeleting(false);
     }
-    setDeleteTarget(null);
   }
 
   async function handleSync() {
@@ -348,29 +364,6 @@ export default function ContactsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm"
-                  className="h-8 px-3 text-[11px] font-normal border-slate-200 bg-white hover:bg-slate-50 rounded justify-between min-w-[110px]">
-                  <Upload size={14} className="mr-1.5" />
-                  Import CSV
-                  <ChevronDown size={10} className="ml-1 shrink-0" strokeWidth={2} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" side="bottom">
-                <DropdownMenuItem onClick={() => toast.info("CSV import coming soon")}>
-                  <Upload className="h-3.5 w-3.5 mr-2.5 text-slate-500" />
-                  Import CSV
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => toast.info("Clear data not available")}
-                  className="text-red-600 focus:bg-red-50 focus:text-red-700">
-                  <Trash2 className="h-3.5 w-3.5 mr-2.5" />
-                  Clear data
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[11px] font-medium text-white transition-opacity hover:opacity-90 min-w-[130px]"
                   style={{ background: "#C8A96E" }}>
                   <Plus className="h-3.5 w-3.5" />
@@ -409,9 +402,20 @@ export default function ContactsPage() {
             <div className="w-full min-w-[900px]">
               {/* Balanced fr columns fill row width — no empty gap on the right */}
               {/* Column headers */}
-              <div className="grid w-full grid-cols-[36px_minmax(0,1.15fr)_minmax(0,0.52fr)_minmax(0,0.58fr)_minmax(0,1.05fr)_minmax(0,0.55fr)_minmax(0,0.5fr)_44px] gap-x-3 gap-y-0 px-4 py-2.5 border-b border-slate-50 bg-slate-50/60">
+              <div className="grid w-full grid-cols-[28px_36px_minmax(0,1.15fr)_minmax(0,0.52fr)_minmax(0,0.58fr)_minmax(0,1.05fr)_minmax(0,0.55fr)_minmax(0,0.5fr)_44px] gap-x-3 gap-y-0 px-4 py-2.5 border-b border-slate-50 bg-slate-50/60">
+                <div className="flex items-center justify-center">
+                  <input type="checkbox"
+                    checked={paged.length > 0 && paged.every(g => selected.has(g.id))}
+                    onChange={(e) => {
+                      const next = new Set(selected);
+                      if (e.target.checked) paged.forEach(g => next.add(g.id));
+                      else paged.forEach(g => next.delete(g.id));
+                      setSelected(next);
+                    }}
+                    className="h-3.5 w-3.5 rounded border-slate-300 accent-[#C8A96E]" />
+                </div>
                 {["#","Contact / Organisation","Category","Contact Name","Email","Phone","Added","Actions"].map((h) => (
-                  <span key={h} className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap">{h}</span>
+                  <span key={h} className={cn("text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap", h === "#" && "text-right")}>{h}</span>
                 ))}
               </div>
 
@@ -438,8 +442,19 @@ export default function ContactsPage() {
                     const rowNum = page * PAGE_SIZE + idx + 1;
                     return (
                       <Fragment key={group.id}>
-                        <div className="grid w-full grid-cols-[36px_minmax(0,1.15fr)_minmax(0,0.52fr)_minmax(0,0.58fr)_minmax(0,1.05fr)_minmax(0,0.55fr)_minmax(0,0.5fr)_44px] gap-x-3 gap-y-0 px-4 py-3.5 items-start hover:bg-slate-50/60 transition-colors">
-                          <span className="text-[11px] font-medium text-slate-300 text-center tabular-nums pt-1">{rowNum}</span>
+                        <div className="grid w-full grid-cols-[28px_36px_minmax(0,1.15fr)_minmax(0,0.52fr)_minmax(0,0.58fr)_minmax(0,1.05fr)_minmax(0,0.55fr)_minmax(0,0.5fr)_44px] gap-x-3 gap-y-0 px-4 py-3.5 items-start hover:bg-slate-50/60 transition-colors">
+                          <div className="flex items-center justify-center pt-1">
+                            <input type="checkbox"
+                              checked={selected.has(group.id)}
+                              onChange={() => {
+                                const next = new Set(selected);
+                                if (next.has(group.id)) next.delete(group.id);
+                                else next.add(group.id);
+                                setSelected(next);
+                              }}
+                              className="h-3.5 w-3.5 rounded border-slate-300 accent-[#C8A96E]" />
+                          </div>
+                          <span className="text-[11px] font-medium text-slate-300 text-right tabular-nums pt-1">{rowNum}</span>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
                               {group.contactType === "organisation"
@@ -490,7 +505,7 @@ export default function ContactsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-1" />
                                 <DropdownMenuItem
-                                  onClick={() => setDeleteTarget({ id: group.id, name: group.companyName })}
+                                  onClick={() => setDeleteTarget({ id: group.id, name: group.companyName, xeroContactId: group.xeroContactId })}
                                   className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md text-red-500 focus:text-red-600 focus:bg-red-50"
                                 >
                                   <Trash2 className="h-4 w-4 shrink-0" />Delete
@@ -564,22 +579,26 @@ export default function ContactsPage() {
         />
 
         {/* Delete confirm */}
-        <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
           <AlertDialogContent>
             <div className="flex items-start justify-between gap-4">
               <AlertDialogHeader className="flex-1 space-y-2 text-left">
-                <AlertDialogTitle>Delete contact?</AlertDialogTitle>
+                <AlertDialogTitle>Delete contact permanently?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? This action cannot be undone.
+                  This will permanently delete &quot;{deleteTarget?.name}&quot;
+                  {deleteTarget?.xeroContactId ? " and archive the contact in Xero" : ""}.
+                  This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <button type="button" onClick={() => setDeleteTarget(null)} className="-m-1 p-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 shrink-0">
+              <button type="button" onClick={() => !deleting && setDeleteTarget(null)} className="-m-1 p-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 shrink-0">
                 <X className="h-4 w-4" />
               </button>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteTarget && handleDelete(deleteTarget.id)} className="bg-red-600 hover:bg-red-700">Yes, delete</AlertDialogAction>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700">
+                {deleting ? "Deleting…" : "Delete permanently"}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

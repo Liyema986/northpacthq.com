@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Users, Building2, User, X, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { validateRequiredEmail } from "@/lib/contact-validators";
@@ -22,6 +22,7 @@ const ACCENT = "#C8A96E";
 
 export function AddClientSheet({ open, onOpenChange, userId, onSuccess }: AddClientSheetProps) {
   const createClient = useMutation(api.clients.createClient);
+  const pushToXero = useAction(api.integrations.pushClientToXero);
 
   const [contactType, setContactType] = useState<"organisation" | "individual">("organisation");
   const [companyName, setCompanyName] = useState("");
@@ -77,6 +78,29 @@ export function AddClientSheet({ open, onOpenChange, userId, onSuccess }: AddCli
         }
         return;
       }
+
+      // Push to Xero in background — client is saved locally regardless
+      if (result.clientId) {
+        pushToXero({
+          userId,
+          clientId: result.clientId,
+          name,
+          email: email.trim() || undefined,
+          phone: phone.trim() || undefined,
+          contactType,
+        }).then((xeroResult) => {
+          if (xeroResult.success) {
+            toast.success("Synced to Xero");
+          } else if (xeroResult.error === "Xero not connected") {
+            // Silently skip — firm hasn't connected Xero
+          } else {
+            toast.error(`Xero sync: ${xeroResult.error}`);
+          }
+        }).catch(() => {
+          // Non-blocking — client is already saved
+        });
+      }
+
       toast.success(`Client "${name}" added`);
       handleClose(false);
       onSuccess?.();

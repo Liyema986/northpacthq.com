@@ -100,87 +100,117 @@ export const sendProposalEmail = action({
     const formatCurrencyEmail = (amount: number) =>
       new Intl.NumberFormat("en-ZA", { style: "currency", currency, minimumFractionDigits: 2 }).format(Number(amount) || 0);
 
-    const primaryColor = firm.brandColors?.primary || "#4F46E5";
-    const secondaryColor = firm.brandColors?.secondary || "#7C3AED";
+    // NorthPact system palette — consistent across all emails
+    const navyColor = "#243E63";
+    const goldColor = "#C8A96E";
+    const ctaColor = firm.brandColors?.primary || goldColor;
+    const firmLogoUrl = (firm as any).logoUrl as string | undefined;
 
-    // Create email HTML - professional, clean, balanced (ProposalViewPage-inspired)
+    // Create email HTML — Outlook-safe (no border-radius, no gradient, VML button)
     const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>New Proposal from ${firm.name}</title>
+  <title>Proposal from ${firm.name}</title>
+  <!--[if mso]><style>body,table,td{font-family:Arial,Helvetica,sans-serif !important;}</style><![endif]-->
 </head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f8fafc;color:#1e293b;line-height:1.6;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;background:#fff;">
-    <!-- Header: primary gradient, firm name, Proposal pill -->
-    <tr>
-      <td style="background:linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%);padding:36px 32px;border-radius:12px 12px 0 0;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-          <tr>
-            <td>
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.02em;">${firm.name}</h1>
-              <p style="margin:6px 0 0;font-size:14px;color:rgba(255,255,255,0.9);">${proposal.title}</p>
-            </td>
-            <td align="right" style="vertical-align:top;">
-              <span style="display:inline-block;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 14px;border-radius:9999px;font-size:11px;font-weight:600;letter-spacing:0.05em;">PROPOSAL</span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <!-- Content -->
-    <tr>
-      <td style="padding:32px;">
-        <p style="margin:0 0 16px;font-size:16px;color:#334155;">Dear ${proposal.clientName},</p>
-        <p style="margin:0 0 24px;font-size:15px;color:#475569;">Thank you for the opportunity to work with you. We're pleased to present our proposal for your review.</p>
+<body style="margin:0;padding:0;background-color:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <!-- Outer wrapper for background color -->
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f1f5f9" style="background-color:#f1f5f9;">
+    <tr><td align="center" style="padding:32px 16px;">
 
-        ${args.customMessage ? `
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border-left:4px solid ${primaryColor};border-radius:0 8px 8px 0;">
-          <tr><td style="padding:16px 20px;"><p style="margin:0;font-size:14px;color:#475569;"><strong>Personal message</strong></p><p style="margin:8px 0 0;font-size:14px;color:#64748b;">${args.customMessage.replace(/\n/g, "<br>")}</p></td></tr>
-        </table>
-        ` : ""}
+      <!-- Email card -->
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e2e8f0;">
 
-        <!-- Proposal info card -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
-          <tr><td style="padding:20px 24px;">
-            <p style="margin:0 0 16px;font-size:13px;font-weight:600;color:${primaryColor};letter-spacing:0.05em;text-transform:uppercase;">Proposal details</p>
+        <!-- Header bar — solid color, Outlook-safe -->
+        <tr>
+          <td bgcolor="${navyColor}" style="background-color:${navyColor};padding:28px 32px;">
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-              <tr><td style="padding:8px 0;border-bottom:1px solid #e2e8f0;"><span style="font-size:12px;color:#64748b;">Proposal number</span></td><td align="right" style="padding:8px 0;border-bottom:1px solid #e2e8f0;"><span style="font-size:14px;font-weight:600;color:#1e293b;">${proposal.proposalNumber}</span></td></tr>
-              <tr><td style="padding:8px 0;border-bottom:1px solid #e2e8f0;"><span style="font-size:12px;color:#64748b;">Date</span></td><td align="right" style="padding:8px 0;border-bottom:1px solid #e2e8f0;"><span style="font-size:14px;color:#1e293b;">${new Date(proposal.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span></td></tr>
-              ${proposal.validUntil ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#64748b;">Valid until</span></td><td align="right" style="padding:8px 0;"><span style="font-size:14px;color:#1e293b;">${new Date(proposal.validUntil).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span></td></tr>` : ""}
+              <tr>
+                ${firmLogoUrl ? `<td width="48" valign="middle" style="padding-right:14px;"><img src="${firmLogoUrl}" width="44" height="44" alt="${firm.name}" style="display:block;border:0;outline:none;width:44px;height:44px;object-fit:contain;" /></td>` : ""}
+                <td>
+                  <h1 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${firm.name}</h1>
+                  <p style="margin:6px 0 0;font-size:13px;color:${goldColor};font-family:Arial,Helvetica,sans-serif;">${proposal.title}</p>
+                </td>
+                <td align="right" valign="top" width="90">
+                  <table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:${navyColor};font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">PROPOSAL</td></tr></table>
+                </td>
+              </tr>
             </table>
-          </td></tr>
-        </table>
+          </td>
+        </tr>
 
-        <!-- Services summary -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
-          <tr><td style="padding:8px 0;border-bottom:1px solid #e2e8f0;"><span style="font-size:12px;color:#64748b;">Services</span></td><td align="right" style="padding:8px 0;border-bottom:1px solid #e2e8f0;"><span style="font-size:12px;color:#64748b;">Amount</span></td></tr>
-          ${proposal.services.map((s: any) => `<tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:14px;color:#334155;">${s.serviceName}</span> <span style="color:#94a3b8;">× ${s.quantity}</span></td><td align="right" style="padding:10px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:14px;color:#1e293b;">${formatCurrencyEmail(s.subtotal)}</span></td></tr>`).join("")}
-          <tr><td style="padding:14px 0 0;font-size:16px;font-weight:700;color:${primaryColor};">Total</td><td align="right" style="padding:14px 0 0;font-size:18px;font-weight:700;color:${primaryColor};">${formatCurrencyEmail(proposal.total)}</td></tr>
-        </table>
+        <!-- Gold accent strip -->
+        <tr><td bgcolor="${goldColor}" style="background-color:${goldColor};height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
 
-        <!-- CTA: View Proposal - prominent, centered -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 24px;">
-          <tr><td align="center">
-            <a href="${viewUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">View Proposal</a>
-          </td></tr>
-        </table>
+        <!-- Body content -->
+        <tr>
+          <td style="padding:32px 32px 24px;font-family:Arial,Helvetica,sans-serif;">
+            <p style="margin:0 0 8px;font-size:15px;color:#334155;">Dear ${proposal.clientName},</p>
+            <p style="margin:0 0 28px;font-size:14px;color:#64748b;line-height:1.6;">Thank you for the opportunity to work with you. We&rsquo;re pleased to present our proposal for your review.</p>
 
-        <p style="margin:0 0 24px;font-size:14px;color:#64748b;">Review the proposal online, accept or decline, and sign digitally. If you have any questions, please reach out.</p>
+            ${args.customMessage ? `
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 28px;">
+              <tr>
+                <td width="4" bgcolor="${goldColor}" style="background-color:${goldColor};"></td>
+                <td bgcolor="#f8fafc" style="background-color:#f8fafc;padding:14px 18px;">
+                  <p style="margin:0;font-size:12px;font-weight:700;color:#475569;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.04em;">Personal message</p>
+                  <p style="margin:8px 0 0;font-size:14px;color:#64748b;line-height:1.5;font-family:Arial,Helvetica,sans-serif;">${args.customMessage.replace(/\n/g, "<br>")}</p>
+                </td>
+              </tr>
+            </table>
+            ` : ""}
 
-        <p style="margin:0;font-size:15px;color:#334155;">Best regards,<br><strong>${user.name}</strong><br>${firm.name}</p>
-      </td>
-    </tr>
-    <!-- Footer -->
-    <tr>
-      <td style="padding:24px 32px;background:linear-gradient(135deg,#e0f2fe 0%,#f3e8ff 50%,#e0e7ff 100%);border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
-        <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">${firm.name}</p>
-        <p style="margin:4px 0 0;font-size:12px;color:#64748b;">Powered by ProposalPro</p>
-      </td>
-    </tr>
+            <!-- Proposal details card -->
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f8fafc" style="background-color:#f8fafc;border:1px solid #e2e8f0;margin:0 0 28px;">
+              <tr><td style="padding:18px 22px;">
+                <p style="margin:0 0 14px;font-size:11px;font-weight:700;color:${goldColor};letter-spacing:0.08em;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;">Proposal Details</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Proposal number</td><td align="right" style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${proposal.proposalNumber}</td></tr>
+                  <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Date</td><td align="right" style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${new Date(proposal.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</td></tr>
+                  ${proposal.validUntil ? `<tr><td style="padding:7px 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Valid until</td><td align="right" style="padding:7px 0;font-size:13px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${new Date(proposal.validUntil).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</td></tr>` : ""}
+                </table>
+              </td></tr>
+            </table>
+
+            <!-- Services table -->
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 28px;">
+              <tr><td style="padding:7px 0;border-bottom:1px solid #cbd5e1;font-size:11px;font-weight:700;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.04em;">Service</td><td align="right" style="padding:7px 0;border-bottom:1px solid #cbd5e1;font-size:11px;font-weight:700;color:#64748b;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.04em;">Amount</td></tr>
+              ${proposal.services.map((s: any) => `<tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#334155;font-family:Arial,Helvetica,sans-serif;">${s.serviceName} <span style="color:#94a3b8;">&times; ${s.quantity}</span></td><td align="right" style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${formatCurrencyEmail(s.subtotal)}</td></tr>`).join("")}
+              <tr><td style="padding:14px 0 0;font-size:15px;font-weight:700;color:${navyColor};font-family:Arial,Helvetica,sans-serif;">Total</td><td align="right" style="padding:14px 0 0;font-size:17px;font-weight:700;color:${goldColor};font-family:Arial,Helvetica,sans-serif;">${formatCurrencyEmail(proposal.total)}</td></tr>
+            </table>
+
+            <!-- CTA button — gold with navy text, Outlook VML fallback -->
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:8px 0 28px;">
+              <tr><td align="center">
+                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${goldColor}" stroke="f"><w:anchorlock/><center style="color:${navyColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View Proposal</center></v:roundrect><![endif]-->
+                <!--[if !mso]><!--><a href="${viewUrl}" style="display:inline-block;background-color:${goldColor};color:${navyColor};padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">View Proposal</a><!--<![endif]-->
+              </td></tr>
+            </table>
+
+            <p style="margin:0 0 28px;font-size:13px;color:#94a3b8;text-align:center;font-family:Arial,Helvetica,sans-serif;">Review the proposal online, accept or decline, and sign digitally.<br>If you have any questions, please reach out.</p>
+
+            <p style="margin:0;font-size:14px;color:#334155;font-family:Arial,Helvetica,sans-serif;">Best regards,<br><strong>${user.name}</strong><br><span style="color:#64748b;">${firm.name}</span></p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#f8fafc" style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><p style="margin:0;font-size:12px;font-weight:700;color:#334155;font-family:Arial,Helvetica,sans-serif;">${firm.name}</p><p style="margin:3px 0 0;font-size:11px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">Powered by NorthPact</p></td>
+                <td align="right" valign="middle"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};width:28px;height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr></table></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
   </table>
   <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="">
 </body>
@@ -406,61 +436,59 @@ export const processScheduledEmail = internalAction({
         minimumFractionDigits: 2,
       }).format(Number(amount) || 0);
 
-    const primaryColor = firm.brandColors?.primary || "#4F46E5";
-    const secondaryColor = firm.brandColors?.secondary || "#7C3AED";
+    const navyColor = "#243E63";
+    const goldColor = "#C8A96E";
+    const firmLogoUrl = (firm as any).logoUrl as string | undefined;
 
     const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>New Proposal from ${firm.name}</title>
+  <title>Proposal from ${firm.name}</title>
+  <!--[if mso]><style>body,table,td{font-family:Arial,Helvetica,sans-serif !important;}</style><![endif]-->
 </head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f8fafc;color:#1e293b;line-height:1.6;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;background:#fff;">
-    <tr>
-      <td style="background:linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%);padding:36px 32px;border-radius:12px 12px 0 0;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-          <tr>
-            <td>
-              <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;">${firm.name}</h1>
-              <p style="margin:6px 0 0;font-size:14px;color:rgba(255,255,255,0.9);">${proposal.title}</p>
-            </td>
-            <td align="right" style="vertical-align:top;">
-              <span style="display:inline-block;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 14px;border-radius:9999px;font-size:11px;font-weight:600;letter-spacing:0.05em;">PROPOSAL</span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:32px;">
-        <p style="margin:0 0 16px;font-size:16px;color:#334155;">Dear ${proposal.clientName},</p>
-        <p style="margin:0 0 24px;font-size:15px;color:#475569;">Thank you for the opportunity to work with you. We're pleased to present our proposal for your review.</p>
-        ${args.customMessage ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border-left:4px solid ${primaryColor};border-radius:0 8px 8px 0;"><tr><td style="padding:16px 20px;"><p style="margin:0;font-size:14px;color:#475569;"><strong>Personal message</strong></p><p style="margin:8px 0 0;font-size:14px;color:#64748b;">${args.customMessage.replace(/\n/g, "<br>")}</p></td></tr></table>` : ""}
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
-          <tr><td style="padding:20px 24px;">
-            <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#1e293b;">${proposal.proposalNumber}</p>
-            <p style="margin:0;font-size:14px;color:#64748b;">Services: ${proposal.services?.map((s: any) => `${s.serviceName} × ${s.quantity}`).join(", ")}</p>
-            <p style="margin:12px 0 0;font-size:16px;font-weight:700;color:${primaryColor};">Total: ${formatCurrencyEmail(proposal.total)}</p>
-          </td></tr>
-        </table>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 24px;">
-          <tr><td align="center">
-            <a href="${viewUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">View Proposal</a>
-          </td></tr>
-        </table>
-        <p style="margin:0;font-size:15px;color:#334155;">Best regards,<br><strong>${user.name}</strong><br>${firm.name}</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:24px 32px;background:linear-gradient(135deg,#e0f2fe 0%,#f3e8ff 50%,#e0e7ff 100%);border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
-        <p style="margin:0;font-size:13px;font-weight:600;color:#334155;">${firm.name}</p>
-        <p style="margin:4px 0 0;font-size:12px;color:#64748b;">Powered by ProposalPro</p>
-      </td>
-    </tr>
+<body style="margin:0;padding:0;background-color:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f1f5f9" style="background-color:#f1f5f9;">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e2e8f0;">
+        <tr><td bgcolor="${navyColor}" style="background-color:${navyColor};padding:28px 32px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+            ${firmLogoUrl ? `<td width="48" valign="middle" style="padding-right:14px;"><img src="${firmLogoUrl}" width="44" height="44" alt="${firm.name}" style="display:block;border:0;outline:none;width:44px;height:44px;object-fit:contain;" /></td>` : ""}
+            <td><h1 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${firm.name}</h1><p style="margin:6px 0 0;font-size:13px;color:${goldColor};font-family:Arial,Helvetica,sans-serif;">${proposal.title}</p></td>
+            <td align="right" valign="top" width="90"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:${navyColor};font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">PROPOSAL</td></tr></table></td>
+          </tr></table>
+        </td></tr>
+        <tr><td bgcolor="${goldColor}" style="background-color:${goldColor};height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
+        <tr><td style="padding:32px 32px 24px;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 8px;font-size:15px;color:#334155;">Dear ${proposal.clientName},</p>
+          <p style="margin:0 0 28px;font-size:14px;color:#64748b;line-height:1.6;">Thank you for the opportunity to work with you. We&rsquo;re pleased to present our proposal for your review.</p>
+          ${args.customMessage ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 28px;"><tr><td width="4" bgcolor="${goldColor}" style="background-color:${goldColor};"></td><td bgcolor="#f8fafc" style="background-color:#f8fafc;padding:14px 18px;"><p style="margin:0;font-size:12px;font-weight:700;color:#475569;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.04em;">Personal message</p><p style="margin:8px 0 0;font-size:14px;color:#64748b;line-height:1.5;font-family:Arial,Helvetica,sans-serif;">${args.customMessage.replace(/\n/g, "<br>")}</p></td></tr></table>` : ""}
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f8fafc" style="background-color:#f8fafc;border:1px solid #e2e8f0;margin:0 0 28px;">
+            <tr><td style="padding:18px 22px;">
+              <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${proposal.proposalNumber}</p>
+              <p style="margin:0;font-size:13px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Services: ${proposal.services?.map((s: any) => `${s.serviceName} &times; ${s.quantity}`).join(", ")}</p>
+              <p style="margin:12px 0 0;font-size:16px;font-weight:700;color:${goldColor};font-family:Arial,Helvetica,sans-serif;">Total: ${formatCurrencyEmail(proposal.total)}</p>
+            </td></tr>
+          </table>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:8px 0 28px;">
+            <tr><td align="center">
+              <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${goldColor}" stroke="f"><w:anchorlock/><center style="color:${navyColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View Proposal</center></v:roundrect><![endif]-->
+              <!--[if !mso]><!--><a href="${viewUrl}" style="display:inline-block;background-color:${goldColor};color:${navyColor};padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">View Proposal</a><!--<![endif]-->
+            </td></tr>
+          </table>
+          <p style="margin:0;font-size:14px;color:#334155;font-family:Arial,Helvetica,sans-serif;">Best regards,<br><strong>${user.name}</strong><br><span style="color:#64748b;">${firm.name}</span></p>
+        </td></tr>
+        <tr><td bgcolor="#f8fafc" style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+            <td><p style="margin:0;font-size:12px;font-weight:700;color:#334155;font-family:Arial,Helvetica,sans-serif;">${firm.name}</p><p style="margin:3px 0 0;font-size:11px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">Powered by NorthPact</p></td>
+            <td align="right" valign="middle"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};width:28px;height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr></table></td>
+          </tr></table>
+        </td></tr>
+      </table>
+    </td></tr>
   </table>
   <img src="${trackingPixelUrl}" width="1" height="1" style="display:none;" alt="">
 </body>

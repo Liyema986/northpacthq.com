@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -107,6 +108,24 @@ export function ServiceConfigDrawer({
 
   const usesMinutes = pricingMethodUsesMinutesPerUnit(item.pricingMethod);
   const usesHourly  = pricingMethodUsesHourlyQuantity(item.pricingMethod);
+
+  function handleDone() {
+    if (!item) return;
+    const errors: string[] = [];
+
+    if (!item.name.trim()) {
+      errors.push("Service name cannot be empty");
+    }
+    if (!usesHourly && item.unitPrice === 0 && !item.isOptional) {
+      errors.push(`"${item.name || "This service"}" has a R0.00 price — set a price before continuing`);
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((err) => toast.error(err));
+      return;
+    }
+    onClose();
+  }
 
   const toggleEntity = (entityId: string) => {
     const current = item.entityAssignmentMode === "all_entities"
@@ -550,7 +569,7 @@ export function ServiceConfigDrawer({
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-2">
                   <Label className="text-[13px]">Delivery frequency</Label>
                   <Select
                     value={item.frequency ?? "monthly"}
@@ -620,7 +639,7 @@ export function ServiceConfigDrawer({
             </button>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleDone}
               className="h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90 flex items-center gap-1.5"
               style={{ background: ACCENT }}
             >

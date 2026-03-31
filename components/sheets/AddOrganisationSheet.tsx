@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, X, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import {
@@ -54,6 +54,7 @@ function combinePhone(phone: string, mobile: string): string | undefined {
 
 export function AddOrganisationSheet({ open, onOpenChange, userId, onSuccess }: AddOrganisationSheetProps) {
   const createClient = useMutation(api.clients.createClient);
+  const pushToXero = useAction(api.integrations.pushClientToXero);
 
   const [companyName, setCompanyName] = useState("");
   const [contactName, setContactName] = useState("");
@@ -119,6 +120,22 @@ export function AddOrganisationSheet({ open, onOpenChange, userId, onSuccess }: 
         }
         return;
       }
+
+      // Push to Xero in background
+      if (result.clientId) {
+        pushToXero({
+          userId,
+          clientId: result.clientId,
+          name: companyName.trim(),
+          email: email.trim() || undefined,
+          phone: combinePhone(phone, mobile),
+          contactType: "organisation",
+        }).then((xeroResult) => {
+          if (xeroResult.success) toast.success("Synced to Xero");
+          else if (xeroResult.error !== "Xero not connected") toast.error(`Xero sync: ${xeroResult.error}`);
+        }).catch(() => { /* non-blocking */ });
+      }
+
       toast.success(`Organisation "${companyName.trim()}" saved`);
       handleClose();
       onSuccess?.();
