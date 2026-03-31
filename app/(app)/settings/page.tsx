@@ -33,6 +33,10 @@ import {
 import { toast } from "sonner";
 import { getInitials, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ─── Subscription plans ───────────────────────────────────────────────────────
 
@@ -256,6 +260,7 @@ function SettingsPageInner() {
   const [autoExpire, setAutoExpire] = useState(true);
   const [requireSignature, setRequireSignature] = useState(false);
   const [savingWorkflow, setSavingWorkflow] = useState(false);
+  const [removeConfirmMember, setRemoveConfirmMember] = useState<{ id: string; name: string } | null>(null);
 
   // Sync firm settings from Convex when loaded
   useEffect(() => {
@@ -1305,18 +1310,7 @@ function SettingsPageInner() {
                                     {canRemove && (
                                       <DropdownMenuItem
                                         className="text-[13px] text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer flex items-center gap-2"
-                                        onClick={async () => {
-                                          if (!userId) return;
-                                          try {
-                                            await removeUserMut({
-                                              adminId: userId,
-                                              targetUserId: m._id as Id<"users">,
-                                            });
-                                            toast.success(`${m.name} removed`);
-                                          } catch {
-                                            toast.error("Failed to remove user");
-                                          }
-                                        }}
+                                        onClick={() => setRemoveConfirmMember({ id: m._id, name: m.name })}
                                       >
                                         <Trash2 className="h-3.5 w-3.5 shrink-0" />
                                         Remove from workspace
@@ -1620,8 +1614,11 @@ function SettingsPageInner() {
 
             {/* Plan cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              {PRICING_PLANS.map((plan) => {
+              {PRICING_PLANS.map((plan, planIdx) => {
                 const isCurrent = currentPlan === plan.id;
+                const currentIdx = PRICING_PLANS.findIndex(p => p.id === currentPlan);
+                const isDowngrade = planIdx < currentIdx;
+                const isUpgrade = planIdx > currentIdx;
                 const isAnnual = billingPeriod === "annual";
                 const priceUsd = isAnnual && plan.priceAnnualTotal > 0 ? plan.priceAnnualTotal : plan.priceMonthly;
                 const priceUnit = isAnnual && plan.priceAnnualTotal > 0 ? "per year" : "per month";
@@ -1706,11 +1703,15 @@ function SettingsPageInner() {
                       }}
                       className={cn(
                         "group w-full h-[48px] rounded-full font-semibold text-[14px] mt-auto transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2",
-                        plan.highlight
-                          ? "bg-white text-north-navy hover:opacity-90"
-                          : isCurrent
-                            ? "bg-slate-100 text-slate-500 cursor-default"
-                            : "bg-white border border-slate-200 text-slate-900 hover:border-north-gold hover:text-north-gold"
+                        isCurrent
+                          ? plan.highlight
+                            ? "bg-white/20 text-white/60 cursor-default"
+                            : "bg-slate-100 text-slate-500 cursor-default"
+                          : isDowngrade
+                            ? "bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                            : plan.highlight
+                              ? "bg-white text-north-navy hover:opacity-90"
+                              : "bg-white border border-slate-200 text-slate-900 hover:border-north-gold hover:text-north-gold"
                       )}
                     >
                       {savingPlan === plan.id ? (
@@ -1718,17 +1719,17 @@ function SettingsPageInner() {
                       ) : (
                         <>
                           <span>
-                            {isCurrent && (plan.id === "professional" || plan.id === "enterprise")
-                              ? "Manage subscription"
-                              : isCurrent
-                                ? "Current plan"
+                            {isCurrent
+                              ? "Current plan"
+                              : isDowngrade
+                                ? "Downgrade"
                                 : plan.id === "starter"
                                   ? "Get started free"
                                   : plan.id === "professional"
-                                    ? "Start Pro"
-                                    : "Start Business"}
+                                    ? "Upgrade to Pro"
+                                    : "Upgrade to Business"}
                           </span>
-                          {!(isCurrent && plan.id === "starter") && (
+                          {!isCurrent && (
                             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 shrink-0 opacity-90" />
                           )}
                         </>
@@ -1969,6 +1970,36 @@ function SettingsPageInner() {
         )}
 
       </div>
+
+      <AlertDialog open={!!removeConfirmMember} onOpenChange={(o) => !o && setRemoveConfirmMember(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {removeConfirmMember?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              They will lose access to this workspace immediately. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={async () => {
+                if (!userId || !removeConfirmMember) return;
+                try {
+                  await removeUserMut({ adminId: userId, targetUserId: removeConfirmMember.id as Id<"users"> });
+                  toast.success(`${removeConfirmMember.name} removed`);
+                } catch {
+                  toast.error("Failed to remove user");
+                } finally {
+                  setRemoveConfirmMember(null);
+                }
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
