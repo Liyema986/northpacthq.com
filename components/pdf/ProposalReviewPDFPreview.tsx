@@ -819,8 +819,8 @@ export function ProposalReviewPDFPreview({
           onClick={handleDownload}
           disabled={!pdfDataUrl || isGenerating}
           size="sm"
-          className="text-white shadow-md h-9 px-4 text-[13px] font-medium rounded-lg"
-          style={{ backgroundColor: "#C8A96E", color: "#243E63" }}
+          className="shadow-md h-9 px-4 text-[13px] font-medium rounded-lg"
+          style={{ backgroundColor: "#243E63", color: "#ffffff" }}
         >
           {isGenerating ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />

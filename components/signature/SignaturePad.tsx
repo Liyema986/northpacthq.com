@@ -99,18 +99,53 @@ export function SignaturePad({ onSignatureChange, disabled, proposalMode, allowU
     handleClear();
   };
 
-  // Proposal mode: compact pad with optional Draw | Upload tabs
-  if (proposalMode) {
-    const activeTab = uploadedImageUrl ? "upload" : hasDrawn ? "draw" : proposalTab;
+  // Helpers to clear only one mode
+  const clearDraw = () => {
+    if (signatureRef.current) { signatureRef.current.clear(); setHasDrawn(false); }
+    onSignatureChange(null);
+  };
+  const clearUpload = () => {
+    setUploadedImageUrl(null); setUploadError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    onSignatureChange(null);
+  };
 
+  // When drawing starts, auto-clear any uploaded image
+  const handleDrawEndWithReplace = () => {
+    if (signatureRef.current && !signatureRef.current.isEmpty()) {
+      if (uploadedImageUrl) clearUpload();
+      setHasDrawn(true);
+      const dataUrl = signatureRef.current.toDataURL("image/png");
+      onSignatureChange(dataUrl);
+    }
+  };
+
+  // When uploading, auto-clear any drawn signature
+  const handleFileSelectWithReplace = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_SIGNATURE_SIZE_BYTES) { setUploadError("Image must be 2MB or smaller"); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (hasDrawn) clearDraw();
+      const dataUrl = reader.result as string;
+      setUploadedImageUrl(dataUrl);
+      onSignatureChange(dataUrl);
+    };
+    reader.onerror = () => setUploadError("Failed to read file");
+    reader.readAsDataURL(file);
+  };
+
+  // Proposal mode: compact pad with Draw | Upload tabs
+  if (proposalMode) {
     return (
       <div className="space-y-3">
         {allowUpload && (
           <Tabs
-            value={activeTab}
+            value={proposalTab}
             onValueChange={(v) => {
-              const mode = v as "draw" | "upload";
-              setProposalTab(mode);
+              setProposalTab(v as "draw" | "upload");
               setUploadError(null);
             }}
           >
@@ -118,88 +153,95 @@ export function SignaturePad({ onSignatureChange, disabled, proposalMode, allowU
               <TabsTrigger value="draw" disabled={disabled}>
                 <Pen className="h-3.5 w-3.5 mr-1.5" />
                 Draw
+                {hasDrawn && <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />}
               </TabsTrigger>
               <TabsTrigger value="upload" disabled={disabled}>
                 <Upload className="h-3.5 w-3.5 mr-1.5" />
                 Upload
+                {uploadedImageUrl && <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500" />}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="draw" className="mt-3">
-              <div
-                className={cn(
-                  "relative w-full border-2 border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 shadow-inner overflow-hidden",
-                  disabled && "opacity-50 pointer-events-none"
-                )}
-              >
-                <SignatureCanvas
-                  ref={signatureRef}
-                  canvasProps={{
-                    className: "w-full h-32 bg-transparent relative z-10",
-                    style: { width: "100%", height: "128px", cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23243E63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E\") 2 22, crosshair" },
-                  }}
-                  onEnd={handleDrawEnd}
-                  penColor="#1e293b"
-                  backgroundColor="rgba(255, 255, 255, 0)"
-                  minWidth={1}
-                  maxWidth={4}
-                  velocityFilterWeight={0.4}
-                  dotSize={2}
-                />
-                {!hasDrawn && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                    <span className="text-slate-400 text-sm font-medium">Sign here</span>
-                  </div>
-                )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClear}
-                  className="absolute top-2 right-2 h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full z-20"
-                  title="Clear signature"
-                  disabled={disabled}
+              {uploadedImageUrl ? (
+                <div className="border-2 border-dashed border-amber-200 rounded-lg bg-amber-50/50 dark:bg-amber-900/10 p-6 text-center space-y-3">
+                  <p className="text-[13px] text-amber-700 dark:text-amber-400">You have an uploaded signature. Drawing will replace it.</p>
+                  <Button type="button" size="sm" variant="outline"
+                    className="text-[12px] border-amber-300 text-amber-700 hover:bg-amber-100"
+                    onClick={() => { clearUpload(); }}
+                    disabled={disabled}
+                  >
+                    Clear upload &amp; draw instead
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    "relative w-full border-2 border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 shadow-inner overflow-hidden",
+                    disabled && "opacity-50 pointer-events-none"
+                  )}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                  <SignatureCanvas
+                    ref={signatureRef}
+                    canvasProps={{
+                      className: "w-full h-32 bg-transparent relative z-10",
+                      style: { width: "100%", height: "128px", cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23243E63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E\") 2 22, crosshair" },
+                    }}
+                    onEnd={handleDrawEndWithReplace}
+                    penColor="#1e293b"
+                    backgroundColor="rgba(255, 255, 255, 0)"
+                    minWidth={1}
+                    maxWidth={4}
+                    velocityFilterWeight={0.4}
+                    dotSize={2}
+                  />
+                  {!hasDrawn && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                      <span className="text-slate-400 text-sm font-medium">Sign here</span>
+                    </div>
+                  )}
+                  {hasDrawn && (
+                    <Button
+                      type="button" variant="ghost" size="sm"
+                      onClick={() => { clearDraw(); }}
+                      className="absolute top-2 right-2 h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full z-20"
+                      title="Clear signature" disabled={disabled}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="upload" className="mt-3 space-y-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={ACCEPTED_SIGNATURE_TYPES}
-                className="hidden"
-                onChange={handleFileSelect}
-                disabled={disabled}
-              />
-              {uploadedImageUrl ? (
+              <input ref={fileInputRef} type="file" accept={ACCEPTED_SIGNATURE_TYPES} className="hidden"
+                onChange={handleFileSelectWithReplace} disabled={disabled} />
+              {hasDrawn && !uploadedImageUrl ? (
+                <div className="border-2 border-dashed border-amber-200 rounded-lg bg-amber-50/50 dark:bg-amber-900/10 p-6 text-center space-y-3">
+                  <p className="text-[13px] text-amber-700 dark:text-amber-400">You have a drawn signature. Uploading will replace it.</p>
+                  <Button type="button" size="sm" variant="outline"
+                    className="text-[12px] border-amber-300 text-amber-700 hover:bg-amber-100"
+                    onClick={() => { clearDraw(); fileInputRef.current?.click(); }}
+                    disabled={disabled}
+                  >
+                    Clear drawing &amp; upload instead
+                  </Button>
+                </div>
+              ) : uploadedImageUrl ? (
                 <div className="relative border-2 border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 p-4 min-h-[128px] flex items-center justify-center">
-                  <img
-                    src={uploadedImageUrl}
-                    alt="Your signature"
-                    className="max-h-28 max-w-full object-contain"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
+                  <img src={uploadedImageUrl} alt="Your signature" className="max-h-28 max-w-full object-contain" />
+                  <Button type="button" variant="ghost" size="sm"
                     onClick={handleClear}
                     className="absolute top-2 right-2 h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
-                    title="Remove signature"
-                    disabled={disabled}
+                    title="Remove signature" disabled={disabled}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
+                  <Button type="button" variant="outline" size="sm"
                     className="w-full h-32 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary/50 dark:hover:border-primary/50 rounded-lg"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={disabled}
+                    onClick={() => fileInputRef.current?.click()} disabled={disabled}
                   >
                     <span className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
                       <Upload className="h-8 w-8" />
@@ -207,11 +249,7 @@ export function SignaturePad({ onSignatureChange, disabled, proposalMode, allowU
                       <span className="text-xs">Max 2MB</span>
                     </span>
                   </Button>
-                  {uploadError && (
-                    <p className="text-xs text-red-500 dark:text-red-400" role="alert">
-                      {uploadError}
-                    </p>
-                  )}
+                  {uploadError && <p className="text-xs text-red-500 dark:text-red-400" role="alert">{uploadError}</p>}
                 </>
               )}
             </TabsContent>

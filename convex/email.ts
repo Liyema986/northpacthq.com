@@ -133,10 +133,10 @@ export const sendProposalEmail = action({
                 ${firmLogoUrl ? `<td width="48" valign="middle" style="padding-right:14px;"><img src="${firmLogoUrl}" width="44" height="44" alt="${firm.name}" style="display:block;border:0;outline:none;width:44px;height:44px;object-fit:contain;" /></td>` : ""}
                 <td>
                   <h1 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${firm.name}</h1>
-                  <p style="margin:6px 0 0;font-size:13px;color:${goldColor};font-family:Arial,Helvetica,sans-serif;">${proposal.title}</p>
+                  <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.75);font-family:Arial,Helvetica,sans-serif;">${proposal.title}</p>
                 </td>
                 <td align="right" valign="top" width="90">
-                  <table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:${navyColor};font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">PROPOSAL</td></tr></table>
+                  <table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">PROPOSAL</td></tr></table>
                 </td>
               </tr>
             </table>
@@ -186,8 +186,8 @@ export const sendProposalEmail = action({
             <!-- CTA button — gold with navy text, Outlook VML fallback -->
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:8px 0 28px;">
               <tr><td align="center">
-                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${goldColor}" stroke="f"><w:anchorlock/><center style="color:${navyColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View Proposal</center></v:roundrect><![endif]-->
-                <!--[if !mso]><!--><a href="${viewUrl}" style="display:inline-block;background-color:${goldColor};color:${navyColor};padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">View Proposal</a><!--<![endif]-->
+                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${navyColor}" stroke="f"><w:anchorlock/><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View Proposal</center></v:roundrect><![endif]-->
+                <!--[if !mso]><!--><a href="${viewUrl}" style="display:inline-block;background-color:${navyColor};color:#ffffff;padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">View Proposal</a><!--<![endif]-->
               </td></tr>
             </table>
 
@@ -457,8 +457,8 @@ export const processScheduledEmail = internalAction({
         <tr><td bgcolor="${navyColor}" style="background-color:${navyColor};padding:28px 32px;">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
             ${firmLogoUrl ? `<td width="48" valign="middle" style="padding-right:14px;"><img src="${firmLogoUrl}" width="44" height="44" alt="${firm.name}" style="display:block;border:0;outline:none;width:44px;height:44px;object-fit:contain;" /></td>` : ""}
-            <td><h1 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${firm.name}</h1><p style="margin:6px 0 0;font-size:13px;color:${goldColor};font-family:Arial,Helvetica,sans-serif;">${proposal.title}</p></td>
-            <td align="right" valign="top" width="90"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:${navyColor};font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">PROPOSAL</td></tr></table></td>
+            <td><h1 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${firm.name}</h1><p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.75);font-family:Arial,Helvetica,sans-serif;">${proposal.title}</p></td>
+            <td align="right" valign="top" width="90"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">PROPOSAL</td></tr></table></td>
           </tr></table>
         </td></tr>
         <tr><td bgcolor="${goldColor}" style="background-color:${goldColor};height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
@@ -475,8 +475,8 @@ export const processScheduledEmail = internalAction({
           </table>
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:8px 0 28px;">
             <tr><td align="center">
-              <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${goldColor}" stroke="f"><w:anchorlock/><center style="color:${navyColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View Proposal</center></v:roundrect><![endif]-->
-              <!--[if !mso]><!--><a href="${viewUrl}" style="display:inline-block;background-color:${goldColor};color:${navyColor};padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">View Proposal</a><!--<![endif]-->
+              <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${viewUrl}" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${navyColor}" stroke="f"><w:anchorlock/><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">View Proposal</center></v:roundrect><![endif]-->
+              <!--[if !mso]><!--><a href="${viewUrl}" style="display:inline-block;background-color:${navyColor};color:#ffffff;padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">View Proposal</a><!--<![endif]-->
             </td></tr>
           </table>
           <p style="margin:0;font-size:14px;color:#334155;font-family:Arial,Helvetica,sans-serif;">Best regards,<br><strong>${user.name}</strong><br><span style="color:#64748b;">${firm.name}</span></p>

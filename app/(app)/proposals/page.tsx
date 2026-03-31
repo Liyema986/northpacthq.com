@@ -85,7 +85,7 @@ function getSigBadge(s: string) {
   return "bg-slate-50 border border-slate-200 text-slate-500";
 }
 
-const GRID = "grid-cols-[36px_1fr_120px_130px_72px_72px_100px_96px_130px_110px_44px]";
+const GRID = "grid-cols-[28px_36px_1fr_120px_130px_72px_72px_100px_96px_130px_110px_44px]";
 const ITEMS_PER_PAGE = 10;
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -106,9 +106,10 @@ export default function ProposalsPage() {
   const [page,            setPage]            = useState(1);
   const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set());
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Reset page + collapse rows on filter/search change
-  useMemo(() => { setPage(1); setExpandedClients(new Set()); }, [statusFilter, search]);
+  useMemo(() => { setPage(1); setExpandedClients(new Set()); setSelected(new Set()); }, [statusFilter, search]);
 
   const proposalList = dedupeById(proposals ?? []);
 
@@ -327,8 +328,19 @@ export default function ProposalsPage() {
           <div className="overflow-x-auto">
             <div className="min-w-[1100px]">
               <div className={cn("grid px-4 py-2.5 border-b border-slate-50 gap-3 bg-slate-50/60", GRID)}>
+                <div className="flex items-center justify-center">
+                  <input type="checkbox"
+                    checked={pagedGroups.length > 0 && pagedGroups.every(g => selected.has(g[0]._id))}
+                    onChange={(e) => {
+                      const next = new Set(selected);
+                      if (e.target.checked) pagedGroups.forEach(g => next.add(g[0]._id));
+                      else pagedGroups.forEach(g => next.delete(g[0]._id));
+                      setSelected(next);
+                    }}
+                    className="h-3.5 w-3.5 rounded border-slate-300 accent-[#C8A96E]" />
+                </div>
                 {["#","Client / Proposal","Number","Value","Status","Email","Signatures","Start date","Created by","Created","Actions"].map((h, i) => (
-                  <span key={i} className="text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap">{h}</span>
+                  <span key={i} className={cn("text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap", h === "#" && "text-right")}>{h}</span>
                 ))}
               </div>
 
@@ -336,7 +348,8 @@ export default function ProposalsPage() {
                 <div className="divide-y divide-slate-50">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className={cn("grid px-4 py-4 gap-3 items-center", GRID)}>
-                      <Skeleton className="h-3 w-4 mx-auto" />
+                      <Skeleton className="h-3.5 w-3.5 mx-auto rounded" />
+                      <Skeleton className="h-3 w-4 ml-auto" />
                       <Skeleton className="h-9 w-44" />
                       <Skeleton className="h-3 w-12" />
                       <Skeleton className="h-9 w-28" />
@@ -398,7 +411,18 @@ export default function ProposalsPage() {
                       return (
                         <Fragment key={`grp-${(page - 1) * ITEMS_PER_PAGE + idx}`}>
                           <div className={cn("grid px-4 py-3.5 gap-3 items-start hover:bg-slate-50/60 transition-colors", GRID)}>
-                            <span className="text-[11px] font-medium text-slate-300 text-center tabular-nums pt-1">{rowNum}</span>
+                            <div className="flex items-center justify-center pt-1">
+                              <input type="checkbox"
+                                checked={selected.has(latest._id)}
+                                onChange={() => {
+                                  const next = new Set(selected);
+                                  if (next.has(latest._id)) next.delete(latest._id);
+                                  else next.add(latest._id);
+                                  setSelected(next);
+                                }}
+                                className="h-3.5 w-3.5 rounded border-slate-300 accent-[#C8A96E]" />
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-300 text-right tabular-nums pt-1">{rowNum}</span>
 
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
@@ -409,9 +433,9 @@ export default function ProposalsPage() {
                               </div>
                               <p className="text-[11px] text-slate-500 truncate mt-0.5">{latest.title}</p>
                               {older.length > 0 && (
-                                <button onClick={toggleExpand} className="mt-1 text-[10px] font-semibold hover:underline flex items-center gap-1" style={{ color: "#C8A96E" }}>
+                                <button onClick={toggleExpand} className="mt-0.5 text-[10px] font-semibold hover:underline inline-flex items-center gap-1" style={{ color: "#C8A96E" }}>
                                   <History className="h-3 w-3 shrink-0" />
-                                  {isOpen ? "Hide proposal history" : `Show proposal history (${older.length} older proposal${older.length !== 1 ? "s" : ""})`}
+                                  {isOpen ? "Hide history" : `+${older.length} older`}
                                 </button>
                               )}
                             </div>
@@ -462,6 +486,7 @@ export default function ProposalsPage() {
                             const hSigBdg   = getSigBadge(hSig);
                             return (
                               <div key={`${hp._id}-h${oi}-g${idx}`} className={cn("grid px-4 py-3 gap-3 items-start bg-slate-50/70 border-t border-dashed border-slate-100", GRID)}>
+                                <span />
                                 <span />
                                 <div className="min-w-0 pl-4 border-l-2 border-slate-200">
                                   <Link href={`/proposals/${hp._id}`} className="text-[11px] font-semibold text-blue-600 hover:underline truncate block">{hp.proposalNumber}</Link>

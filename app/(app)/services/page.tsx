@@ -106,7 +106,7 @@ const PRICING_METHOD_LABELS: Record<string, string> = {
   quantity_x_unit: "Qty × Unit", manual_override: "Manual Override",
 };
 
-const SECTIONS_PER_PAGE = 4;
+const SECTIONS_PER_PAGE = 12;
 
 type SortOption = "custom" | "name_asc" | "name_desc" | "items_desc" | "items_asc" | "price_desc" | "price_asc";
 const SORT_LABELS: Record<SortOption, string> = {
@@ -609,8 +609,18 @@ export default function ServicesPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {paginatedSections.map((sec) => {
+                {(() => {
+                  // Build rows of 3 cards, inserting expanded services after the row containing the viewed card
+                  const rows: typeof paginatedSections[] = [];
+                  for (let i = 0; i < paginatedSections.length; i += 3) {
+                    rows.push(paginatedSections.slice(i, i + 3));
+                  }
+                  return rows.map((row, rowIdx) => {
+                    const rowHasViewed = viewedSectionId && row.some(s => s._id === viewedSectionId);
+                    return (
+                      <div key={rowIdx}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
+                          {row.map((sec) => {
                     const catColor = sectionAccent(sec);
                     const isViewed = viewedSectionId === sec._id;
                     const items = sec.lineItems;
@@ -746,7 +756,93 @@ export default function ServicesPage() {
                       </div>
                     );
                   })}
-                </div>
+                        </div>
+                        {rowHasViewed && viewedSection && sortedViewedItems.length > 0 && (
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: sectionAccent(viewedSection) }} />
+                                <h3 className="text-[13px] font-semibold text-slate-700">{viewedSection.name}</h3>
+                                <span className="text-[11px] text-slate-400">({sortedViewedItems.length})</span>
+                              </div>
+                              <button
+                                onClick={() => openAddForSection(viewedSection._id, viewedSection.name)}
+                                className="flex items-center gap-1 h-7 px-3 rounded-lg text-[11px] font-semibold text-white transition-opacity hover:opacity-90"
+                                style={{ background: sectionAccent(viewedSection) }}
+                              >
+                                <Plus className="h-3 w-3" />Add Service
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {sortedViewedItems.map((service) => {
+                                const price = priceOfItem(service);
+                                const pmLabel = PRICING_METHOD_LABELS[service.pricingType] ?? service.pricingType;
+                                const inactive = !service.isActive;
+                                return (
+                                  <div
+                                    key={service._id}
+                                    className={cn(
+                                      "group/svc bg-white border rounded-xl p-4 hover:border-slate-200 transition-colors",
+                                      inactive ? "border-slate-100 opacity-60" : "border-slate-100"
+                                    )}
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <StatusTraffic status={service.status} />
+                                          <p className="text-[14px] font-semibold text-slate-900 truncate">{service.name}</p>
+                                          {inactive && (
+                                            <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500">Inactive</span>
+                                          )}
+                                        </div>
+                                        {service.description && (
+                                          <p className="text-[12px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">{service.description}</p>
+                                        )}
+                                      </div>
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <button className="h-7 w-7 rounded-md flex items-center justify-center opacity-0 group-hover/svc:opacity-100 transition-opacity hover:bg-slate-100 shrink-0">
+                                            <MoreHorizontal className="h-3.5 w-3.5 text-slate-500" />
+                                          </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-44">
+                                          <DropdownMenuItem className="text-[13px]" onClick={() => setEditCtx({ item: service as LineItemForEdit, sectionName: viewedSection.name })}>
+                                            <Pencil className="mr-2 h-3.5 w-3.5 text-slate-500" />Edit service
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem className="text-[13px]" onClick={() => setDupCtx({ item: { ...service, category: viewedSection.name } as LineItemForDuplicate, sectionId: viewedSection._id, sectionName: viewedSection.name })}>
+                                            <Copy className="mr-2 h-3.5 w-3.5 text-slate-500" />Duplicate
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem className="text-[13px]" onClick={() => toggleActive(service)}>
+                                            {service.isActive
+                                              ? <><ToggleLeft className="mr-2 h-3.5 w-3.5 text-amber-500" />Deactivate</>
+                                              : <><ToggleRight className="mr-2 h-3.5 w-3.5 text-emerald-500" />Activate</>
+                                            }
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem className="text-[13px] text-red-600 focus:text-red-600" onClick={() => setDeleteTarget({ id: service._id, name: service.name })}>
+                                            <Trash2 className="mr-2 h-3.5 w-3.5" />Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                    <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
+                                      <p className="text-[15px] font-bold text-slate-900 tabular-nums">
+                                        {formatCurrency(price)}
+                                        {service.pricingType === "hourly" && <span className="text-[11px] font-normal text-slate-400">/hr</span>}
+                                      </p>
+                                      <p className="text-[11px] text-slate-400">{pmLabel}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
 
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-3 py-1">
@@ -774,114 +870,6 @@ export default function ServicesPage() {
               </>
             )}
 
-            {viewedSection && sortedViewedItems.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ background: sectionAccent(viewedSection) }}
-                    />
-                    <h3 className="text-[13px] font-semibold text-slate-700">{viewedSection.name}</h3>
-                    <span className="text-[11px] text-slate-400">({sortedViewedItems.length})</span>
-                  </div>
-                  <button
-                    onClick={() => openAddForSection(viewedSection._id, viewedSection.name)}
-                    className="flex items-center gap-1 h-7 px-3 rounded-lg text-[11px] font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ background: sectionAccent(viewedSection) }}
-                  >
-                    <Plus className="h-3 w-3" />Add Service
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {sortedViewedItems.map((service) => {
-                    const price = priceOfItem(service);
-                    const pmLabel = PRICING_METHOD_LABELS[service.pricingType] ?? service.pricingType;
-                    const inactive = !service.isActive;
-                    return (
-                      <div
-                        key={service._id}
-                        className={cn(
-                          "group/svc bg-white border rounded-xl p-4 hover:border-slate-200 transition-colors",
-                          inactive ? "border-slate-100 opacity-60" : "border-slate-100"
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <StatusTraffic status={service.status} />
-                              <p className="text-[14px] font-semibold text-slate-900 truncate">{service.name}</p>
-                              {inactive && (
-                                <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500">Inactive</span>
-                              )}
-                            </div>
-                            {service.description && (
-                              <p className="text-[12px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">{service.description}</p>
-                            )}
-                          </div>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button className="h-7 w-7 rounded-md flex items-center justify-center opacity-0 group-hover/svc:opacity-100 transition-opacity hover:bg-slate-100 shrink-0">
-                                <MoreHorizontal className="h-3.5 w-3.5 text-slate-500" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-44">
-                              <DropdownMenuItem
-                                className="text-[13px]"
-                                onClick={() =>
-                                  setEditCtx({
-                                    item: service as LineItemForEdit,
-                                    sectionName: viewedSection.name,
-                                  })
-                                }
-                              >
-                                <Pencil className="mr-2 h-3.5 w-3.5 text-slate-500" />Edit service
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-[13px]"
-                                onClick={() =>
-                                  setDupCtx({
-                                    item: { ...service, category: viewedSection.name } as LineItemForDuplicate,
-                                    sectionId: viewedSection._id,
-                                    sectionName: viewedSection.name,
-                                  })
-                                }
-                              >
-                                <Copy className="mr-2 h-3.5 w-3.5 text-slate-500" />Duplicate
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-[13px]" onClick={() => toggleActive(service)}>
-                                {service.isActive
-                                  ? <><ToggleLeft  className="mr-2 h-3.5 w-3.5 text-amber-500" />Deactivate</>
-                                  : <><ToggleRight className="mr-2 h-3.5 w-3.5 text-emerald-500" />Activate</>
-                                }
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-[13px] text-red-600 focus:text-red-600"
-                                onClick={() => setDeleteTarget({ id: service._id, name: service.name })}
-                              >
-                                <Trash2 className="mr-2 h-3.5 w-3.5" />Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-
-                        <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
-                          <p className="text-[15px] font-bold text-slate-900 tabular-nums">
-                            {formatCurrency(price)}
-                            {service.pricingType === "hourly" && <span className="text-[11px] font-normal text-slate-400">/hr</span>}
-                          </p>
-                          <p className="text-[11px] text-slate-400">{pmLabel}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
