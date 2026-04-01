@@ -31,6 +31,8 @@ const lineItemReturn = v.object({
         price: v.number(),
         description: v.string(),
         criteria: v.optional(v.string()),
+        hours: v.optional(v.number()),
+        minutes: v.optional(v.number()),
       })
     )
   ),
@@ -296,6 +298,8 @@ export const createLineItem = mutation({
           price: v.number(),
           description: v.string(),
           criteria: v.optional(v.string()),
+          hours: v.optional(v.number()),
+          minutes: v.optional(v.number()),
         })
       )
     ),
@@ -386,6 +390,8 @@ export const updateLineItem = mutation({
           price: v.number(),
           description: v.string(),
           criteria: v.optional(v.string()),
+          hours: v.optional(v.number()),
+          minutes: v.optional(v.number()),
         })
       )
     ),

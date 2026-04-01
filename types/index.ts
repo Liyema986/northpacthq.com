@@ -305,6 +305,8 @@ export interface ProposalItem {
   commitmentDate?: string;
   /** Work planning: YYYY-MM when this line’s work is scheduled (firm calendar) */
   scheduledWorkMonth?: string;
+  /** User’s selected values for each calculation layer (calc ID → selected numeric value) */
+  calculationInputs?: Record<string, number>;
   // Computed (stored for display)
   baseAmount: number;
   subtotal: number;

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
+  Calculator,
   FileText,
   Layers,
   Settings2,
@@ -54,12 +55,25 @@ import {
   resolveAssignedEntityIds,
 } from "@/lib/proposal-entities";
 import { cn } from "@/lib/utils";
+import { DatePicker, MonthPicker } from "@/components/ui/date-picker";
 
 const ACCENT = "#C8A96E";
 
 export interface ServicePricingOption {
   label: string;
   price: number;
+  hours?: number;
+  minutes?: number;
+}
+
+export interface ServiceCalculation {
+  id: string;
+  operation: "add" | "multiply" | "divide" | "subtract";
+  valueType?: "quantity" | "static" | "variations";
+  label?: string;
+  quantityFieldLabel?: string;
+  staticValue?: number;
+  options?: { label: string; value: number }[];
 }
 
 interface ServiceConfigDrawerProps {
@@ -70,6 +84,8 @@ interface ServiceConfigDrawerProps {
   onUpdate: (id: string, updates: Partial<ProposalItem>) => void;
   /** Pre-configured pricing options from the service template (variations, tiers, or fixed price) */
   pricingOptions?: ServicePricingOption[];
+  /** Calculation layers defined on the service template */
+  calculations?: ServiceCalculation[];
 }
 
 const deliveryOptions: Frequency[] = [
@@ -95,7 +111,7 @@ const selectTrigger =
   "h-10 w-full rounded-lg border border-slate-200 bg-white text-[13px] font-normal text-left";
 
 export function ServiceConfigDrawer({
-  item, entities, open, onClose, onUpdate, pricingOptions = [],
+  item, entities, open, onClose, onUpdate, pricingOptions = [], calculations = [],
 }: ServiceConfigDrawerProps) {
   if (!item) return null;
 
@@ -248,7 +264,15 @@ export function ServiceConfigDrawer({
                       value={pricingOptions.find((o) => o.price === item.unitPrice)?.label ?? ""}
                       onValueChange={(v) => {
                         const opt = pricingOptions.find((o) => o.label === v);
-                        if (opt) handleChange("unitPrice", opt.price);
+                        if (!opt) return;
+                        // Reset manualPrice so calculations reapply on new base
+                        const updates: Partial<ProposalItem> = {
+                          unitPrice: opt.price,
+                          manualPrice: undefined,
+                          calculationInputs: undefined,
+                          ...(opt.hours != null ? { timeInputHours: opt.hours, timeInputMinutes: Math.round(opt.hours * 60) } : {}),
+                        };
+                        onUpdate(item.id, updates);
                       }}
                     >
                       <SelectTrigger className={selectTrigger}>
@@ -278,6 +302,125 @@ export function ServiceConfigDrawer({
                   </div>
                 )}
               </div>
+
+              {/* Calculation layers */}
+              {calculations.length > 0 && (
+                <div className="rounded-lg border border-slate-100 bg-slate-50/80 p-3 space-y-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calculator className="h-4 w-4 text-slate-500" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      Calculations
+                    </span>
+                  </div>
+                  {calculations.map((calc, idx) => {
+                    const calcInputs = item.calculationInputs ?? {};
+                    const currentVal = calcInputs[calc.id];
+                    const opLabel = calc.operation.charAt(0).toUpperCase() + calc.operation.slice(1);
+
+                    /** Recompute manualPrice from base unitPrice + all calc inputs after this change */
+                    const applyCalcChange = (calcId: string, newVal: number) => {
+                      const nextInputs = { ...calcInputs, [calcId]: newVal };
+                      let price = item.unitPrice;
+                      for (const c of calculations) {
+                        const v = c.valueType === "static" ? (c.staticValue ?? 0) : (nextInputs[c.id] ?? null);
+                        if (v == null) continue;
+                        switch (c.operation) {
+                          case "multiply": price *= v; break;
+                          case "divide":   price = v !== 0 ? price / v : price; break;
+                          case "add":      price += v; break;
+                          case "subtract": price -= v; break;
+                        }
+                      }
+                      onUpdate(item.id, {
+                        calculationInputs: nextInputs,
+                        manualPrice: price !== item.unitPrice ? price : undefined,
+                      });
+                    };
+
+                    const calcLabel = calc.label || calc.quantityFieldLabel || "";
+
+                    return (
+                      <div key={calc.id} className="space-y-1.5">
+                        <p className="text-[12px] font-medium text-slate-700">
+                          {opLabel}{calcLabel ? ` by ${calcLabel}` : ""}
+                        </p>
+
+                        {calc.valueType === "variations" && calc.options && calc.options.length > 0 && (
+                          <Select
+                            value={currentVal != null ? String(currentVal) : ""}
+                            onValueChange={(v) => applyCalcChange(calc.id, Number(v))}
+                          >
+                            <SelectTrigger className="h-9 text-[13px] border-slate-200 bg-white rounded-lg">
+                              <SelectValue placeholder="Select option" />
+                            </SelectTrigger>
+                            <SelectContent className="z-[100]">
+                              {calc.options.map((opt) => (
+                                <SelectItem key={opt.label} value={String(opt.value)} className="text-[13px]">
+                                  {opt.label} — {opt.value}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+
+                        {calc.valueType === "quantity" && (
+                          <input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            className={fieldInput}
+                            value={currentVal || ""}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              if (raw === "") {
+                                onUpdate(item.id, {
+                                  calculationInputs: { ...calcInputs, [calc.id]: 0 },
+                                  manualPrice: undefined,
+                                });
+                              } else {
+                                applyCalcChange(calc.id, Number(raw));
+                              }
+                            }}
+                            placeholder={calc.quantityFieldLabel || "Enter value"}
+                          />
+                        )}
+
+                        {calc.valueType === "static" && calc.staticValue != null && (
+                          <p className="text-[12px] text-slate-500 bg-white border border-slate-200 rounded-lg px-3 py-2">
+                            Fixed value: <span className="font-medium text-slate-800">{calc.staticValue}</span>
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Effective price after calculations */}
+                  {(() => {
+                    let price = item.unitPrice;
+                    const inputs = item.calculationInputs ?? {};
+                    for (const calc of calculations) {
+                      const val = calc.valueType === "static" ? (calc.staticValue ?? 0) : (inputs[calc.id] ?? null);
+                      if (val == null) continue;
+                      switch (calc.operation) {
+                        case "multiply": price *= val; break;
+                        case "divide":   price = val !== 0 ? price / val : price; break;
+                        case "add":      price += val; break;
+                        case "subtract": price -= val; break;
+                      }
+                    }
+                    const hasCalcInputs = calculations.some((c) =>
+                      c.valueType === "static" ? c.staticValue != null : inputs[c.id] != null
+                    );
+                    if (!hasCalcInputs || price === item.unitPrice) return null;
+                    return (
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+                        <span className="text-[12px] font-medium text-slate-600">Effective price</span>
+                        <span className="text-[13px] font-semibold text-emerald-600">{formatCurrency(price)}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
 
               {/* Time estimates */}
               {usesMinutes ? (
@@ -545,11 +688,10 @@ export function ServiceConfigDrawer({
               {item.billingCategory === "yearly" && (
                 <div className="space-y-1.5">
                   <Label className="text-[13px]">Planned delivery / commitment date</Label>
-                  <input
-                    type="date"
-                    className={fieldInput}
+                  <DatePicker
                     value={item.commitmentDate ?? ""}
-                    onChange={(e) => handleChange("commitmentDate", e.target.value)}
+                    onChange={(v) => handleChange("commitmentDate", v)}
+                    placeholder="Select a date"
                   />
                   <p className="text-[11px] text-slate-500">
                     Used for yearly work and cash-flow planning (e.g. when financials are due).
@@ -558,11 +700,10 @@ export function ServiceConfigDrawer({
               )}
               <div className="space-y-1.5">
                 <Label className="text-[13px]">Scheduled work month (work planning)</Label>
-                <input
-                  type="month"
-                  className={fieldInput}
+                <MonthPicker
                   value={item.scheduledWorkMonth ?? ""}
-                  onChange={(e) => handleChange("scheduledWorkMonth", e.target.value)}
+                  onChange={(v) => handleChange("scheduledWorkMonth", v)}
+                  placeholder="Select a month"
                 />
                 <p className="text-[11px] text-slate-500">
                   Appears on Work Planning when you save the proposal (e.g. May for annual financials).

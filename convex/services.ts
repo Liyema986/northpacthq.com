@@ -27,6 +27,8 @@ export const listServices = query({
             price: v.number(),
             description: v.string(),
             criteria: v.optional(v.string()),
+            hours: v.optional(v.number()),
+            minutes: v.optional(v.number()),
           })
         )
       ),

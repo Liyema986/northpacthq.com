@@ -305,6 +305,8 @@ export default defineSchema({
           price: v.number(), // 500
           description: v.string(), // "Up to 50 transactions/mo"
           criteria: v.optional(v.string()), // Qualifying criteria
+          hours: v.optional(v.number()),   // Estimated hours for this tier
+          minutes: v.optional(v.number()), // Total minutes (synced: hours × 60)
         })
       )
     ),

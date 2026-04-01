@@ -10,6 +10,8 @@ import {
   Building2,
   Check,
   ChevronDown,
+  ChevronUp,
+  GripVertical,
   HelpCircle,
   Layers3,
   Link2,
@@ -173,12 +175,6 @@ export function EntitySetupPanel({
   selectedPackageId,
   onSelectPackage,
 }: EntitySetupPanelProps) {
-  // Auto-create first entity if none
-  useEffect(() => {
-    if (entities.length === 0) onAddEntity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const isSingle = clientGroupMode === "single_entity";
 
   const { organisations, individuals } = useMemo(
@@ -926,16 +922,51 @@ function ClientGroupLayout({
                     <span className="font-medium text-foreground"> · {entity.name}</span>
                   ) : null}
                 </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => onRemoveEntity(entity.id)}
-                  aria-label={`Remove entity ${index + 1}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1 shrink-0">
+                  {entities.length > 1 && (
+                    <>
+                      <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => {
+                          if (!replaceEntities || index === 0) return;
+                          const next = [...entities];
+                          [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                          replaceEntities(next);
+                        }}
+                        className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"
+                        aria-label="Move up"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === entities.length - 1}
+                        onClick={() => {
+                          if (!replaceEntities || index === entities.length - 1) return;
+                          const next = [...entities];
+                          [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                          replaceEntities(next);
+                        }}
+                        className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground hover:bg-muted disabled:opacity-30 transition-colors"
+                        aria-label="Move down"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => onRemoveEntity(entity.id)}
+                    aria-label={`Remove entity ${index + 1}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <EntityFields entity={entity} onUpdateEntity={onUpdateEntity} />
             </div>

@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MonthPicker } from "@/components/ui/date-picker";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -38,6 +39,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -159,8 +164,8 @@ function ProposalDetailPageInner() {
   const [editTitle,     setEditTitle]     = useState("");
   const [editIntro,     setEditIntro]     = useState("");
   const [editTerms,     setEditTerms]     = useState("");
-  const [editFrequency, setEditFrequency] = useState("monthly");
   const [savingDetails, setSavingDetails] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const [paySchedule, setPaySchedule] = useState<"monthly" | "on_completion" | "blended">("blended");
   const [payStartMonth, setPayStartMonth] = useState("");
@@ -291,6 +296,7 @@ function ProposalDetailPageInner() {
 
   async function saveDetails() {
     if (!proposal || !userId) return;
+    if (!editTitle.trim()) { toast.error("Proposal title is required"); return; }
     setSavingDetails(true);
     try {
       const result = await updateProposal({
@@ -350,11 +356,11 @@ function ProposalDetailPageInner() {
         userId,
         proposalId: id as Id<"proposals">,
       });
-      if (result.success) {
-        const count = result.letters.length;
-        toast.success(
-          `Generated ${count} engagement letter${count > 1 ? "s" : ""}`
-        );
+      const count = result.letters.length;
+      if (count === 0) {
+        toast.info("No sections on this proposal are linked to a letter template. Configure sections in Engagement Letter settings first.");
+      } else {
+        toast.success(`Generated ${count} engagement letter${count > 1 ? "s" : ""}`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to generate";
@@ -463,7 +469,13 @@ function ProposalDetailPageInner() {
           <div className="flex items-center gap-2 shrink-0">
             {proposal.status === "draft" && (
               <button
-                onClick={() => updateStatus("pending-approval")}
+                onClick={() => {
+                  if (items.length === 0) {
+                    toast.error("Add at least one service before submitting for approval");
+                    return;
+                  }
+                  updateStatus("pending-approval");
+                }}
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
                 style={{ background: "#C8A96E" }}
               >
@@ -529,7 +541,7 @@ function ProposalDetailPageInner() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 focus:bg-red-50 focus:text-red-700"
-                  onClick={handleDelete}
+                  onClick={() => setDeleteConfirmOpen(true)}
                 >
                   Delete proposal
                 </DropdownMenuItem>
@@ -608,20 +620,18 @@ function ProposalDetailPageInner() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px] text-slate-600">First recurring payment month</Label>
-                <Input
-                  type="month"
+                <MonthPicker
                   value={payStartMonth}
-                  onChange={(e) => setPayStartMonth(e.target.value)}
-                  className="h-10 text-[13px]"
+                  onChange={setPayStartMonth}
+                  placeholder="Select month"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px] text-slate-600">One-off / completion payment month</Label>
-                <Input
-                  type="month"
+                <MonthPicker
                   value={payOneOffMonth}
-                  onChange={(e) => setPayOneOffMonth(e.target.value)}
-                  className="h-10 text-[13px]"
+                  onChange={setPayOneOffMonth}
+                  placeholder="Select month"
                 />
               </div>
             </div>
@@ -722,23 +732,9 @@ function ProposalDetailPageInner() {
               <p className="text-[11px] text-slate-400 mt-0.5">Edit the core content of this proposal</p>
             </div>
             <div className="p-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>Proposal Title</Label>
-                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Payment Frequency</Label>
-                  <Select value={editFrequency} onValueChange={setEditFrequency}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="quarterly">Quarterly</SelectItem>
-                      <SelectItem value="annually">Annually</SelectItem>
-                      <SelectItem value="as_delivered">As Delivered</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-1.5">
+                <Label>Proposal Title</Label>
+                <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label>Introduction</Label>
@@ -1004,9 +1000,10 @@ function ProposalDetailPageInner() {
                   <Copy className="h-3.5 w-3.5 mr-1.5" />Copy Subject
                 </Button>
                 <button
-                  disabled={isSendingEmail || !userId}
+                  disabled={isSendingEmail || !userId || !client?.email}
+                  title={!client?.email ? "No email address on this client — edit the client first" : undefined}
                   onClick={async () => {
-                    if (!userId) return;
+                    if (!userId || !client?.email) return;
                     setIsSendingEmail(true);
                     try {
                       await sendProposalEmail({ userId, proposalId: id as Id<"proposals"> });
@@ -1303,6 +1300,26 @@ function ProposalDetailPageInner() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this proposal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &ldquo;{proposal.title}&rdquo; will be permanently deleted. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete proposal
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -9,6 +9,7 @@ import { useNorthPactAuth } from "@/lib/use-northpact-auth";
 import type { WorkPlanEntry, BillingCategory, Frequency } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MonthPicker } from "@/components/ui/date-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -590,8 +591,35 @@ export default function WorkPlanningPage() {
                         client?.name?.trim() || entry.clientName?.trim() || "";
                       return (
                         <div key={entry.id} className="bg-white border border-slate-100 rounded-xl p-3.5 hover:border-slate-200 transition-colors">
-                          <p className="text-[12px] font-semibold text-slate-800">{entry.serviceName}</p>
-                          {clientLabel && <p className="text-[11px] text-slate-400 mt-0.5">{clientLabel}</p>}
+                          <div className="flex items-start justify-between gap-1.5">
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-semibold text-slate-800">{entry.serviceName}</p>
+                              {clientLabel && <p className="text-[11px] text-slate-400 mt-0.5">{clientLabel}</p>}
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className="h-6 w-6 flex items-center justify-center rounded text-slate-300 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0 -mt-0.5 -mr-1">
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44">
+                                {(Object.keys(STATUS_CONFIG) as StatusKey[]).map((s) => (
+                                  <DropdownMenuItem key={s} onClick={() => handleUpdateStatus(entry.id, s)}
+                                    className={cn("flex items-center gap-2 text-[12px]", entry.status === s && "bg-slate-50")}>
+                                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", STATUS_CONFIG[s].dot)} />
+                                    Mark {STATUS_CONFIG[s].label}
+                                  </DropdownMenuItem>
+                                ))}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => setDeleteTarget({ id: entry.id, name: entry.serviceName })}
+                                  className="flex items-center gap-2 text-[12px] text-red-500 focus:text-red-600 focus:bg-red-50">
+                                  <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                           <div className="flex items-center gap-3 mt-2.5">
                             {entry.estimatedHours && (
                               <span className="flex items-center gap-1 text-[11px] text-slate-400">
@@ -679,7 +707,7 @@ export default function WorkPlanningPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-[13px]">Scheduled month</Label>
-                  <Input type="month" value={taskMonth} onChange={(e) => setTaskMonth(e.target.value)} className="h-10 text-[13px] border-slate-200 rounded-lg" />
+                  <MonthPicker value={taskMonth} onChange={setTaskMonth} placeholder="Select month" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-[13px]">Estimated hours</Label>

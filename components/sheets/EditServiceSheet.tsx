@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Pencil, X, Loader2, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown, GripHorizontal, HelpCircle } from "lucide-react";
+import { Pencil, X, Loader2, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown, GripHorizontal, HelpCircle, Clock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -50,6 +50,31 @@ const CALC_BY_TYPES = [
 ] as const;
 
 type PriceMode = "fixed" | "formula";
+
+function TimeEstimateRow({
+  hours, minutes, onHoursChange, onMinutesChange, disabled,
+}: {
+  hours: string; minutes: string;
+  onHoursChange: (v: string) => void; onMinutesChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 pl-5">
+      <Clock className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+      <div className="flex items-center gap-1.5">
+        <input type="number" min="0" step="0.25" value={hours} onChange={(e) => onHoursChange(e.target.value)}
+          disabled={disabled} placeholder="Hrs"
+          className="w-16 h-7 px-2 rounded border border-slate-200 text-[12px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] bg-white" />
+        <span className="text-[11px] text-slate-400">h</span>
+        <span className="text-[11px] text-slate-400">=</span>
+        <input type="number" min="0" step="1" value={minutes} onChange={(e) => onMinutesChange(e.target.value)}
+          disabled={disabled} placeholder="Min"
+          className="w-16 h-7 px-2 rounded border border-slate-200 text-[12px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] bg-white" />
+        <span className="text-[11px] text-slate-400">min</span>
+      </div>
+    </div>
+  );
+}
 
 // ── Predefined SA brackets ─────────────────────────────────────────────────
 
@@ -99,6 +124,8 @@ interface Variation {
   priceMode: PriceMode;
   price: string;
   formula: string;
+  hours: string;
+  minutes: string;
 }
 
 interface TierRange {
@@ -106,6 +133,8 @@ interface TierRange {
   from: string;
   to: string;
   price: string;
+  hours: string;
+  minutes: string;
 }
 
 interface PredefinedTier {
@@ -114,6 +143,8 @@ interface PredefinedTier {
   priceMode: PriceMode;
   price: string;
   formula: string;
+  hours: string;
+  minutes: string;
 }
 
 export type LineItemForEdit = {
@@ -127,7 +158,7 @@ export type LineItemForEdit = {
   fieldLabel?: string;
   hourlyRate?: number;
   fixedPrice?: number;
-  pricingTiers?: { name: string; price: number; description: string; criteria?: string }[];
+  pricingTiers?: { name: string; price: number; description: string; criteria?: string; hours?: number; minutes?: number }[];
   isActive: boolean;
   addCalculation?: boolean;
   calculationVariations?: {
@@ -160,16 +191,16 @@ function newCalc(): Calculation {
   return { id: crypto.randomUUID(), operation: "multiply", valueType: "none", staticValue: "", quantityLabel: "", calcVariationLabel: "", calcVariations: [newCalcVariation()] };
 }
 function newVariation(): Variation {
-  return { id: crypto.randomUUID(), name: "", priceMode: "fixed", price: "", formula: "" };
+  return { id: crypto.randomUUID(), name: "", priceMode: "fixed", price: "", formula: "", hours: "", minutes: "" };
 }
 function newTierRange(): TierRange {
-  return { id: crypto.randomUUID(), from: "0", to: "", price: "" };
+  return { id: crypto.randomUUID(), from: "0", to: "", price: "", hours: "", minutes: "" };
 }
 function defaultAnnualRevenueTiers(): PredefinedTier[] {
-  return ANNUAL_REVENUE_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, priceMode: "fixed", price: "", formula: "" }));
+  return ANNUAL_REVENUE_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, priceMode: "fixed", price: "", formula: "", hours: "", minutes: "" }));
 }
 function defaultIncomeTiers(): PredefinedTier[] {
-  return INCOME_TAX_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, priceMode: "fixed", price: "", formula: "" }));
+  return INCOME_TAX_BRACKETS.map(label => ({ id: crypto.randomUUID(), label, priceMode: "fixed", price: "", formula: "", hours: "", minutes: "" }));
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -233,7 +264,7 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
     const varTiers = service.pricingTiers?.filter(t => !t.criteria || t.criteria === "variation") ?? [];
     setVariations(
       varTiers.length
-        ? varTiers.map(t => ({ id: crypto.randomUUID(), name: t.name, priceMode: "fixed" as PriceMode, price: String(t.price), formula: "" }))
+        ? varTiers.map(t => ({ id: crypto.randomUUID(), name: t.name, priceMode: "fixed" as PriceMode, price: String(t.price), formula: "", hours: t.hours != null ? String(t.hours) : "", minutes: t.minutes != null ? String(t.minutes) : "" }))
         : [newVariation()]
     );
 
@@ -241,7 +272,7 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
     const rangeTiers = service.pricingTiers?.filter(t => t.criteria === "number_range") ?? [];
     setTierRanges(
       rangeTiers.length
-        ? rangeTiers.map(t => ({ id: crypto.randomUUID(), from: t.name, to: t.description, price: String(t.price) }))
+        ? rangeTiers.map(t => ({ id: crypto.randomUUID(), from: t.name, to: t.description, price: String(t.price), hours: t.hours != null ? String(t.hours) : "", minutes: t.minutes != null ? String(t.minutes) : "" }))
         : [newTierRange()]
     );
 
@@ -249,7 +280,7 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
     setAnnualRevenueTiers(
       ANNUAL_REVENUE_BRACKETS.map(label => {
         const saved = service.pricingTiers?.find(t => t.name === label && t.criteria === "annual_revenue");
-        return { id: crypto.randomUUID(), label, priceMode: "fixed" as PriceMode, price: String(saved?.price ?? ""), formula: "" };
+        return { id: crypto.randomUUID(), label, priceMode: "fixed" as PriceMode, price: String(saved?.price ?? ""), formula: "", hours: saved?.hours != null ? String(saved.hours) : "", minutes: saved?.minutes != null ? String(saved.minutes) : "" };
       })
     );
 
@@ -257,7 +288,7 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
     setIncomeTiers(
       INCOME_TAX_BRACKETS.map(label => {
         const saved = service.pricingTiers?.find(t => t.name === label && t.criteria === "income_range");
-        return { id: crypto.randomUUID(), label, priceMode: "fixed" as PriceMode, price: String(saved?.price ?? ""), formula: "" };
+        return { id: crypto.randomUUID(), label, priceMode: "fixed" as PriceMode, price: String(saved?.price ?? ""), formula: "", hours: saved?.hours != null ? String(saved.hours) : "", minutes: saved?.minutes != null ? String(saved.minutes) : "" };
       })
     );
   }, [service, open]);
@@ -281,8 +312,13 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
   // ── Variation helpers ──────────────────────────────────────────────────
   function addVariation()                                                 { setVariations(v => [...v, newVariation()]); }
   function removeVariation(id: string)                                    { setVariations(v => v.filter(x => x.id !== id)); }
-  function updateVariation(id: string, field: "name" | "priceMode" | "price" | "formula", val: string) {
-    setVariations(v => v.map(x => x.id === id ? { ...x, [field]: val } : x));
+  function updateVariation(id: string, field: "name" | "priceMode" | "price" | "formula" | "hours" | "minutes", val: string) {
+    setVariations(v => v.map(x => {
+      if (x.id !== id) return x;
+      if (field === "hours") { const h = parseFloat(val) || 0; return { ...x, hours: val, minutes: val === "" ? "" : String(Math.round(h * 60)) }; }
+      if (field === "minutes") { const m = parseFloat(val) || 0; return { ...x, minutes: val, hours: val === "" ? "" : String(+(m / 60).toFixed(2)) }; }
+      return { ...x, [field]: val };
+    }));
   }
   function moveVariation(id: string, dir: -1 | 1) {
     setVariations(v => {
@@ -297,16 +333,31 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
   // ── Number range helpers ───────────────────────────────────────────────
   function addTierRange()                                                  { setTierRanges(r => [...r, newTierRange()]); }
   function removeTierRange(id: string)                                     { setTierRanges(r => r.filter(x => x.id !== id)); }
-  function updateTierRange(id: string, field: "from" | "to" | "price", val: string) {
-    setTierRanges(r => r.map(x => x.id === id ? { ...x, [field]: val } : x));
+  function updateTierRange(id: string, field: "from" | "to" | "price" | "hours" | "minutes", val: string) {
+    setTierRanges(r => r.map(x => {
+      if (x.id !== id) return x;
+      if (field === "hours") { const h = parseFloat(val) || 0; return { ...x, hours: val, minutes: val === "" ? "" : String(Math.round(h * 60)) }; }
+      if (field === "minutes") { const m = parseFloat(val) || 0; return { ...x, minutes: val, hours: val === "" ? "" : String(+(m / 60).toFixed(2)) }; }
+      return { ...x, [field]: val };
+    }));
   }
 
   // ── Predefined tier helpers ────────────────────────────────────────────
-  function updateAnnualTier(id: string, field: "priceMode" | "price" | "formula", val: string) {
-    setAnnualRevenueTiers(t => t.map(x => x.id === id ? { ...x, [field]: val } : x));
+  function updateAnnualTier(id: string, field: "priceMode" | "price" | "formula" | "hours" | "minutes", val: string) {
+    setAnnualRevenueTiers(t => t.map(x => {
+      if (x.id !== id) return x;
+      if (field === "hours") { const h = parseFloat(val) || 0; return { ...x, hours: val, minutes: val === "" ? "" : String(Math.round(h * 60)) }; }
+      if (field === "minutes") { const m = parseFloat(val) || 0; return { ...x, minutes: val, hours: val === "" ? "" : String(+(m / 60).toFixed(2)) }; }
+      return { ...x, [field]: val };
+    }));
   }
-  function updateIncomeTier(id: string, field: "priceMode" | "price" | "formula", val: string) {
-    setIncomeTiers(t => t.map(x => x.id === id ? { ...x, [field]: val } : x));
+  function updateIncomeTier(id: string, field: "priceMode" | "price" | "formula" | "hours" | "minutes", val: string) {
+    setIncomeTiers(t => t.map(x => {
+      if (x.id !== id) return x;
+      if (field === "hours") { const h = parseFloat(val) || 0; return { ...x, hours: val, minutes: val === "" ? "" : String(Math.round(h * 60)) }; }
+      if (field === "minutes") { const m = parseFloat(val) || 0; return { ...x, minutes: val, hours: val === "" ? "" : String(+(m / 60).toFixed(2)) }; }
+      return { ...x, [field]: val };
+    }));
   }
 
   function toggleModeDropdown(id: string, e: React.MouseEvent) {
@@ -364,19 +415,23 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
       case "variation":
         return variations.filter(v => v.name.trim()).map(v => ({
           name: v.name.trim(), price: parseFloat(v.price) || 0, description: "",
+          hours: parseFloat(v.hours) || undefined, minutes: parseFloat(v.minutes) || undefined,
         }));
       case "tiered":
         return tierRanges.filter(r => r.from.trim() || r.to.trim()).map(r => ({
           name: r.from.trim(), price: parseFloat(r.price) || 0,
           description: r.to.trim(), criteria: "number_range",
+          hours: parseFloat(r.hours) || undefined, minutes: parseFloat(r.minutes) || undefined,
         }));
       case "recurring":
         return annualRevenueTiers.map(t => ({
           name: t.label, price: parseFloat(t.price) || 0, description: "", criteria: "annual_revenue",
+          hours: parseFloat(t.hours) || undefined, minutes: parseFloat(t.minutes) || undefined,
         }));
       case "income_range":
         return incomeTiers.map(t => ({
           name: t.label, price: parseFloat(t.price) || 0, description: "", criteria: "income_range",
+          hours: parseFloat(t.hours) || undefined, minutes: parseFloat(t.minutes) || undefined,
         }));
       default:
         return undefined;
@@ -690,6 +745,10 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
                           ))}
                         </div>
                       )}
+                      <TimeEstimateRow hours={v.hours} minutes={v.minutes}
+                        onHoursChange={(val) => updateVariation(v.id, "hours", val)}
+                        onMinutesChange={(val) => updateVariation(v.id, "minutes", val)}
+                        disabled={saving} />
                     </div>
                   ))}
                   <button type="button" disabled={saving} onClick={addVariation}
@@ -708,25 +767,31 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
                   <span className="text-[11px] text-slate-400">You can set the number variants below.</span>
                 </div>
                 {tierRanges.map((r) => (
-                  <div key={r.id} className="flex items-center gap-2">
-                    <span className="text-[12px] text-slate-500 shrink-0">From</span>
-                    <input type="number" min="0" step="1" value={r.from}
-                      onChange={(e) => updateTierRange(r.id, "from", e.target.value)} disabled={saving}
-                      className="w-20 h-9 px-2 rounded-lg border border-slate-200 text-[13px] text-slate-800 focus:outline-none focus:border-[#C8A96E] bg-white" />
-                    <span className="text-[12px] text-slate-500 shrink-0">to</span>
-                    <input type="number" min="0" step="1" value={r.to}
-                      onChange={(e) => updateTierRange(r.id, "to", e.target.value)} disabled={saving}
-                      className="w-20 h-9 px-2 rounded-lg border border-slate-200 text-[13px] text-slate-800 focus:outline-none focus:border-[#C8A96E] bg-white" />
-                    <div className="flex h-9 rounded-lg border border-slate-200 overflow-hidden flex-1">
-                      <span className="px-2 flex items-center text-[11px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">ZAR</span>
-                      <input type="number" min="0" step="0.01" value={r.price} placeholder="Price per unit"
-                        onChange={(e) => updateTierRange(r.id, "price", e.target.value)} disabled={saving}
-                        className="flex-1 px-2 text-[13px] text-slate-800 focus:outline-none bg-white min-w-0 placeholder-slate-300" />
+                  <div key={r.id} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] text-slate-500 shrink-0">From</span>
+                      <input type="number" min="0" step="1" value={r.from}
+                        onChange={(e) => updateTierRange(r.id, "from", e.target.value)} disabled={saving}
+                        className="w-20 h-9 px-2 rounded-lg border border-slate-200 text-[13px] text-slate-800 focus:outline-none focus:border-[#C8A96E] bg-white" />
+                      <span className="text-[12px] text-slate-500 shrink-0">to</span>
+                      <input type="number" min="0" step="1" value={r.to}
+                        onChange={(e) => updateTierRange(r.id, "to", e.target.value)} disabled={saving}
+                        className="w-20 h-9 px-2 rounded-lg border border-slate-200 text-[13px] text-slate-800 focus:outline-none focus:border-[#C8A96E] bg-white" />
+                      <div className="flex h-9 rounded-lg border border-slate-200 overflow-hidden flex-1">
+                        <span className="px-2 flex items-center text-[11px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">ZAR</span>
+                        <input type="number" min="0" step="0.01" value={r.price} placeholder="Price per unit"
+                          onChange={(e) => updateTierRange(r.id, "price", e.target.value)} disabled={saving}
+                          className="flex-1 px-2 text-[13px] text-slate-800 focus:outline-none bg-white min-w-0 placeholder-slate-300" />
+                      </div>
+                      <button type="button" disabled={saving || tierRanges.length <= 1} onClick={() => removeTierRange(r.id)}
+                        className="h-9 w-9 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center text-red-500 hover:bg-red-100 disabled:opacity-30 transition-colors shrink-0">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    <button type="button" disabled={saving || tierRanges.length <= 1} onClick={() => removeTierRange(r.id)}
-                      className="h-9 w-9 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center text-red-500 hover:bg-red-100 disabled:opacity-30 transition-colors shrink-0">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    <TimeEstimateRow hours={r.hours} minutes={r.minutes}
+                      onHoursChange={(val) => updateTierRange(r.id, "hours", val)}
+                      onMinutesChange={(val) => updateTierRange(r.id, "minutes", val)}
+                      disabled={saving} />
                   </div>
                 ))}
                 <button type="button" disabled={saving} onClick={addTierRange}
@@ -786,6 +851,10 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
                         ))}
                       </div>
                     )}
+                    <TimeEstimateRow hours={t.hours} minutes={t.minutes}
+                      onHoursChange={(val) => updateAnnualTier(t.id, "hours", val)}
+                      onMinutesChange={(val) => updateAnnualTier(t.id, "minutes", val)}
+                      disabled={saving} />
                   </div>
                 ))}
               </div>
@@ -841,6 +910,10 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
                         ))}
                       </div>
                     )}
+                    <TimeEstimateRow hours={t.hours} minutes={t.minutes}
+                      onHoursChange={(val) => updateIncomeTier(t.id, "hours", val)}
+                      onMinutesChange={(val) => updateIncomeTier(t.id, "minutes", val)}
+                      disabled={saving} />
                   </div>
                 ))}
               </div>
@@ -865,6 +938,18 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
                 <input type="checkbox" checked={addCalc} onChange={(e) => setAddCalc(e.target.checked)} disabled={saving}
                   className="h-4 w-4 rounded border-slate-300 accent-[#C8A96E]" />
                 <span className="text-[13px] font-medium text-slate-700">Add Calculation to Line Price?</span>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-slate-400 outline-none hover:bg-slate-100 hover:text-slate-600" aria-label="Help">
+                        <HelpCircle className="h-3.5 w-3.5" strokeWidth={2} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[280px] text-left text-[12px] font-normal leading-relaxed">
+                      Apply up to 5 calculation layers (multiply, add, divide, subtract) to the base price. Use variations for dropdowns, quantity for user input, or static for fixed values.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </label>
 
               {addCalc && (

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type {
   ProposalItem,
   ProposalBuilderEntity,
@@ -109,7 +109,8 @@ function itemFromTemplate(
 
 function recalc(item: ProposalItem): ProposalItem {
   const normalized = normalizeFixedTimeEstimate(item);
-  const base = normalized.unitPrice * (normalized.quantity ?? 1);
+  const effectivePrice = normalized.manualPrice ?? normalized.unitPrice;
+  const base = effectivePrice * (normalized.quantity ?? 1);
   const discounted = base * (1 - (normalized.discount ?? 0) / 100);
   const total = discounted * (1 + (normalized.taxRate ?? 0) / 100);
   const hours = calculateServiceHours(normalized);
@@ -173,20 +174,40 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
   const [paymentFrequency, setPaymentFrequency] = useState<PaymentFrequency>("monthly");
   const [engagementLetterAfterAccept, setEngagementLetterAfterAccept] = useState<boolean>(true);
 
+  // Guard: prevent the persist effect from writing empty defaults before restore completes.
+  const restoredRef = useRef(false);
+
   // Restore draft from sessionStorage after mount (client-only) to keep
   // the initial server render in sync with the first client render.
   useEffect(() => {
-    if (!restore) return;
+    if (!restore) {
+      restoredRef.current = true; // nothing to restore — allow persist immediately
+      return;
+    }
     const s = readPersistedDraft();
-    if (!s) return;
-    if (Array.isArray(s.items)) setItems(s.items as ProposalItem[]);
-    if (Array.isArray(s.entities)) setEntities(s.entities as ProposalBuilderEntity[]);
-    if (s.clientGroupMode) setClientGroupMode(s.clientGroupMode as ClientGroupMode);
-    if (s.clientGroup) setClientGroup(s.clientGroup as ProposalBuilderClientGroup);
-    if (s.paymentFrequency) setPaymentFrequency(s.paymentFrequency as PaymentFrequency);
-    if (typeof s.engagementLetterAfterAccept === "boolean") setEngagementLetterAfterAccept(s.engagementLetterAfterAccept);
+    if (s) {
+      if (Array.isArray(s.items)) setItems(s.items as ProposalItem[]);
+      if (Array.isArray(s.entities)) setEntities(s.entities as ProposalBuilderEntity[]);
+      if (s.clientGroupMode) setClientGroupMode(s.clientGroupMode as ClientGroupMode);
+      if (s.clientGroup) setClientGroup(s.clientGroup as ProposalBuilderClientGroup);
+      if (s.paymentFrequency) setPaymentFrequency(s.paymentFrequency as PaymentFrequency);
+      if (typeof s.engagementLetterAfterAccept === "boolean") setEngagementLetterAfterAccept(s.engagementLetterAfterAccept);
+    }
+    // Mark restored on next tick so the state updates above are applied
+    // before the persist effect is allowed to write.
+    requestAnimationFrame(() => { restoredRef.current = true; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // After restoration, if entities are still empty, seed one default entity.
+  // This replaces the auto-create in EntitySetupPanel which would fire too
+  // early (before sessionStorage restore) and overwrite saved entities.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (!restoredRef.current || seededRef.current) return;
+    seededRef.current = true;
+    setEntities((prev) => (prev.length === 0 ? [makeEntity()] : prev));
+  });
 
   // ── Entity management ──────────────────────────────────────────────────────
   const addEntity = useCallback(() => {
@@ -317,6 +338,9 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
   // ── Persist draft to sessionStorage ───────────────────────────────────────
   useEffect(() => {
     if (!restore || typeof window === "undefined") return;
+    // Don't persist until the restore effect has completed, otherwise
+    // the initial empty defaults overwrite the saved draft.
+    if (!restoredRef.current) return;
     try {
       sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
         items, entities, clientGroupMode, clientGroup, paymentFrequency, engagementLetterAfterAccept,

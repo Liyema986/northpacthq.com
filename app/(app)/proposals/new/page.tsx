@@ -242,16 +242,40 @@ function NewProposalInner() {
 
   /** Map serviceId → pricing options (variations/tiers/fixed) from the catalog. */
   const servicePricingMap = useMemo(() => {
-    const map = new Map<string, { label: string; price: number }[]>();
+    const map = new Map<string, { label: string; price: number; hours?: number; minutes?: number }[]>();
     if (!catalogSections) return map;
     for (const sec of catalogSections) {
       for (const row of sec.lineItems) {
         if (row.pricingTiers && row.pricingTiers.length > 0) {
-          map.set(String(row._id), row.pricingTiers.map((t) => ({ label: t.name, price: t.price })));
+          map.set(String(row._id), row.pricingTiers.map((t: { name: string; price: number; hours?: number; minutes?: number }) => ({
+            label: t.name, price: t.price, hours: t.hours, minutes: t.minutes,
+          })));
         } else if (row.fixedPrice != null && row.fixedPrice > 0) {
           map.set(String(row._id), [{ label: "Fixed Price", price: row.fixedPrice }]);
         } else if (row.hourlyRate != null && row.hourlyRate > 0) {
           map.set(String(row._id), [{ label: "Hourly Rate", price: row.hourlyRate }]);
+        }
+      }
+    }
+    return map;
+  }, [catalogSections]);
+
+  /** Map serviceId → calculation definitions from the catalog. */
+  const serviceCalculationsMap = useMemo(() => {
+    const map = new Map<string, { id: string; operation: "add" | "multiply" | "divide" | "subtract"; valueType?: "quantity" | "static" | "variations"; label?: string; quantityFieldLabel?: string; staticValue?: number; options?: { label: string; value: number }[] }[]>();
+    if (!catalogSections) return map;
+    for (const sec of catalogSections) {
+      for (const row of sec.lineItems) {
+        if (row.addCalculation && row.calculationVariations?.length) {
+          map.set(String(row._id), row.calculationVariations.map((c) => ({
+            id: c.id,
+            operation: c.operation as "add" | "multiply" | "divide" | "subtract",
+            valueType: c.valueType as "quantity" | "static" | "variations" | undefined,
+            label: c.label,
+            quantityFieldLabel: c.quantityFieldLabel,
+            staticValue: c.staticValue,
+            options: c.options,
+          })));
         }
       }
     }
@@ -923,6 +947,11 @@ function NewProposalInner() {
         pricingOptions={
           currentEditingItem?.serviceTemplateId
             ? servicePricingMap.get(currentEditingItem.serviceTemplateId)
+            : undefined
+        }
+        calculations={
+          currentEditingItem?.serviceTemplateId
+            ? serviceCalculationsMap.get(currentEditingItem.serviceTemplateId)
             : undefined
         }
       />
