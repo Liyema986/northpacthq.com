@@ -23,8 +23,8 @@ import {
 import {
   ChevronDown, ChevronLeft, Send, CheckCircle2, MoreHorizontal, FileText,
   DollarSign, TrendingUp, Clock, Download, User, Building2, Mail,
-  MessageSquare, Plus, AlertCircle, Tag,
-  Banknote, ArrowRight, Copy, Layers3, Users,
+  MessageSquare, Plus, AlertCircle, Tag, ScrollText, ExternalLink, Pen,
+  Banknote, ArrowRight, Copy, Layers3, Users, Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -188,9 +188,16 @@ function ProposalDetailPageInner() {
   const deleteProposal = useMutation(api.proposals.deleteProposal);
   const generateScopeLibraryLetter = useMutation(api.engagementLetters.generateLetterFromScopeLibrary);
   const sendProposalEmail = useAction(api.email.sendProposalEmail);
+  const deleteLetterMut = useMutation(api.engagementLetters.deleteLetter);
+  const resendSigningLinkMut = useMutation(api.engagementLetters.resendSigningLink);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [deletingLetterId, setDeletingLetterId] = useState<string | null>(null);
   const generatedLetter = useQuery(
     api.engagementLetters.getLetterByProposal,
+    userId && id ? { userId, proposalId: id as Id<"proposals"> } : "skip"
+  );
+  const allLetters = useQuery(
+    api.engagementLetters.getLettersByProposal,
     userId && id ? { userId, proposalId: id as Id<"proposals"> } : "skip"
   );
   const [generatingLetter, setGeneratingLetter] = useState(false);
@@ -368,6 +375,66 @@ function ProposalDetailPageInner() {
     } finally {
       setGeneratingLetter(false);
     }
+  }
+
+  async function handleDeleteLetter(letterId: string) {
+    if (!userId) return;
+    try {
+      const res = await deleteLetterMut({ userId, letterId: letterId as Id<"engagementLetters"> });
+      if (res.success) toast.success("Letter deleted");
+      else toast.error(res.error || "Failed to delete");
+    } catch { toast.error("Failed to delete letter"); }
+    setDeletingLetterId(null);
+  }
+
+  async function handleResendSigningLink(letterId: string) {
+    if (!userId) return;
+    try {
+      const res = await resendSigningLinkMut({ userId, letterId: letterId as Id<"engagementLetters"> });
+      if (res.success && res.signingToken) {
+        const url = `${window.location.origin}/sign/${res.signingToken}`;
+        await navigator.clipboard.writeText(url);
+        toast.success("Signing link copied to clipboard");
+      } else {
+        toast.error(res.error || "Failed to get signing link");
+      }
+    } catch { toast.error("Failed to resend"); }
+  }
+
+  function LetterActionsDropdown({ letter }: { letter: { _id: any; status: string; letterNumber: string; signatureData?: any } }) {
+    const isSigned = letter.status === "signed";
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="h-7 w-7 flex items-center justify-center rounded-md text-slate-300 hover:text-slate-600 hover:bg-slate-100 transition-colors" aria-label="Actions">
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52 rounded-lg border border-slate-100 shadow-lg p-1">
+          {!isSigned && (
+            <DropdownMenuItem onClick={() => handleResendSigningLink(letter._id)} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
+              <Send className="h-4 w-4 shrink-0 text-violet-500" /> Copy signing link
+            </DropdownMenuItem>
+          )}
+          {isSigned && letter.signatureData?.signatureImage && (
+            <DropdownMenuItem onClick={() => toast.info("Signature captured on " + new Date(letter.signatureData.signedAt).toLocaleDateString())} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
+              <Pen className="h-4 w-4 shrink-0 text-emerald-500" /> View signature
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem onClick={() => toast.info("PDF download coming soon")} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
+            <Download className="h-4 w-4 shrink-0 text-slate-400" /> Download PDF
+          </DropdownMenuItem>
+          {!isSigned && (
+            <>
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem onClick={() => setDeletingLetterId(letter._id)} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md text-red-500 focus:text-red-600 focus:bg-red-50">
+                <Trash2 className="h-4 w-4 shrink-0" /> Delete
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
   }
 
   if (loading) {
@@ -1169,134 +1236,129 @@ function ProposalDetailPageInner() {
 
         {/* ── Tab: Docs ─────────────────────────────────────────────────── */}
         {activeTab === "docs" && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-              <Collapsible
-                open={docsProposalOpen}
-                onOpenChange={setDocsProposalOpen}
-                className="min-w-0 w-full bg-white border border-slate-100 rounded-xl overflow-hidden"
-              >
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-2 px-4 py-3 border-b border-slate-100 text-left transition-colors hover:bg-slate-50/80"
-                  >
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
-                        docsProposalOpen ? "rotate-180" : "rotate-0"
-                      )}
-                      aria-hidden
-                    />
-                    <FileText className="h-4 w-4 text-red-500 shrink-0" />
-                    <span className="text-[13px] font-semibold text-slate-800">Proposal Document</span>
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="overflow-hidden">
-                  <div className="p-4 space-y-3">
-                    <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                        <FileText className="h-5 w-5 text-red-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium text-slate-900 truncate">{proposal.title}.pdf</p>
-                        <p className="text-[11px] text-slate-400">{formatDate(createdAtStr)}</p>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")}>
-                        <Download className="h-3.5 w-3.5 mr-1.5" />Download
-                      </Button>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")} className="flex-1">
-                        Generate PDF
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/portal/${id}`); toast.success("Portal link copied"); }} className="flex-1">
-                        Copy Portal Link
-                      </Button>
-                    </div>
+          <div className="space-y-6">
+            {/* ── Proposal Document ── */}
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-red-500" />
+                <h3 className="text-[14px] font-semibold text-slate-800">Proposal Document</h3>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-white overflow-hidden">
+                <div className="flex items-center gap-4 px-5 py-4">
+                  <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5 text-red-600" />
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible
-                open={docsLetterOpen}
-                onOpenChange={setDocsLetterOpen}
-                className="min-w-0 w-full bg-white border border-slate-100 rounded-xl overflow-hidden"
-              >
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-2 px-4 py-3 border-b border-slate-100 text-left transition-colors hover:bg-slate-50/80"
-                  >
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
-                        docsLetterOpen ? "rotate-180" : "rotate-0"
-                      )}
-                      aria-hidden
-                    />
-                    <FileText className="h-4 w-4 text-amber-600 shrink-0" />
-                    <span className="text-[13px] font-semibold text-slate-800">Engagement Letter</span>
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="overflow-hidden">
-                  <div className="p-4 space-y-3">
-                    {generatedLetter ? (
-                      <>
-                        <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                            <FileText className="h-5 w-5 text-amber-700" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-medium text-slate-900 truncate">{generatedLetter.letterNumber}</p>
-                            <p className="text-[11px] text-slate-400">{generatedLetter.serviceType ?? "Engagement letter"} · {generatedLetter.status}</p>
-                          </div>
-                        </div>
-                        <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-slate-100 bg-white p-5 text-[13px] text-slate-700 leading-relaxed whitespace-pre-line">
-                          {generatedLetter.content ?? ""}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-[12px] text-slate-400">No engagement letter generated yet.</p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleGenerateScopeLibraryLetter}
-                          disabled={generatingLetter}
-                          className="w-full"
-                        >
-                          <FileText className="h-3.5 w-3.5 mr-1.5" />
-                          {generatingLetter ? "Generating…" : "Generate engagement letter"}
-                        </Button>
-                      </div>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-slate-900 truncate">{proposal.title}.pdf</p>
+                    <p className="text-[11px] text-slate-400">{formatDate(createdAtStr)}</p>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
-                  <User className="h-4 w-4 text-blue-500" />
-                  <span className="text-[13px] font-semibold text-slate-800">Client Acceptance</span>
-                </div>
-                <div className="p-4 space-y-3">
-                  {proposal.status === "accepted" ? (
-                    <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-3 flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                      <div>
-                        <p className="text-[12px] font-medium text-emerald-800">Proposal Accepted</p>
-                        {proposal.acceptedAt && (
-                          <p className="text-[11px] text-emerald-600">{formatDate(new Date(proposal.acceptedAt).toISOString())}</p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-[12px] text-slate-400">Awaiting client acceptance.</p>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/portal/${id}`); toast.success("Portal link copied"); }}>
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Copy link
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.info("PDF generation available in production")}>
+                      <Download className="h-3.5 w-3.5 mr-1.5" /> Download
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </section>
+
+            {/* ── Client Acceptance ── */}
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <User className="h-4 w-4 text-blue-500" />
+                <h3 className="text-[14px] font-semibold text-slate-800">Client Acceptance</h3>
+              </div>
+              {proposal.status === "accepted" ? (
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 px-5 py-3.5 flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <p className="text-[13px] font-semibold text-emerald-800">Proposal Accepted</p>
+                    {proposal.acceptedAt && (
+                      <p className="text-[11px] text-emerald-600">{formatDate(new Date(proposal.acceptedAt).toISOString())}</p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-slate-100 bg-white px-5 py-3.5">
+                  <p className="text-[13px] text-slate-400">Awaiting client acceptance.</p>
+                </div>
+              )}
+            </section>
+
+            {/* ── Engagement Letters ── */}
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ScrollText className="h-4 w-4 text-amber-600" />
+                  <h3 className="text-[14px] font-semibold text-slate-800">Engagement Letters</h3>
+                  {allLetters && allLetters.length > 0 && (
+                    <span className="text-[11px] text-slate-400 ml-1">({allLetters.length})</span>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateScopeLibraryLetter}
+                  disabled={generatingLetter}
+                  className="gap-1.5"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  {generatingLetter ? "Generating..." : "Generate letter"}
+                </Button>
+              </div>
+
+              {allLetters && allLetters.length > 0 ? (
+                <div className="rounded-xl border border-slate-100 bg-white overflow-hidden divide-y divide-slate-50">
+                  {/* Table header */}
+                  <div className="grid grid-cols-[1.2fr_1fr_0.7fr_0.7fr_0.7fr_0.7fr_36px] gap-3 px-5 py-2.5 bg-slate-50/60">
+                    {["Letter", "Type", "Status", "Sent", "Signed", "Expires", "Actions"].map((h) => (
+                      <span key={h} className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{h}</span>
+                    ))}
+                  </div>
+                  {/* Rows */}
+                  {allLetters.map((letter) => (
+                    <div key={letter._id} className="grid grid-cols-[1.2fr_1fr_0.7fr_0.7fr_0.7fr_0.7fr_36px] gap-3 px-5 py-3.5 items-center hover:bg-slate-50/50 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                          <ScrollText className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-slate-800 truncate">{letter.letterNumber}</p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] text-slate-500 truncate">{letter.serviceType || "General"}</span>
+                      <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium whitespace-nowrap w-fit",
+                        letter.status === "signed" ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : letter.status === "sent" || letter.status === "viewed" ? "bg-blue-50 text-blue-700 border border-blue-200"
+                        : "bg-slate-50 text-slate-600 border border-slate-200"
+                      )}>
+                        {letter.status.charAt(0).toUpperCase() + letter.status.slice(1)}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {letter.sentAt ? formatDate(new Date(letter.sentAt).toISOString()) : "—"}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {letter.signedAt ? formatDate(new Date(letter.signedAt).toISOString()) : "—"}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {letter.expiresAt ? formatDate(new Date(letter.expiresAt).toISOString()) : "—"}
+                      </span>
+                      <div className="flex justify-center">
+                        <LetterActionsDropdown letter={letter} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white px-5 py-8 text-center">
+                  <ScrollText className="h-8 w-8 text-slate-300 mx-auto mb-3" />
+                  <p className="text-[13px] text-slate-500 mb-1">No engagement letters yet</p>
+                  <p className="text-[11px] text-slate-400">Letters are auto-generated when the proposal is accepted, or you can generate one manually.</p>
+                </div>
+              )}
+            </section>
           </div>
         )}
       </div>
@@ -1316,6 +1378,26 @@ function ProposalDetailPageInner() {
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               Delete proposal
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deletingLetterId} onOpenChange={(v) => !v && setDeletingLetterId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete engagement letter?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This letter will be permanently deleted along with its signing session. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingLetterId && handleDeleteLetter(deletingLetterId)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete letter
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

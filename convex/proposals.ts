@@ -95,6 +95,11 @@ export const listProposals = query({
       ),
       cashFlowStartMonth: v.optional(v.string()),
       oneOffCashMonth: v.optional(v.string()),
+      engagementLetters: v.optional(v.array(v.object({
+        _id: v.id("engagementLetters"),
+        status: v.string(),
+        letterNumber: v.string(),
+      }))),
     })
   ),
   handler: async (ctx, args) => {
@@ -129,6 +134,11 @@ export const listProposals = query({
         const createdByUser = proposal.createdBy
           ? await ctx.db.get(proposal.createdBy)
           : null;
+        // Get all linked engagement letters
+        const engLetters = await ctx.db
+          .query("engagementLetters")
+          .withIndex("by_proposal", (q) => q.eq("proposalId", proposal._id))
+          .collect();
         return {
           _id: proposal._id,
           proposalNumber: proposal.proposalNumber,
@@ -150,6 +160,9 @@ export const listProposals = query({
           paymentSchedule: proposal.paymentSchedule,
           cashFlowStartMonth: proposal.cashFlowStartMonth,
           oneOffCashMonth: proposal.oneOffCashMonth,
+          engagementLetters: engLetters.length > 0
+            ? engLetters.map((l) => ({ _id: l._id, status: l.status, letterNumber: l.letterNumber }))
+            : undefined,
         };
       })
     );

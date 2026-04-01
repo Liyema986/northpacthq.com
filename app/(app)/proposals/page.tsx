@@ -20,7 +20,7 @@ import {
   Plus, Search, FileText, TrendingUp, CheckCircle2,
   Clock, Copy, Trash2, MoreHorizontal,
   Eye, Pencil, Send, User, History, Banknote, FilePlus,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, ScrollText,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ type ConvexProposal = {
   oneOffFee?: number;
   startMonth?: string;
   createdByName?: string;
+  engagementLetters?: { _id: Id<"engagementLetters">; status: string; letterNumber: string }[];
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -85,7 +86,7 @@ function getSigBadge(s: string) {
   return "bg-slate-50 border border-slate-200 text-slate-500";
 }
 
-const GRID = "grid-cols-[28px_36px_1fr_120px_130px_72px_72px_100px_96px_130px_110px_44px]";
+const GRID = "grid-cols-[26px_26px_1.5fr_1fr_1fr_0.7fr_0.6fr_0.6fr_0.6fr_0.8fr_0.8fr_0.9fr_36px]";
 const ITEMS_PER_PAGE = 10;
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -235,6 +236,39 @@ export default function ProposalsPage() {
               <Send className="h-4 w-4 shrink-0 text-violet-500" /> Send to client
             </DropdownMenuItem>
           )}
+          {(p.engagementLetters && p.engagementLetters.length > 0) ? (
+            p.engagementLetters.length === 1 ? (
+              <DropdownMenuItem asChild>
+                <Link href={`/engagement-letters`} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
+                  <ScrollText className="h-4 w-4 shrink-0 text-emerald-500" />
+                  Engagement letter
+                  <span className={cn("ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded",
+                    p.engagementLetters[0].status === "signed" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
+                  )}>{p.engagementLetters[0].status}</span>
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <>
+                {p.engagementLetters.map((el) => (
+                  <DropdownMenuItem key={el._id} asChild>
+                    <Link href={`/engagement-letters`} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
+                      <ScrollText className="h-4 w-4 shrink-0 text-emerald-500" />
+                      <span className="truncate">{el.letterNumber}</span>
+                      <span className={cn("ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded",
+                        el.status === "signed" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
+                      )}>{el.status}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )
+          ) : (
+            <DropdownMenuItem asChild>
+              <Link href={`/engagement-letters`} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
+                <ScrollText className="h-4 w-4 shrink-0 text-amber-500" /> Engagement letter
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => handleDuplicate(p._id)} className="flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-md">
             <Copy className="h-4 w-4 shrink-0 text-slate-400" /> Duplicate
           </DropdownMenuItem>
@@ -326,7 +360,7 @@ export default function ProposalsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[1100px]">
+            <div className="min-w-[1020px]">
               <div className={cn("grid px-4 py-2.5 border-b border-slate-50 gap-3 bg-slate-50/60", GRID)}>
                 <div className="flex items-center justify-center">
                   <input type="checkbox"
@@ -339,7 +373,7 @@ export default function ProposalsPage() {
                     }}
                     className="h-3.5 w-3.5 rounded border-slate-300 accent-[#C8A96E]" />
                 </div>
-                {["#","Client / Proposal","Number","Value","Status","Email","Signatures","Start date","Created by","Created","Actions"].map((h, i) => (
+                {["#","Client / Proposal","Number","Value","Status","Letter","Email","Signed","Start","Created by","Created","Actions"].map((h, i) => (
                   <span key={i} className={cn("text-[10px] font-bold tracking-[0.14em] uppercase text-slate-400 whitespace-nowrap", h === "#" && "text-right")}>{h}</span>
                 ))}
               </div>
@@ -350,16 +384,17 @@ export default function ProposalsPage() {
                     <div key={i} className={cn("grid px-4 py-4 gap-3 items-center", GRID)}>
                       <Skeleton className="h-3.5 w-3.5 mx-auto rounded" />
                       <Skeleton className="h-3 w-4 ml-auto" />
-                      <Skeleton className="h-9 w-44" />
-                      <Skeleton className="h-3 w-12" />
-                      <Skeleton className="h-9 w-28" />
-                      <Skeleton className="h-5 w-14 rounded" />
-                      <Skeleton className="h-5 w-14 rounded" />
-                      <Skeleton className="h-5 w-22 rounded" />
-                      <Skeleton className="h-3 w-20" />
-                      <Skeleton className="h-3 w-24" />
-                      <Skeleton className="h-9 w-24" />
-                      <Skeleton className="h-6 w-6 rounded mx-auto" />
+                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-3 w-14" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-12 rounded" />
+                      <Skeleton className="h-4 w-10 rounded" />
+                      <Skeleton className="h-4 w-10 rounded" />
+                      <Skeleton className="h-4 w-10 rounded" />
+                      <Skeleton className="h-3 w-14" />
+                      <Skeleton className="h-3 w-14" />
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-5 w-5 rounded mx-auto" />
                     </div>
                   ))}
                 </div>
@@ -457,21 +492,33 @@ export default function ProposalsPage() {
                               {statusLabel}
                             </span>
 
+                            {(() => {
+                              const letters = latest.engagementLetters;
+                              if (!letters || letters.length === 0) return <span className="text-[10px] text-slate-300 pt-1">—</span>;
+                              const allSigned = letters.every((l) => l.status === "signed");
+                              const anySent = letters.some((l) => l.status === "sent" || l.status === "viewed");
+                              const label = allSigned ? "Signed" : anySent ? `${letters.filter((l) => l.status === "signed").length}/${letters.length}` : letters[0].status.charAt(0).toUpperCase() + letters[0].status.slice(1);
+                              const cls = allSigned ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : anySent ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                : "bg-slate-50 text-slate-600 border border-slate-200";
+                              return <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mt-0.5 whitespace-nowrap", cls)}>{label}</span>;
+                            })()}
+
                             {emailBadge ? (
-                              <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mt-0.5 whitespace-nowrap", emailBadge)}>{emailStatus}</span>
+                              <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium mt-0.5 whitespace-nowrap", emailBadge)}>{emailStatus}</span>
                             ) : (
-                              <span className="text-[11px] text-slate-400 pt-1">{emailStatus}</span>
+                              <span className="text-[10px] text-slate-400 pt-1 truncate">{emailStatus}</span>
                             )}
 
-                            <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium mt-0.5 whitespace-nowrap", sigBadge)}>
+                            <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium mt-0.5 whitespace-nowrap", sigBadge)}>
                               {sigStatus}
                             </span>
 
-                            <span className="text-[11px] text-slate-600 pt-1">{startDate}</span>
-                            <span className="text-[11px] text-slate-400 pt-1">{createdBy}</span>
+                            <span className="text-[10px] text-slate-600 pt-1 truncate">{startDate}</span>
+                            <span className="text-[10px] text-slate-400 pt-1 truncate">{createdBy}</span>
 
                             <div className="pt-0.5">
-                              <p className="text-[11px] text-slate-700 leading-tight">{formatDate(latest.createdAt)}</p>
+                              <p className="text-[10px] text-slate-700 leading-tight">{formatDate(latest.createdAt)}</p>
                             </div>
 
                             <div className="flex justify-center pt-1">
@@ -504,16 +551,24 @@ export default function ProposalsPage() {
                                   )}
                                 </div>
                                 <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap", getStatusCls(hp.status))}>{getStatusLabel(hp.status)}</span>
+                                {(() => {
+                                  const letters = hp.engagementLetters;
+                                  if (!letters || letters.length === 0) return <span className="text-[10px] text-slate-300">—</span>;
+                                  const allSigned = letters.every((l) => l.status === "signed");
+                                  const label = allSigned ? "Signed" : letters[0].status.charAt(0).toUpperCase() + letters[0].status.slice(1);
+                                  const cls = allSigned ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-blue-50 text-blue-700 border border-blue-200";
+                                  return <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap", cls)}>{label}</span>;
+                                })()}
                                 {hEmailBdg ? (
-                                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap", hEmailBdg)}>{hEmail}</span>
+                                  <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium whitespace-nowrap", hEmailBdg)}>{hEmail}</span>
                                 ) : (
-                                  <span className="text-[11px] text-slate-400">{hEmail}</span>
+                                  <span className="text-[10px] text-slate-400 truncate">{hEmail}</span>
                                 )}
-                                <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium whitespace-nowrap", hSigBdg)}>{hSig}</span>
-                                <span className="text-[11px] text-slate-500">{getStartDate(hp)}</span>
-                                <span className="text-[11px] text-slate-400">{hp.createdByName ?? "—"}</span>
+                                <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium whitespace-nowrap", hSigBdg)}>{hSig}</span>
+                                <span className="text-[10px] text-slate-500 truncate">{getStartDate(hp)}</span>
+                                <span className="text-[10px] text-slate-400 truncate">{hp.createdByName ?? "—"}</span>
                                 <div>
-                                  <p className="text-[11px] text-slate-500 leading-tight">{formatDate(hp.createdAt)}</p>
+                                  <p className="text-[10px] text-slate-500 leading-tight">{formatDate(hp.createdAt)}</p>
                                 </div>
                                 <div className="flex justify-center">
                                   <ActionsDropdown p={hp} isHistory />
@@ -535,13 +590,29 @@ export default function ProposalsPage() {
                         <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors">
                           <ChevronLeft className="h-3.5 w-3.5" />
                         </button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                          <button key={n} onClick={() => setPage(n)}
-                            className={cn("h-7 w-7 flex items-center justify-center rounded-md text-[11px] font-semibold transition-colors", n === page ? "text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100")}
-                            style={n === page ? { background: "#C8A96E" } : {}}>
-                            {n}
-                          </button>
-                        ))}
+                        {(() => {
+                          const pages: (number | "...")[] = [];
+                          if (totalPages <= 7) {
+                            for (let i = 1; i <= totalPages; i++) pages.push(i);
+                          } else {
+                            pages.push(1);
+                            if (page > 3) pages.push("...");
+                            for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+                            if (page < totalPages - 2) pages.push("...");
+                            pages.push(totalPages);
+                          }
+                          return pages.map((p, idx) =>
+                            p === "..." ? (
+                              <span key={`dots-${idx}`} className="h-7 w-7 flex items-center justify-center text-[11px] text-slate-400">...</span>
+                            ) : (
+                              <button key={p} onClick={() => setPage(p)}
+                                className={cn("h-7 w-7 flex items-center justify-center rounded-md text-[11px] font-semibold transition-colors", p === page ? "text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100")}
+                                style={p === page ? { background: "#C8A96E" } : {}}>
+                                {p}
+                              </button>
+                            )
+                          );
+                        })()}
                         <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors">
                           <ChevronRight className="h-3.5 w-3.5" />
                         </button>

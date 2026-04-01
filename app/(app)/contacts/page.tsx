@@ -534,18 +534,34 @@ export default function ContactsPage() {
                     >
                       <ChevronLeft className="h-3.5 w-3.5" />
                     </button>
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setPage(i)}
-                        className={cn("h-7 w-7 flex items-center justify-center rounded-md text-[11px] font-semibold transition-colors",
-                          page === i ? "text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                        )}
-                        style={page === i ? { background: "#C8A96E" } : {}}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
+                    {(() => {
+                      const pages: (number | "...")[] = [];
+                      if (totalPages <= 7) {
+                        for (let i = 0; i < totalPages; i++) pages.push(i);
+                      } else {
+                        pages.push(0);
+                        if (page > 2) pages.push("...");
+                        for (let i = Math.max(1, page - 1); i <= Math.min(totalPages - 2, page + 1); i++) pages.push(i);
+                        if (page < totalPages - 3) pages.push("...");
+                        pages.push(totalPages - 1);
+                      }
+                      return pages.map((p, idx) =>
+                        p === "..." ? (
+                          <span key={`dots-${idx}`} className="h-7 w-7 flex items-center justify-center text-[11px] text-slate-400">...</span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => setPage(p)}
+                            className={cn("h-7 w-7 flex items-center justify-center rounded-md text-[11px] font-semibold transition-colors",
+                              page === p ? "text-white" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                            )}
+                            style={page === p ? { background: "#C8A96E" } : {}}
+                          >
+                            {p + 1}
+                          </button>
+                        )
+                      );
+                    })()}
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                       disabled={page === totalPages - 1}

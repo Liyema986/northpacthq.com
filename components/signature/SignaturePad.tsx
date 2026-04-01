@@ -184,15 +184,15 @@ export function SignaturePad({ onSignatureChange, disabled, proposalMode, allowU
                     ref={signatureRef}
                     canvasProps={{
                       className: "w-full h-32 bg-transparent relative z-10",
-                      style: { width: "100%", height: "128px", cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23243E63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E\") 2 22, crosshair" },
+                      style: { width: "100%", height: "128px", cursor: "crosshair" },
                     }}
                     onEnd={handleDrawEndWithReplace}
-                    penColor="#1e293b"
+                    penColor="#1a1a2e"
                     backgroundColor="rgba(255, 255, 255, 0)"
-                    minWidth={1}
-                    maxWidth={4}
-                    velocityFilterWeight={0.4}
-                    dotSize={2}
+                    minWidth={0.5}
+                    maxWidth={1.5}
+                    velocityFilterWeight={0.7}
+                    dotSize={0.5}
                   />
                   {!hasDrawn && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">

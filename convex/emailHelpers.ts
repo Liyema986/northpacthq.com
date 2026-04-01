@@ -377,3 +377,32 @@ export const getScheduledEmailsDueInternal = internalQuery({
       .collect();
   },
 });
+
+/**
+ * Internal: Get all engagement letters + signing sessions for a proposal (for multi-letter emails).
+ */
+export const getLettersWithSessionsForProposal = internalQuery({
+  args: { proposalId: v.id("proposals") },
+  handler: async (ctx, args) => {
+    const letters = await ctx.db
+      .query("engagementLetters")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", args.proposalId))
+      .collect();
+
+    const results = [];
+    for (const letter of letters) {
+      const session = await ctx.db
+        .query("signingSessions")
+        .filter((q) => q.eq(q.field("letterId"), letter._id))
+        .first();
+      results.push({
+        letterId: letter._id,
+        letterNumber: letter.letterNumber,
+        serviceType: letter.serviceType,
+        status: letter.status,
+        signingToken: session?.token ?? null,
+      });
+    }
+    return results;
+  },
+});

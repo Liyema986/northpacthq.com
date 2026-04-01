@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type Tab = "home" | "setup" | "messages" | "help";
 
@@ -225,6 +226,10 @@ export function SupportChatWidget() {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const anyModalOpen = useAnyModalOpen();
+  const pathname = usePathname();
+
+  // Hide on specific pages (proposal detail, sign, client detail)
+  const hideOnPage = /^\/(proposals|sign|clients)\/[^/]+/.test(pathname ?? "");
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -363,7 +368,7 @@ export function SupportChatWidget() {
         zIndex: 2147483647,
         width: 52,
         height: 52,
-        display: open || anyModalOpen ? "none" : "block",
+        display: open || anyModalOpen || hideOnPage ? "none" : "block",
       }}
     >
       <button

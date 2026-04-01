@@ -248,6 +248,25 @@ export const getLetterByProposal = query({
 });
 
 /**
+ * Get ALL engagement letters linked to a proposal.
+ */
+export const getLettersByProposal = query({
+  args: {
+    userId: v.id("users"),
+    proposalId: v.id("proposals"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return [];
+    const letters = await ctx.db
+      .query("engagementLetters")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", args.proposalId))
+      .collect();
+    return letters.filter((l) => l.firmId === user.firmId);
+  },
+});
+
+/**
  * List all engagement letters
  */
 export const listLetters = query({
@@ -366,6 +385,92 @@ export const sendForSignature = mutation({
     });
 
     return { success: true };
+  },
+});
+
+/**
+ * Delete an engagement letter (only draft or sent, not signed).
+ */
+export const deleteLetter = mutation({
+  args: {
+    userId: v.id("users"),
+    letterId: v.id("engagementLetters"),
+  },
+  returns: v.object({ success: v.boolean(), error: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return { success: false, error: "User not found" };
+    const letter = await ctx.db.get(args.letterId);
+    if (!letter || letter.firmId !== user.firmId) return { success: false, error: "Letter not found" };
+    if (letter.status === "signed") return { success: false, error: "Cannot delete a signed letter" };
+
+    // Delete associated signing sessions
+    const sessions = await ctx.db
+      .query("signingSessions")
+      .filter((q) => q.eq(q.field("letterId"), args.letterId))
+      .collect();
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+
+    await ctx.db.delete(args.letterId);
+    await ctx.db.insert("activities", {
+      firmId: user.firmId,
+      userId: args.userId,
+      entityType: "engagement-letter",
+      entityId: args.letterId,
+      action: "deleted",
+      metadata: { letterNumber: letter.letterNumber },
+      timestamp: Date.now(),
+    });
+    return { success: true };
+  },
+});
+
+/**
+ * Resend signing link email for an engagement letter.
+ */
+export const resendSigningLink = mutation({
+  args: {
+    userId: v.id("users"),
+    letterId: v.id("engagementLetters"),
+  },
+  returns: v.object({ success: v.boolean(), signingToken: v.optional(v.string()), error: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return { success: false, error: "User not found" };
+    const letter = await ctx.db.get(args.letterId);
+    if (!letter || letter.firmId !== user.firmId) return { success: false, error: "Letter not found" };
+    if (letter.status === "signed") return { success: false, error: "Letter already signed" };
+
+    // Find or create signing session
+    let session = await ctx.db
+      .query("signingSessions")
+      .filter((q) => q.eq(q.field("letterId"), args.letterId))
+      .first();
+
+    if (!session || session.expiresAt < Date.now()) {
+      // Create new session
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let token = "";
+      for (let i = 0; i < 64; i++) token += chars.charAt(Math.floor(Math.random() * chars.length));
+      const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+      await ctx.db.insert("signingSessions", {
+        firmId: letter.firmId,
+        letterId: args.letterId,
+        token,
+        status: "pending",
+        createdBy: args.userId,
+        expiresAt,
+        createdAt: Date.now(),
+      });
+      if (letter.status === "draft") {
+        await ctx.db.patch(args.letterId, { status: "sent", sentAt: Date.now(), updatedAt: Date.now() });
+      }
+      return { success: true, signingToken: token };
+    }
+
+    return { success: true, signingToken: session.token };
   },
 });
 
@@ -1587,30 +1692,47 @@ export const generateAndLinkSigningSession = internalMutation({
       isNew = true;
     }
 
-    // Create signing session (same logic as signatures.generateSigningLink)
+    // Create signing sessions for ALL letters that don't have one yet
+    const allLetters = await ctx.db
+      .query("engagementLetters")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", args.proposalId))
+      .collect();
+
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let token = "";
-    for (let i = 0; i < 64; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
     const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
 
-    await ctx.db.insert("signingSessions", {
-      firmId: proposal.firmId,
-      letterId,
-      token,
-      status: "pending",
-      createdBy: args.createdByUserId,
-      expiresAt,
-      createdAt: Date.now(),
-    });
+    for (const letter of allLetters) {
+      // Check if this letter already has a signing session
+      const existingSession = await ctx.db
+        .query("signingSessions")
+        .filter((q) => q.eq(q.field("letterId"), letter._id))
+        .first();
+      if (existingSession) continue;
 
-    // Mark letter as sent
-    await ctx.db.patch(letterId, {
-      status: "sent",
-      sentAt: Date.now(),
-      updatedAt: Date.now(),
-    });
+      let token = "";
+      for (let i = 0; i < 64; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      await ctx.db.insert("signingSessions", {
+        firmId: proposal.firmId,
+        letterId: letter._id,
+        token,
+        status: "pending",
+        createdBy: args.createdByUserId,
+        expiresAt,
+        createdAt: Date.now(),
+      });
+
+      // Mark letter as sent
+      if (letter.status === "draft") {
+        await ctx.db.patch(letter._id, {
+          status: "sent",
+          sentAt: Date.now(),
+          updatedAt: Date.now(),
+        });
+      }
+    }
 
     await ctx.db.insert("activities", {
       firmId: proposal.firmId,
@@ -1622,6 +1744,12 @@ export const generateAndLinkSigningSession = internalMutation({
       timestamp: Date.now(),
     });
 
-    return { signingUrl: `/sign/${token}`, letterId, letterNumber, isNew };
+    // Get the signing session for the first letter to return the URL
+    const firstSession = await ctx.db
+      .query("signingSessions")
+      .filter((q) => q.eq(q.field("letterId"), letterId))
+      .first();
+
+    return { signingUrl: firstSession ? `/sign/${firstSession.token}` : `/sign/unknown`, letterId, letterNumber, isNew };
   },
 });

@@ -7,12 +7,30 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { SignaturePad } from "@/components/signature/SignaturePad";
-import { CheckCircle, AlertTriangle, FileText, Clock, Shield } from "lucide-react";
+import { CheckCircle, AlertTriangle, FileText, Clock, Shield, Loader2, Pen, X, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
+
+const NAVY = "#243E63";
+const GOLD = "#C8A96E";
+
+function triggerConfetti() {
+  const duration = 2.5 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 30, spread: 360, ticks: 80, zIndex: 9999 };
+  const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+  const interval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+    if (timeLeft <= 0) return clearInterval(interval);
+    const particleCount = 50 * (timeLeft / duration);
+    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: [GOLD, "#b8955a", "#d4bc8a", NAVY, "#ffffff"] });
+    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: [GOLD, "#b8955a", "#d4bc8a", NAVY, "#ffffff"] });
+  }, 150);
+  setTimeout(() => clearInterval(interval), duration);
+}
 
 export default function SigningPage() {
   const params = useParams();
@@ -28,27 +46,14 @@ export default function SigningPage() {
   const signingSession = useQuery(api.signatures.getSigningSession, { token });
   const submitSignature = useMutation(api.signatures.submitSignature);
 
-  // Get client info on mount
   useEffect(() => {
-    setClientInfo({
-      ip: "Client IP", // In production, get from API route
-      userAgent: navigator.userAgent,
-    });
+    setClientInfo({ ip: "Client IP", userAgent: navigator.userAgent });
   }, []);
 
   const handleSubmit = async () => {
-    if (!signerName.trim()) {
-      toast.error("Please enter your full name");
-      return;
-    }
-    if (!signatureData) {
-      toast.error("Please provide your signature");
-      return;
-    }
-    if (!agreedToTerms) {
-      toast.error("Please agree to the terms");
-      return;
-    }
+    if (!signerName.trim()) { toast.error("Please enter your full name"); return; }
+    if (!signatureData) { toast.error("Please provide your signature"); return; }
+    if (!agreedToTerms) { toast.error("Please agree to the terms"); return; }
 
     setIsSubmitting(true);
     try {
@@ -59,8 +64,8 @@ export default function SigningPage() {
         ipAddress: clientInfo.ip,
         userAgent: clientInfo.userAgent,
       });
-
       setIsComplete(true);
+      setTimeout(() => triggerConfetti(), 300);
       toast.success("Document signed successfully!");
     } catch (error: any) {
       toast.error(error.message);
@@ -69,192 +74,214 @@ export default function SigningPage() {
     }
   };
 
-  // Error state
+  // ── Error state ──
   if (signingSession?.error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
-            <AlertTriangle className="h-12 w-12 mx-auto text-amber-500 mb-4" />
-            <CardTitle>Unable to Sign</CardTitle>
-            <CardDescription>{signingSession.error}</CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-sm text-muted-foreground">
-              Please contact the sender if you believe this is an error.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#f8fafc" }}>
+        <div className="w-full max-w-md text-center">
+          <div className="flex justify-center mb-5">
+            <div className="h-16 w-16 rounded-full flex items-center justify-center" style={{ backgroundColor: "#fef3c7" }}>
+              <AlertTriangle className="h-8 w-8 text-amber-500" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Unable to Sign</h1>
+          <p className="text-[15px] text-slate-500 mb-6">{signingSession.error}</p>
+          <p className="text-[13px] text-slate-400">Please contact the sender if you believe this is an error.</p>
+        </div>
       </div>
     );
   }
 
-  // Loading state
+  // ── Loading state ──
   if (!signingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <Clock className="h-8 w-8 mx-auto text-muted-foreground animate-pulse mb-4" />
-            <p>Loading document...</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#f8fafc" }}>
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" style={{ color: GOLD }} />
+          <p className="text-[14px] text-slate-500">Loading document...</p>
+        </div>
       </div>
     );
   }
 
-  // Success state
+  // ── Success state ──
   if (isComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-        <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
-            <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-            <CardTitle className="text-2xl">Successfully Signed!</CardTitle>
-            <CardDescription>
-              Thank you for signing the engagement letter
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              A copy of the signed document has been sent to your email address.
-            </p>
-            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-              <p className="text-sm font-medium">Document Details</p>
-              <p className="text-sm text-muted-foreground">
-                {signingSession.letter?.letterNumber}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Signed by: {signerName}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Date: {new Date().toLocaleDateString()}
-              </p>
+      <div className="min-h-screen flex items-center justify-center p-6 relative" style={{ backgroundColor: "#f8fafc" }}>
+        <div className="w-full max-w-lg text-center">
+          <div className="flex justify-center mb-5">
+            <div className="h-20 w-20 rounded-full flex items-center justify-center" style={{ backgroundColor: `${GOLD}20` }}>
+              <CheckCircle className="h-10 w-10" style={{ color: GOLD }} />
             </div>
-          </CardContent>
-          <CardFooter className="justify-center">
-            <p className="text-xs text-muted-foreground text-center">
-              You may close this window
-            </p>
-          </CardFooter>
-        </Card>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2" style={{ color: GOLD }}>Successfully Signed!</h1>
+          <p className="text-[15px] text-slate-500 mb-8">Thank you for signing the engagement letter</p>
+
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-w-sm mx-auto text-left mb-8">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Document</p>
+              <p className="text-[14px] text-slate-700 font-medium">{signingSession.letter?.letterNumber || "—"}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Signed by</p>
+              <p className="text-[14px] text-slate-700 font-medium">{signerName}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Date</p>
+              <p className="text-[14px] text-slate-700 font-medium">{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Status</p>
+              <p className="text-[14px] font-medium" style={{ color: GOLD }}>Complete</p>
+            </div>
+          </div>
+
+          <div className="h-px max-w-xs mx-auto mb-6" style={{ backgroundColor: `${GOLD}40` }} />
+
+          <p className="text-[13px] text-slate-400 mb-6">A copy of the signed document has been sent to your email address.</p>
+
+          <div className="flex items-center justify-center gap-3">
+            <Button size="lg" className="rounded-full px-6 text-[14px] font-semibold text-white" style={{ backgroundColor: GOLD }}
+              onClick={() => window.close()}>
+              <Mail className="h-4 w-4 mr-2" /> Back to email
+            </Button>
+            <Button size="lg" variant="outline" className="rounded-full px-6 text-[14px]" onClick={() => window.close()}>
+              <X className="h-4 w-4 mr-2" /> Close
+            </Button>
+          </div>
+
+          <p className="text-center mt-8 text-[11px] text-slate-400">
+            Powered by <span className="font-semibold" style={{ color: GOLD }}>NorthPact</span>
+          </p>
+        </div>
       </div>
     );
   }
 
+  // ── Main signing form ──
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  {signingSession.firmName}
-                </CardTitle>
-                <CardDescription>
-                  Engagement Letter • {signingSession.letter?.letterNumber}
-                </CardDescription>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium">{signingSession.clientName}</p>
-                <p className="text-xs text-muted-foreground">Client</p>
-              </div>
+    <div className="min-h-screen" style={{ backgroundColor: "#f8fafc" }}>
+      {/* Top bar */}
+      <div className="border-b border-slate-100 bg-white">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${NAVY}10` }}>
+              <FileText className="h-5 w-5" style={{ color: NAVY }} />
             </div>
-          </CardHeader>
-        </Card>
-
-        {/* Document Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Document to Sign</CardTitle>
-            <CardDescription>
-              Please review the engagement letter carefully before signing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px] border rounded-lg bg-white p-4">
-              <div
-                className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: signingSession.letter?.content || "",
-                }}
-              />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-
-        {/* Signature Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Your Signature</CardTitle>
-            <CardDescription>
-              Sign below to accept the terms of this engagement letter
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
             <div>
-              <Label htmlFor="signer-name">Full Legal Name *</Label>
+              <h1 className="text-[15px] font-semibold text-slate-800">{signingSession.firmName}</h1>
+              <p className="text-[12px] text-slate-400">Engagement Letter &bull; {signingSession.letter?.letterNumber}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-[14px] font-semibold text-slate-700">{signingSession.clientName}</p>
+            <p className="text-[11px] text-slate-400">Client</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 py-8 space-y-10">
+
+        {/* Section 1: Document */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-7 w-7 rounded-full flex items-center justify-center text-[12px] font-bold text-white" style={{ backgroundColor: NAVY }}>1</div>
+            <h2 className="text-[16px] font-semibold text-slate-800">Review Document</h2>
+          </div>
+          <p className="text-[13px] text-slate-500 mb-4">Please review the engagement letter carefully before signing.</p>
+          <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
+            <div className="h-[450px] overflow-y-auto scrollbar-hide p-6 sm:p-8">
+              <div
+                className="prose prose-sm max-w-none prose-headings:text-slate-800 prose-p:text-slate-600 prose-p:leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: signingSession.letter?.content || "" }}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Section 2: Signature */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-7 w-7 rounded-full flex items-center justify-center text-[12px] font-bold text-white" style={{ backgroundColor: NAVY }}>2</div>
+            <h2 className="text-[16px] font-semibold text-slate-800">Your Signature</h2>
+          </div>
+          <p className="text-[13px] text-slate-500 mb-6">Sign below to accept the terms of this engagement letter.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div>
+              <Label htmlFor="signer-name" className="text-[13px] font-medium text-slate-700">Full legal name</Label>
               <Input
                 id="signer-name"
                 value={signerName}
                 onChange={(e) => setSignerName(e.target.value)}
                 placeholder="Enter your full legal name"
-                className="mt-1"
+                className="mt-1.5 h-11 text-[14px] border-slate-200 focus:border-[#C8A96E]"
               />
             </div>
-
             <div>
-              <Label>Signature *</Label>
-              <div className="mt-1">
-                <SignaturePad
-                  onSignatureChange={setSignatureData}
-                  disabled={isSubmitting}
-                />
+              <Label className="text-[13px] font-medium text-slate-700">Date</Label>
+              <div className="mt-1.5 h-11 flex items-center px-3 rounded-lg border border-slate-200 bg-slate-50 text-[14px] text-slate-600">
+                {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
               </div>
             </div>
+          </div>
 
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="agree-terms"
-                checked={agreedToTerms}
-                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-              />
-              <Label htmlFor="agree-terms" className="text-sm leading-relaxed cursor-pointer">
-                I have read and agree to the terms of this engagement letter. I understand
-                that my electronic signature is legally binding and equivalent to a
-                handwritten signature.
-              </Label>
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col gap-4">
+          <div className="mb-6">
+            <Label className="text-[13px] font-medium text-slate-700 mb-2 block">Signature</Label>
+            <SignaturePad
+              onSignatureChange={setSignatureData}
+              disabled={isSubmitting}
+              proposalMode
+              allowUpload
+            />
+          </div>
+
+          <div className="flex items-start gap-3 mb-8">
+            <Checkbox
+              id="agree-terms"
+              checked={agreedToTerms}
+              onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              className="mt-0.5"
+            />
+            <Label htmlFor="agree-terms" className="text-[13px] text-slate-600 leading-relaxed cursor-pointer">
+              I have read and agree to the terms of this engagement letter. I understand
+              that my electronic signature is legally binding and equivalent to a
+              handwritten signature.
+            </Label>
+          </div>
+
+          <div className="flex items-center gap-4">
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !signerName || !signatureData || !agreedToTerms}
-              className="w-full"
               size="lg"
+              className="rounded-lg text-[14px] font-semibold text-white px-8"
+              style={{ backgroundColor: GOLD }}
             >
-              {isSubmitting ? "Signing..." : "Sign Document"}
+              {isSubmitting ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing...</>
+              ) : (
+                <><Pen className="h-4 w-4 mr-2" /> Sign Document</>
+              )}
             </Button>
-
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Shield className="h-4 w-4" />
-              <span>
-                Your signature is encrypted and stored securely with a complete audit trail
-              </span>
+            <div className="flex items-center gap-2 text-[12px] text-slate-400">
+              <Shield className="h-4 w-4 shrink-0" />
+              <span>Encrypted &amp; stored securely with a complete audit trail</span>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </section>
+      </div>
 
-        {/* Footer */}
-        <div className="text-center text-xs text-muted-foreground">
-          <p>Powered by ProProposals • Secure Electronic Signatures</p>
-          <p className="mt-1">
-            This signing session expires on{" "}
-            {signingSession.session?.expiresAt
-              ? new Date(signingSession.session.expiresAt).toLocaleDateString()
+      {/* Footer */}
+      <div className="border-t border-slate-100 mt-8">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <p className="text-[11px] text-slate-400">
+            Powered by <span className="font-semibold" style={{ color: GOLD }}>NorthPact</span>
+          </p>
+          <p className="text-[11px] text-slate-400">
+            Expires {signingSession.session?.expiresAt
+              ? new Date(signingSession.session.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
               : "N/A"}
           </p>
         </div>

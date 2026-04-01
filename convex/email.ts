@@ -834,6 +834,10 @@ export const sendEngagementLetterEmail = action({
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.CONVEX_SITE_URL ?? "";
     const signingUrl = `${siteUrl}${result.signingUrl}`;
     const primaryColor = firm.brandColors?.primary ?? "#C8A96E";
+
+    // Fetch ALL letters + signing sessions for this proposal (for multi-letter emails)
+    const allLetters = await ctx.runQuery(internal.emailHelpers.getLettersWithSessionsForProposal, { proposalId: args.proposalId });
+    const hasMultipleLetters = allLetters.length > 1;
     const secondaryColor = firm.brandColors?.secondary ?? "#243E63";
     const clientName =
       (client as any).contactName || (client as any).companyName || "Client";
@@ -856,19 +860,42 @@ export const sendEngagementLetterEmail = action({
         <p style="margin:0 0 24px;font-size:15px;color:#475569;">
           Thank you for accepting our proposal. Please review and sign your engagement letter at your earliest convenience.
         </p>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
-          <tr><td style="padding:20px 24px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${primaryColor};letter-spacing:0.05em;text-transform:uppercase;">Letter details</p>
-            <p style="margin:0;font-size:14px;color:#334155;"><strong>Letter number:</strong> ${result.letterNumber}</p>
-            <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Proposal:</strong> ${proposal.title}</p>
-          </td></tr>
-        </table>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 24px;">
-          <tr><td align="center">
-            <a href="${signingUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">Sign Engagement Letter</a>
-          </td></tr>
-        </table>
-        <p style="margin:0 0 8px;font-size:13px;color:#94a3b8;text-align:center;">Or copy this link:<br>${signingUrl}</p>
+        ${hasMultipleLetters ? `
+            <p style="margin:0 0 16px;font-size:14px;color:#475569;">You have <strong>${allLetters.length} engagement letters</strong> to sign for this proposal. Please sign each one below:</p>
+            ${allLetters.map((l, i) => {
+              const lUrl = l.signingToken ? `${siteUrl}/sign/${l.signingToken}` : signingUrl;
+              return `
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+                <tr><td style="padding:16px 24px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td>
+                        <p style="margin:0;font-size:13px;font-weight:600;color:${primaryColor};">Letter ${i + 1} of ${allLetters.length}</p>
+                        <p style="margin:4px 0 0;font-size:14px;color:#334155;"><strong>${l.letterNumber}</strong> — ${l.serviceType || "General"}</p>
+                      </td>
+                      <td align="right" valign="middle">
+                        <a href="${lUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:10px 24px;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px;">Sign</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td></tr>
+              </table>`;
+            }).join("")}
+        ` : `
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+              <tr><td style="padding:20px 24px;">
+                <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${primaryColor};letter-spacing:0.05em;text-transform:uppercase;">Letter details</p>
+                <p style="margin:0;font-size:14px;color:#334155;"><strong>Letter number:</strong> ${result.letterNumber}</p>
+                <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Proposal:</strong> ${proposal.title}</p>
+              </td></tr>
+            </table>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 24px;">
+              <tr><td align="center">
+                <a href="${signingUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">Sign Engagement Letter</a>
+              </td></tr>
+            </table>
+            <p style="margin:0 0 8px;font-size:13px;color:#94a3b8;text-align:center;">Or copy this link:<br>${signingUrl}</p>
+        `}
         <p style="margin:24px 0 0;font-size:15px;color:#334155;">Kind regards,<br><strong>${firm.name}</strong></p>
       </td>
     </tr>
