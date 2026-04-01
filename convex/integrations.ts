@@ -800,10 +800,11 @@ export const getXeroEntitiesForGroup = action({
         incomeTaxRange: v.string(),
       })),
       primaryClientId: v.union(v.id("clients"), v.null()),
+      xeroContactIds: v.array(v.string()),
     }),
     v.object({ error: v.string() })
   ),
-  handler: async (ctx, args): Promise<{ entities: Array<{ name: string; type: string; revenueRange: string; incomeTaxRange: string }>; primaryClientId: Id<"clients"> | null } | { error: string }> => {
+  handler: async (ctx, args): Promise<{ entities: Array<{ name: string; type: string; revenueRange: string; incomeTaxRange: string }>; primaryClientId: Id<"clients"> | null; xeroContactIds: string[] } | { error: string }> => {
     try {
       const user = await ctx.runQuery(internal.internal.getUserInternal, { userId: args.userId });
       if (!user) return { error: "User not found" };
@@ -852,9 +853,14 @@ export const getXeroEntitiesForGroup = action({
         }
       }
 
+      const xeroContactIds = contacts
+        .map((c) => (c.ContactID ?? "").trim())
+        .filter(Boolean);
+
       return {
         entities,
         primaryClientId,
+        xeroContactIds,
       };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

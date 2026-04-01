@@ -10,7 +10,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
 import { useNorthPactAuth } from "@/lib/use-northpact-auth";
-import { useProposalDraft } from "@/hooks/useProposalDraft";
+import { useProposalDraft, clearProposalDraft } from "@/hooks/useProposalDraft";
 import {
   hydrateDraftFromConvexProposal,
   type ConvexProposalHydrateInput,
@@ -66,6 +66,9 @@ function extractUnitPrice(row: { fixedPrice?: number; hourlyRate?: number; prici
   return 0;
 }
 
+// ─── Draft meta persistence key ──────────────────────────────────────────────
+const PROPOSAL_META_KEY = "northpact_proposal_meta_v1";
+
 // ─── Inner (needs searchParams) ──────────────────────────────────────────────
 
 function NewProposalInner() {
@@ -75,6 +78,11 @@ function NewProposalInner() {
   const templateIdParam = searchParams.get("templateId") ?? "";
   const fromProposalIdParam = searchParams.get("fromProposalId") ?? "";
   const editProposalIdParam = searchParams.get("editProposalId") ?? "";
+  const urlClientId = searchParams.get("clientId") ?? "";
+
+  // Fresh proposal (no URL loading context) — restore draft from sessionStorage
+  const hasUrlParams = Boolean(packageIdParam || templateIdParam || fromProposalIdParam || editProposalIdParam);
+
   const { user }      = useNorthPactAuth();
   const userId        = user?.id as Id<"users"> | undefined;
   const firmId        = user?.firmId ?? "";
@@ -83,8 +91,14 @@ function NewProposalInner() {
   const [showLibrary, setShowLibrary] = useState(true);
   const [showSummary, setShowSummary] = useState(true);
 
-  // Package selection
-  const [selectedPackageId, setSelectedPackageId] = useState("");
+  // Package selection — restore from sessionStorage when no URL params
+  const [selectedPackageId, setSelectedPackageId] = useState(() => {
+    if (hasUrlParams) return "";
+    try {
+      const raw = typeof window !== "undefined" ? sessionStorage.getItem(PROPOSAL_META_KEY) : null;
+      return raw ? (JSON.parse(raw)?.selectedPackageId ?? "") : "";
+    } catch { return ""; }
+  });
 
   // Editing item
   const [editingItem, setEditingItem] = useState<ProposalItem | null>(null);
@@ -93,12 +107,25 @@ function NewProposalInner() {
   const [entityFilter,    setEntityFilter]    = useState("all");
   const [groupByEntity,   setGroupByEntity]   = useState(false);
 
-  // Proposal metadata
-  const [title,    setTitle]    = useState("New Proposal");
-  const [clientId, setClientId] = useState(searchParams.get("clientId") ?? "");
+  // Proposal metadata — restore title/clientId from sessionStorage when no URL params
+  const [title, setTitle] = useState(() => {
+    if (hasUrlParams) return "New Proposal";
+    try {
+      const raw = typeof window !== "undefined" ? sessionStorage.getItem(PROPOSAL_META_KEY) : null;
+      return raw ? (JSON.parse(raw)?.title ?? "New Proposal") : "New Proposal";
+    } catch { return "New Proposal"; }
+  });
+  const [clientId, setClientId] = useState(() => {
+    if (urlClientId) return urlClientId; // URL always wins
+    if (hasUrlParams) return "";
+    try {
+      const raw = typeof window !== "undefined" ? sessionStorage.getItem(PROPOSAL_META_KEY) : null;
+      return raw ? (JSON.parse(raw)?.clientId ?? "") : "";
+    } catch { return ""; }
+  });
   const [saving,   setSaving]   = useState(false);
 
-  const proposal = useProposalDraft(firmId);
+  const proposal = useProposalDraft(firmId, { restoreFromDraft: !hasUrlParams });
 
   // ── Convex data (catalog = sections + line items, same as /services) ─────
   const catalogSections = useQuery(
@@ -157,6 +184,14 @@ function NewProposalInner() {
   const addService = proposal.addService;
   const setEngagementLetterAfterAccept = proposal.setEngagementLetterAfterAccept;
 
+  // ── Persist meta (title, clientId, selectedPackageId) to sessionStorage ────
+  useEffect(() => {
+    if (hasUrlParams || typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(PROPOSAL_META_KEY, JSON.stringify({ title, clientId, selectedPackageId }));
+    } catch {}
+  }, [title, clientId, selectedPackageId, hasUrlParams]);
+
   const loadingCatalog = catalogSections === undefined || proposalContacts === undefined;
 
   const stripHtml = (html: string | undefined) => {
@@ -204,6 +239,24 @@ function NewProposalInner() {
     () => (catalogSections ?? []).map((s) => s.name),
     [catalogSections]
   );
+
+  /** Map serviceId → pricing options (variations/tiers/fixed) from the catalog. */
+  const servicePricingMap = useMemo(() => {
+    const map = new Map<string, { label: string; price: number }[]>();
+    if (!catalogSections) return map;
+    for (const sec of catalogSections) {
+      for (const row of sec.lineItems) {
+        if (row.pricingTiers && row.pricingTiers.length > 0) {
+          map.set(String(row._id), row.pricingTiers.map((t) => ({ label: t.name, price: t.price })));
+        } else if (row.fixedPrice != null && row.fixedPrice > 0) {
+          map.set(String(row._id), [{ label: "Fixed Price", price: row.fixedPrice }]);
+        } else if (row.hourlyRate != null && row.hourlyRate > 0) {
+          map.set(String(row._id), [{ label: "Hourly Rate", price: row.hourlyRate }]);
+        }
+      }
+    }
+    return map;
+  }, [catalogSections]);
 
   useEffect(() => {
     if (searchParams.get("fromProposalId") || searchParams.get("editProposalId")) return;
@@ -517,16 +570,64 @@ function NewProposalInner() {
 
   const isEditMode = Boolean(editProposalIdParam);
 
+  // ── Validation ───────────────────────────────────────────────────────────
+  function getSubmitErrors(): string[] {
+    const errors: string[] = [];
+
+    if (!clientId) {
+      errors.push("Select a client for this proposal");
+    }
+
+    if (proposal.items.length === 0) {
+      errors.push("Add at least one service to the proposal");
+    }
+
+    if (proposal.clientGroupMode === "single_entity") {
+      if (proposal.entities.length === 0) {
+        errors.push("Complete your entity details — enter at least a name and type");
+      } else if (!proposal.entities[0].name.trim()) {
+        errors.push("Enter a name for your entity");
+      }
+    } else {
+      // client_group
+      if (proposal.entities.length === 0) {
+        errors.push("Add at least one entity to the client group");
+      } else if (proposal.entities.some((e) => !e.name.trim())) {
+        errors.push("All entities in the group must have a name");
+      }
+    }
+
+    const zeroPrice = proposal.items.filter((i) => !i.isOptional && i.unitPrice === 0);
+    if (zeroPrice.length > 0) {
+      errors.push(
+        `${zeroPrice.length} service${zeroPrice.length > 1 ? "s have" : " has"} a R0.00 price — open Configure Service to set a price`
+      );
+    }
+
+    return errors;
+  }
+
   // ── Save handler ─────────────────────────────────────────────────────────
   async function handleSave(status: "draft" | "pending-approval" = "draft") {
     if (!userId) {
       toast.error("Not authenticated");
       return;
     }
-    if (!clientId) {
-      toast.error("Please select a client first");
-      return;
+
+    if (status === "pending-approval") {
+      const errors = getSubmitErrors();
+      if (errors.length > 0) {
+        errors.forEach((err) => toast.error(err));
+        return;
+      }
+    } else {
+      // Draft: only require a client
+      if (!clientId) {
+        toast.error("Select a client before saving a draft");
+        return;
+      }
     }
+
     setSaving(true);
     try {
       const services = proposal.items.map((item) => {
@@ -602,6 +703,8 @@ function NewProposalInner() {
           return;
         }
 
+        clearProposalDraft();
+        try { sessionStorage.removeItem(PROPOSAL_META_KEY); } catch {}
         toast.success(
           status === "pending-approval"
             ? "Proposal updated and submitted for approval"
@@ -635,6 +738,8 @@ function NewProposalInner() {
         return;
       }
 
+      clearProposalDraft();
+      try { sessionStorage.removeItem(PROPOSAL_META_KEY); } catch {}
       toast.success(
         status === "pending-approval"
           ? "Proposal submitted for approval"
@@ -815,6 +920,11 @@ function NewProposalInner() {
         open={!!currentEditingItem}
         onClose={() => setEditingItem(null)}
         onUpdate={proposal.updateItem}
+        pricingOptions={
+          currentEditingItem?.serviceTemplateId
+            ? servicePricingMap.get(currentEditingItem.serviceTemplateId)
+            : undefined
+        }
       />
     </DragDropContext>
   );

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, X, Loader2, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown, GripHorizontal } from "lucide-react";
+import { Package, X, Loader2, AlertCircle, Plus, Trash2, ChevronUp, ChevronDown, GripHorizontal, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
@@ -154,7 +155,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   const [schedule,           setSchedule]           = useState("");
   const [billingFreq,        setBillingFreq]        = useState<"monthly" | "one_off">("monthly");
   const [pricingType,        setPricingType]        = useState<PricingType>("fixed");
-  const [price,              setPrice]              = useState("0");
+  const [price,              setPrice]              = useState("");
   const [taxRate,            setTaxRate]            = useState("default");
   const [openModeDropdown,   setOpenModeDropdown]   = useState<string | null>(null);
   const [openActionsDropdown, setOpenActionsDropdown] = useState<string | null>(null);
@@ -166,7 +167,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   const [addCalc,            setAddCalc]            = useState(false);
   const [calculations,       setCalculations]       = useState<Calculation[]>([newCalc()]);
   const [applyMinFee,        setApplyMinFee]        = useState(false);
-  const [minFee,             setMinFee]             = useState("0");
+  const [minFee,             setMinFee]             = useState("");
   const [nameError,          setNameError]          = useState("");
   const [saving,             setSaving]             = useState(false);
 
@@ -199,13 +200,13 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
     setPickedSectionId(null);
     setName(""); setDesc(""); setSchedule("");
     setBillingFreq("monthly"); setPricingType("fixed");
-    setPrice("0"); setTaxRate("default"); setOpenModeDropdown(null); setOpenActionsDropdown(null);
+    setPrice(""); setTaxRate("default"); setOpenModeDropdown(null); setOpenActionsDropdown(null);
     setFieldLabel(""); setVariations([newVariation()]);
     setTierRanges([newTierRange()]);
     setAnnualRevenueTiers(defaultAnnualRevenueTiers());
     setIncomeTiers(defaultIncomeTiers());
     setAddCalc(false); setCalculations([newCalc()]);
-    setApplyMinFee(false); setMinFee("0");
+    setApplyMinFee(false); setMinFee("");
     setNameError("");
   }
   function handleClose() { onOpenChange(false); reset(); }
@@ -525,31 +526,19 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
               <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pricing</p>
             </div>
 
-            {/* Billing + Pricing type (GoProposal layout) */}
+            {/* Pricing type */}
             <div className="space-y-2">
               <Label className="text-[13px]">Pricing Type</Label>
-              <div className="flex gap-2">
-                <div className="flex h-10 rounded-lg border border-slate-200 overflow-hidden shrink-0">
-                  {(["monthly", "one_off"] as const).map((v) => (
-                    <button key={v} type="button" disabled={saving} onClick={() => setBillingFreq(v)}
-                      className={cn("px-3 text-[12px] font-medium transition-colors",
-                        billingFreq === v ? "text-white" : "text-slate-500 hover:bg-slate-50")}
-                      style={billingFreq === v ? { background: "#243E63" } : {}}>
-                      {v === "monthly" ? "Monthly" : "One-Off"}
-                    </button>
+              <Select value={pricingType} onValueChange={(v) => setPricingType(v as PricingType)} disabled={saving}>
+                <SelectTrigger className="w-full h-10 text-[13px] border-slate-200 bg-white rounded-lg border-2 border-[#C8A96E]/30 focus:border-[#C8A96E]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-[100]">
+                  {PRICING_TYPES.map(({ value, label }) => (
+                    <SelectItem key={value} value={value} className="text-[13px]">{label}</SelectItem>
                   ))}
-                </div>
-                <Select value={pricingType} onValueChange={(v) => setPricingType(v as PricingType)} disabled={saving}>
-                  <SelectTrigger className="flex-1 h-10 text-[13px] border-slate-200 bg-white rounded-lg border-2 border-[#C8A96E]/30 focus:border-[#C8A96E]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="z-[100]">
-                    {PRICING_TYPES.map(({ value, label }) => (
-                      <SelectItem key={value} value={value} className="text-[13px]">{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Fixed: single price */}
@@ -560,7 +549,8 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                   <span className="px-3 flex items-center text-[12px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">ZAR</span>
                   <input type="number" min="0" step="0.01" value={price}
                     onChange={(e) => setPrice(e.target.value)} disabled={saving}
-                    className="flex-1 px-3 text-[13px] text-slate-800 focus:outline-none bg-white" />
+                    placeholder="0.00"
+                    className="flex-1 px-3 text-[13px] text-slate-800 focus:outline-none bg-white placeholder-slate-400" />
                 </div>
               </div>
             )}
@@ -575,9 +565,20 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                     className="w-full h-10 px-3 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] bg-white" />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
                     <Label className="text-[13px]">Variations</Label>
-                    <span className="text-[11px] text-slate-400">Set the price for each variation below.</span>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button type="button" className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-slate-400 outline-none hover:bg-slate-100 hover:text-slate-600" aria-label="Help">
+                            <HelpCircle className="h-3.5 w-3.5" strokeWidth={2} />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[260px] text-left text-[12px] font-normal leading-relaxed">
+                          Set a fixed price or formula for each variation below.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   {variations.map((v, idx) => (
                     <div key={v.id} className="space-y-1">
@@ -807,8 +808,8 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
               </Select>
             </div>
 
-            {/* Add Calculation */}
-            <div className="space-y-3">
+            {/* Add Calculation — hidden for fixed price */}
+            {pricingType !== "fixed" && <div className="space-y-3">
               <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" checked={addCalc} onChange={(e) => setAddCalc(e.target.checked)} disabled={saving}
                   className="h-4 w-4 rounded border-slate-300 accent-[#C8A96E]" />
@@ -907,7 +908,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                   )}
                 </div>
               )}
-            </div>
+            </div>}
 
             {/* Min monthly fee — only for Monthly billing */}
             {billingFreq === "monthly" && (
@@ -922,7 +923,8 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
                     <span className="px-3 flex items-center text-[12px] font-medium text-slate-500 bg-slate-50 border-r border-slate-200">Min</span>
                     <input type="number" min="0" step="0.01" value={minFee}
                       onChange={(e) => setMinFee(e.target.value)} disabled={saving}
-                      className="flex-1 px-3 text-[13px] text-slate-800 focus:outline-none bg-white" />
+                      placeholder="0.00"
+                      className="flex-1 px-3 text-[13px] text-slate-800 focus:outline-none bg-white placeholder-slate-400" />
                   </div>
                 )}
               </div>

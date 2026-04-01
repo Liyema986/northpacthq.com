@@ -8,6 +8,7 @@ import { generateId } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Building2,
+  Check,
   ChevronDown,
   HelpCircle,
   Layers3,
@@ -28,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from "@/components/ui/command";
 import {
   Select,
   SelectContent,
@@ -327,51 +330,78 @@ function ContactLinkSelect({
   onSelectChange: (v: string) => void;
   contactsLoading?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+
   if (contactsLoading) {
     return <div className="h-10 w-full animate-pulse rounded-md bg-muted" aria-hidden />;
   }
 
+  const selectedContact =
+    selectValue && selectValue !== SELECT_NONE
+      ? [...organisations, ...individuals].find((c) => c._id === selectValue)
+      : null;
+
   return (
-    <Select value={selectValue} onValueChange={onSelectChange}>
-      <SelectTrigger className={cn("min-w-0", selectTriggerCls)}>
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          <SelectValue placeholder="Choose a contact…" />
-        </div>
-      </SelectTrigger>
-      <SelectContent position="popper" className="max-h-72 w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]">
-        <SelectItem value={SELECT_NONE} className="text-muted-foreground">
-          No contact linked
-        </SelectItem>
-        <>
-          {organisations.length > 0 && (
-            <SelectGroup>
-              <SelectLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Organisations
-              </SelectLabel>
-              {organisations.map((c) => (
-                <SelectItem key={c._id} value={c._id}>
-                  {formatContactOptionLabel(c)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          )}
-          {organisations.length > 0 && individuals.length > 0 ? <SelectSeparator /> : null}
-          {individuals.length > 0 && (
-            <SelectGroup>
-              <SelectLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Individuals
-              </SelectLabel>
-              {individuals.map((c) => (
-                <SelectItem key={c._id} value={c._id}>
-                  {formatContactOptionLabel(c)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          )}
-        </>
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" className={cn("min-w-0 justify-between", selectTriggerCls)}>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <span className={cn("truncate", !selectedContact && "text-muted-foreground")}>
+              {selectedContact ? formatContactOptionLabel(selectedContact) : "Choose a contact…"}
+            </span>
+          </div>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search contacts…" />
+          <CommandList>
+            <CommandEmpty>No contacts found.</CommandEmpty>
+            <CommandItem
+              value="__no_contact__"
+              onSelect={() => { onSelectChange(SELECT_NONE); setOpen(false); }}
+              className="text-muted-foreground"
+            >
+              No contact linked
+              {(!selectValue || selectValue === SELECT_NONE) && (
+                <Check className="ml-auto h-4 w-4" />
+              )}
+            </CommandItem>
+            {organisations.length > 0 && (
+              <CommandGroup heading="Organisations">
+                {organisations.map((c) => (
+                  <CommandItem
+                    key={c._id}
+                    value={formatContactOptionLabel(c)}
+                    onSelect={() => { onSelectChange(c._id); setOpen(false); }}
+                  >
+                    {formatContactOptionLabel(c)}
+                    {selectValue === c._id && <Check className="ml-auto h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {organisations.length > 0 && individuals.length > 0 && <CommandSeparator />}
+            {individuals.length > 0 && (
+              <CommandGroup heading="Individuals">
+                {individuals.map((c) => (
+                  <CommandItem
+                    key={c._id}
+                    value={formatContactOptionLabel(c)}
+                    onSelect={() => { onSelectChange(c._id); setOpen(false); }}
+                  >
+                    {formatContactOptionLabel(c)}
+                    {selectValue === c._id && <Check className="ml-auto h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -444,32 +474,122 @@ function PackageSelect({
   selectedPackageId?: string;
   onSelectPackage: (id: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const selectedPkg = selectedPackageId
+    ? packageOptions.find((p) => p._id === selectedPackageId)
+    : null;
+
   return (
-    <Select
-      value={selectedPackageId || SELECT_PACKAGE_NONE}
-      onValueChange={(v) => onSelectPackage(v === SELECT_PACKAGE_NONE ? "" : v)}
-    >
-      <SelectTrigger className={cn("min-w-0", selectTriggerCls)}>
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Layers3 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          <SelectValue placeholder="Choose a package…" />
-        </div>
-      </SelectTrigger>
-      <SelectContent
-        position="popper"
-        className="max-h-72 w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]"
-      >
-        <SelectItem value={SELECT_PACKAGE_NONE} className="text-muted-foreground">
-          No package
-        </SelectItem>
-        {packageOptions.length > 0 && <SelectSeparator />}
-        {packageOptions.map((pkg) => (
-          <SelectItem key={pkg._id} value={pkg._id}>
-            {pkg.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" className={cn("min-w-0 justify-between", selectTriggerCls)}>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Layers3 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <span className={cn("truncate", !selectedPkg && "text-muted-foreground")}>
+              {selectedPkg ? selectedPkg.name : "Choose a package…"}
+            </span>
+          </div>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search packages…" />
+          <CommandList>
+            <CommandEmpty>No packages found.</CommandEmpty>
+            <CommandItem
+              value="__no_package__"
+              onSelect={() => { onSelectPackage(""); setOpen(false); }}
+              className="text-muted-foreground"
+            >
+              No package
+              {!selectedPackageId && <Check className="ml-auto h-4 w-4" />}
+            </CommandItem>
+            {packageOptions.length > 0 && <CommandSeparator />}
+            {packageOptions.map((pkg) => (
+              <CommandItem
+                key={pkg._id}
+                value={pkg.name}
+                onSelect={() => { onSelectPackage(pkg._id); setOpen(false); }}
+              >
+                {pkg.name}
+                {selectedPackageId === pkg._id && <Check className="ml-auto h-4 w-4" />}
+              </CommandItem>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function XeroGroupSearchSelect({
+  xeroGroups,
+  xeroSelectValue,
+  xeroImportLoading,
+  disabled,
+  onSelect,
+}: {
+  xeroGroups: { contactGroupID: string; name: string; status: string }[];
+  xeroSelectValue: string;
+  xeroImportLoading: boolean;
+  disabled: boolean;
+  onSelect: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedGroup =
+    xeroSelectValue !== SELECT_XERO_NONE
+      ? xeroGroups.find((g) => g.contactGroupID === xeroSelectValue)
+      : null;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={xeroImportLoading || disabled}
+          className={cn("min-w-0 justify-between", selectTriggerCls, (xeroImportLoading || disabled) && "opacity-50 cursor-not-allowed")}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            {xeroImportLoading ? (
+              <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
+            ) : (
+              <Users className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            )}
+            <span className={cn("truncate", !selectedGroup && "text-muted-foreground")}>
+              {selectedGroup ? selectedGroup.name : "Choose a Xero group to import entities…"}
+            </span>
+          </div>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search Xero groups…" />
+          <CommandList>
+            <CommandEmpty>No groups found.</CommandEmpty>
+            <CommandItem
+              value="__no_xero_group__"
+              onSelect={() => { onSelect(SELECT_XERO_NONE); setOpen(false); }}
+              className="text-muted-foreground"
+            >
+              No group (manual entities)
+              {xeroSelectValue === SELECT_XERO_NONE && <Check className="ml-auto h-4 w-4" />}
+            </CommandItem>
+            {xeroGroups.map((g) => (
+              <CommandItem
+                key={g.contactGroupID}
+                value={g.name}
+                onSelect={() => { onSelect(g.contactGroupID); setOpen(false); }}
+              >
+                {g.name}
+                {xeroSelectValue === g.contactGroupID && <Check className="ml-auto h-4 w-4" />}
+              </CommandItem>
+            ))}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -598,6 +718,8 @@ function ClientGroupLayout({
   const [xeroGroups, setXeroGroups] = useState<{ contactGroupID: string; name: string; status: string }[]>([]);
   const [xeroGroupsLoading, setXeroGroupsLoading] = useState(false);
   const [xeroImportLoading, setXeroImportLoading] = useState(false);
+  /** Xero ContactIDs belonging to the currently selected group — used to filter the Primary Contact dropdown */
+  const [groupXeroContactIds, setGroupXeroContactIds] = useState<Set<string>>(new Set());
 
   const xeroSelectValue = clientGroup.xeroContactGroupId ?? SELECT_XERO_NONE;
 
@@ -642,6 +764,7 @@ function ClientGroupLayout({
         }
         const mapped = r.entities.map(mapXeroEntityToBuilder);
         replaceEntities(mapped);
+        setGroupXeroContactIds(new Set(r.xeroContactIds ?? []));
         onUpdateClientGroup({
           name: meta?.name ?? clientGroup.name,
           xeroContactGroupId: groupId,
@@ -693,38 +816,20 @@ function ClientGroupLayout({
               No active contact groups in Xero, or groups could not be loaded. Create groups in Xero, or add entities manually below.
             </p>
           ) : (
-            <Select
-              value={xeroSelectValue}
-              disabled={xeroImportLoading || !replaceEntities}
-              onValueChange={(v) => {
+            <XeroGroupSearchSelect
+              xeroGroups={xeroGroups}
+              xeroSelectValue={xeroSelectValue}
+              xeroImportLoading={xeroImportLoading}
+              disabled={!replaceEntities}
+              onSelect={(v) => {
                 if (v === SELECT_XERO_NONE) {
                   onUpdateClientGroup({ xeroContactGroupId: undefined });
+                  setGroupXeroContactIds(new Set());
                   return;
                 }
                 void applyXeroGroup(v);
               }}
-            >
-              <SelectTrigger className={cn("min-w-0", selectTriggerCls)}>
-                <div className="flex min-w-0 flex-1 items-center gap-2">
-                  {xeroImportLoading ? (
-                    <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
-                  ) : (
-                    <Users className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  )}
-                  <SelectValue placeholder="Choose a Xero group to import entities…" />
-                </div>
-              </SelectTrigger>
-              <SelectContent position="popper" className="max-h-72 w-[var(--radix-select-trigger-width)]">
-                <SelectItem value={SELECT_XERO_NONE} className="text-muted-foreground">
-                  No group (manual entities)
-                </SelectItem>
-                {xeroGroups.map((g) => (
-                  <SelectItem key={g.contactGroupID} value={g.contactGroupID}>
-                    {g.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           )}
           {!replaceEntities && (
             <p className="text-xs text-amber-700">Entity replace is unavailable — refresh the page.</p>
@@ -738,8 +843,8 @@ function ClientGroupLayout({
           tooltip="The client record this proposal is filed under. Separate from entity rows below."
         />
         <ContactLinkSelect
-          organisations={organisations}
-          individuals={individuals}
+          organisations={groupXeroContactIds.size > 0 ? organisations.filter((c) => c.xeroContactId && groupXeroContactIds.has(c.xeroContactId)) : organisations}
+          individuals={groupXeroContactIds.size > 0 ? individuals.filter((c) => c.xeroContactId && groupXeroContactIds.has(c.xeroContactId)) : individuals}
           selectValue={selectValue}
           onSelectChange={onSelectChange}
           contactsLoading={contactsLoading}

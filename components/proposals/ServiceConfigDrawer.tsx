@@ -57,12 +57,19 @@ import { cn } from "@/lib/utils";
 
 const ACCENT = "#C8A96E";
 
+export interface ServicePricingOption {
+  label: string;
+  price: number;
+}
+
 interface ServiceConfigDrawerProps {
   item: ProposalItem | null;
   entities: ProposalBuilderEntity[];
   open: boolean;
   onClose: () => void;
   onUpdate: (id: string, updates: Partial<ProposalItem>) => void;
+  /** Pre-configured pricing options from the service template (variations, tiers, or fixed price) */
+  pricingOptions?: ServicePricingOption[];
 }
 
 const deliveryOptions: Frequency[] = [
@@ -88,7 +95,7 @@ const selectTrigger =
   "h-10 w-full rounded-lg border border-slate-200 bg-white text-[13px] font-normal text-left";
 
 export function ServiceConfigDrawer({
-  item, entities, open, onClose, onUpdate,
+  item, entities, open, onClose, onUpdate, pricingOptions = [],
 }: ServiceConfigDrawerProps) {
   if (!item) return null;
 
@@ -234,54 +241,42 @@ export function ServiceConfigDrawer({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">Pricing method</Label>
-                  <Select
-                    value={item.pricingMethod}
-                    onValueChange={(v) => handleChange("pricingMethod", v as PricingMethod)}
-                  >
-                    <SelectTrigger className={selectTrigger}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="z-[100] max-h-[min(60vh,360px)]">
-                      {(Object.keys(PRICING_METHOD_LABELS) as PricingMethod[]).map((m) => (
-                        <SelectItem key={m} value={m} className="text-[13px]">
-                          {PRICING_METHOD_LABELS[m]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-[13px]">Pricing driver</Label>
-                  <input
-                    className={fieldInput}
-                    value={item.pricingDriver ?? ""}
-                    onChange={(e) => handleChange("pricingDriver", e.target.value)}
-                    placeholder="e.g. Number of transactions"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">Quantity</Label>
-                  <input
-                    type="number"
-                    min={0}
-                    className={fieldInput}
-                    value={item.quantity}
-                    onChange={(e) => handleChange("quantity", Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">Unit price (R)</Label>
-                  <input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    className={fieldInput}
-                    value={item.unitPrice}
-                    onChange={(e) => handleChange("unitPrice", Number(e.target.value))}
-                  />
-                </div>
+                {pricingOptions.length > 1 ? (
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Pricing option</Label>
+                    <Select
+                      value={pricingOptions.find((o) => o.price === item.unitPrice)?.label ?? ""}
+                      onValueChange={(v) => {
+                        const opt = pricingOptions.find((o) => o.label === v);
+                        if (opt) handleChange("unitPrice", opt.price);
+                      }}
+                    >
+                      <SelectTrigger className={selectTrigger}>
+                        <SelectValue placeholder="Select option" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100] max-h-[min(60vh,360px)]">
+                        {pricingOptions.map((opt) => (
+                          <SelectItem key={opt.label} value={opt.label} className="text-[13px]">
+                            {opt.label} — {formatCurrency(opt.price)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Unit price (R)</Label>
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      className={fieldInput}
+                      value={item.unitPrice || ""}
+                      onChange={(e) => handleChange("unitPrice", Number(e.target.value))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Time estimates */}
@@ -296,8 +291,9 @@ export function ServiceConfigDrawer({
                       min={0}
                       step="1"
                       className={fieldInput}
-                      value={item.timeInputMinutes ?? 0}
+                      value={item.timeInputMinutes || ""}
                       onChange={(e) => handleChange("timeInputMinutes", Number(e.target.value))}
+                      placeholder="0"
                     />
                   </div>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -324,7 +320,7 @@ export function ServiceConfigDrawer({
                         min={0}
                         step="0.25"
                         className={fieldInput}
-                        value={item.timeInputHours ?? 0}
+                        value={item.timeInputHours || ""}
                         onChange={(e) => {
                           const v = Number(e.target.value);
                           const hours = Number.isFinite(v) ? Math.max(0, v) : 0;
@@ -333,6 +329,7 @@ export function ServiceConfigDrawer({
                             timeInputMinutes: Math.round(hours * 60),
                           });
                         }}
+                        placeholder="0"
                       />
                     </div>
                     <span className="hidden sm:block pb-2.5 text-center text-muted-foreground text-lg font-medium">
@@ -345,7 +342,7 @@ export function ServiceConfigDrawer({
                         min={0}
                         step={1}
                         className={fieldInput}
-                        value={item.timeInputMinutes ?? 0}
+                        value={item.timeInputMinutes || ""}
                         onChange={(e) => {
                           const v = Number(e.target.value);
                           const mins = Number.isFinite(v) ? Math.max(0, Math.round(v)) : 0;
@@ -354,6 +351,7 @@ export function ServiceConfigDrawer({
                             timeInputHours: mins / 60,
                           });
                         }}
+                        placeholder="0"
                       />
                     </div>
                   </div>
@@ -370,8 +368,9 @@ export function ServiceConfigDrawer({
                     min={0}
                     max={100}
                     className={fieldInput}
-                    value={item.discount}
+                    value={item.discount || ""}
                     onChange={(e) => handleChange("discount", Number(e.target.value))}
+                    placeholder="0"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -380,8 +379,9 @@ export function ServiceConfigDrawer({
                     type="number"
                     min={0}
                     className={fieldInput}
-                    value={item.taxRate}
+                    value={item.taxRate || ""}
                     onChange={(e) => handleChange("taxRate", Number(e.target.value))}
+                    placeholder="0"
                   />
                 </div>
               </div>
@@ -523,8 +523,9 @@ export function ServiceConfigDrawer({
                                 min={0}
                                 step="0.01"
                                 className={fieldInput}
-                                value={item.customEntityPrices?.[eid] ?? item.subtotal ?? 0}
+                                value={(item.customEntityPrices?.[eid] ?? item.subtotal) || ""}
                                 onChange={(e) => updateCustomPrice(eid, Number(e.target.value))}
+                                placeholder="0.00"
                               />
                             </div>
                           );

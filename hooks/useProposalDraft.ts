@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import type {
   ProposalItem,
   ProposalBuilderEntity,
@@ -21,6 +21,25 @@ import {
   normalizeFixedTimeEstimate,
   roundHoursUpOneDecimal,
 } from "@/lib/service-metrics";
+
+// ─── Draft persistence ────────────────────────────────────────────────────────
+
+const DRAFT_KEY = "northpact_proposal_draft_v1";
+
+function readPersistedDraft(): Record<string, unknown> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+  } catch { return null; }
+}
+
+export function clearProposalDraft(): void {
+  if (typeof window === "undefined") return;
+  try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function makeEntity(): ProposalBuilderEntity {
   return {
@@ -142,13 +161,32 @@ export interface ProposalDraft {
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-export function useProposalDraft(firmId: string): ProposalDraft {
+export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boolean }): ProposalDraft {
+  const restore = opts?.restoreFromDraft ?? false;
+
+  // Always initialise with SSR-safe defaults to avoid hydration mismatches.
+  // sessionStorage is restored in a post-mount effect below.
   const [items, setItems] = useState<ProposalItem[]>([]);
   const [entities, setEntities] = useState<ProposalBuilderEntity[]>([]);
   const [clientGroupMode, setClientGroupMode] = useState<ClientGroupMode>("single_entity");
   const [clientGroup, setClientGroup] = useState<ProposalBuilderClientGroup>({ name: "", groupType: "", notes: "" });
   const [paymentFrequency, setPaymentFrequency] = useState<PaymentFrequency>("monthly");
-  const [engagementLetterAfterAccept, setEngagementLetterAfterAccept] = useState(true);
+  const [engagementLetterAfterAccept, setEngagementLetterAfterAccept] = useState<boolean>(true);
+
+  // Restore draft from sessionStorage after mount (client-only) to keep
+  // the initial server render in sync with the first client render.
+  useEffect(() => {
+    if (!restore) return;
+    const s = readPersistedDraft();
+    if (!s) return;
+    if (Array.isArray(s.items)) setItems(s.items as ProposalItem[]);
+    if (Array.isArray(s.entities)) setEntities(s.entities as ProposalBuilderEntity[]);
+    if (s.clientGroupMode) setClientGroupMode(s.clientGroupMode as ClientGroupMode);
+    if (s.clientGroup) setClientGroup(s.clientGroup as ProposalBuilderClientGroup);
+    if (s.paymentFrequency) setPaymentFrequency(s.paymentFrequency as PaymentFrequency);
+    if (typeof s.engagementLetterAfterAccept === "boolean") setEngagementLetterAfterAccept(s.engagementLetterAfterAccept);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Entity management ──────────────────────────────────────────────────────
   const addEntity = useCallback(() => {
@@ -275,6 +313,16 @@ export function useProposalDraft(firmId: string): ProposalDraft {
   const replaceItems = useCallback((next: ProposalItem[]) => {
     setItems(next.map((i) => recalc(i)));
   }, []);
+
+  // ── Persist draft to sessionStorage ───────────────────────────────────────
+  useEffect(() => {
+    if (!restore || typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
+        items, entities, clientGroupMode, clientGroup, paymentFrequency, engagementLetterAfterAccept,
+      }));
+    } catch {}
+  }, [restore, items, entities, clientGroupMode, clientGroup, paymentFrequency, engagementLetterAfterAccept]);
 
   // ── Computed summary ───────────────────────────────────────────────────────
   const summary = useMemo<ProposalBuilderSummary>(() => {
