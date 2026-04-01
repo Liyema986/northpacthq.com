@@ -90,6 +90,39 @@ export const getProposalAcceptSession = query({
       }
     }
 
+    // ── Advisor (proposal creator) ──
+    const advisor = await ctx.db.get(proposal.createdBy);
+
+    // ── Team members ──
+    const teamMemberIds = proposal.teamMemberIds ?? [];
+    const teamMembers: { name: string; role?: string; bio?: string; avatarUrl?: string }[] = [];
+    for (const uid of teamMemberIds) {
+      const u = await ctx.db.get(uid);
+      if (u && !u.deactivatedAt) {
+        teamMembers.push({
+          name: u.name,
+          role: u.jobTitle ?? undefined,
+          bio: u.bio ?? undefined,
+          avatarUrl: u.avatar ?? undefined,
+        });
+      }
+    }
+    // If no team assigned, include the advisor as fallback
+    if (teamMembers.length === 0 && advisor) {
+      teamMembers.push({
+        name: advisor.name,
+        role: advisor.jobTitle ?? undefined,
+        bio: advisor.bio ?? undefined,
+        avatarUrl: advisor.avatar ?? undefined,
+      });
+    }
+
+    // ── All firm service sections (for "All Services We Provide" page) ──
+    const allSections = firm
+      ? await ctx.db.query("serviceSections").withIndex("by_firm_sort", (q) => q.eq("firmId", firm._id)).collect()
+      : [];
+    const allFirmServices = allSections.map((s) => ({ name: s.name, icon: s.iconName ?? undefined }));
+
     return {
       session,
       proposal: {
@@ -105,10 +138,14 @@ export const getProposalAcceptSession = query({
         createdAt: proposal.createdAt,
         pdfUrl: proposal.pdfUrl,
         pdfStorageUrl,
+        entities: proposal.entities,
+        netMonthlyFee: proposal.netMonthlyFee,
+        oneOffFee: proposal.oneOffFee,
       },
       firmName: firm?.name || "Unknown Firm",
       clientName: client?.companyName || "Client",
       clientEmail: client?.email || "",
+      clientPhone: client?.phone ?? undefined,
       brandColors: firm?.brandColors
         ? { primary: firm.brandColors.primary, secondary: firm.brandColors.secondary }
         : { primary: "#2563EB", secondary: "#10B981" },
@@ -121,6 +158,26 @@ export const getProposalAcceptSession = query({
       pdfCoverImageUrl: pdfCoverImageUrl ?? undefined,
       pdfFooterImageUrl: pdfFooterImageUrl ?? undefined,
       pdfLastPageImageUrl: pdfLastPageImageUrl ?? undefined,
+      // ── New template fields ──
+      aboutUsHtml: firm?.aboutUsHtml ?? undefined,
+      missionStatement: firm?.missionStatement ?? undefined,
+      whyChooseUsItems: firm?.whyChooseUsItems ?? undefined,
+      valuesStatement: firm?.valuesStatement ?? undefined,
+      website: firm?.website ?? undefined,
+      coverQuote: firm?.coverQuote ?? undefined,
+      coverQuoteAuthor: firm?.coverQuoteAuthor ?? undefined,
+      closingQuote: firm?.closingQuote ?? undefined,
+      closingQuoteAuthor: firm?.closingQuoteAuthor ?? undefined,
+      feesIntroductionText: firm?.feesIntroductionText ?? undefined,
+      whatHappensNextText: firm?.whatHappensNextText ?? undefined,
+      paymentTermsText: firm?.paymentTermsText ?? undefined,
+      teamMembers,
+      allFirmServices,
+      advisorName: advisor?.name ?? undefined,
+      advisorTitle: advisor?.jobTitle ?? undefined,
+      advisorEmail: advisor?.email ?? undefined,
+      advisorPhone: advisor?.phone ?? undefined,
+      timelineSteps: firm?.defaultTimelineSteps ?? undefined,
     };
   },
 });

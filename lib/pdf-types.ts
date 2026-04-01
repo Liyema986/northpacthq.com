@@ -9,7 +9,25 @@ export type ProposalPDFServiceItem = {
   quantity: number;
   unitPrice?: number;
   subtotal: number;
+  description?: string;
+  billingCategory?: string;
+  frequency?: string;
+  /** Entity names this service applies to */
+  entityLabels?: string[];
 };
+
+export interface ProposalPDFTeamMember {
+  name: string;
+  role?: string;
+  bio?: string;
+  avatarUrl?: string;
+}
+
+export interface ProposalPDFTimelineStep {
+  marker: string;
+  title: string;
+  description: string;
+}
 
 export interface ProposalPDFData {
   firmName: string;
@@ -43,4 +61,45 @@ export interface ProposalPDFData {
   footerImageUrl?: string;
   /** Optional last page image/background URL (Settings > Proposals). */
   lastPageImageUrl?: string;
+
+  // ── New template fields ──
+  /** About Us HTML content */
+  aboutUsHtml?: string;
+  /** Firm mission statement */
+  missionStatement?: string;
+  /** "Why choose us" bullet items */
+  whyChooseUsItems?: string[];
+  /** Firm values statement */
+  valuesStatement?: string;
+  /** Firm website */
+  website?: string;
+  /** Cover page quote */
+  coverQuote?: string;
+  coverQuoteAuthor?: string;
+  /** Closing page quote */
+  closingQuote?: string;
+  closingQuoteAuthor?: string;
+  /** Team members for "Your Dedicated Team" page */
+  teamMembers?: ProposalPDFTeamMember[];
+  /** Onboarding timeline steps */
+  timelineSteps?: ProposalPDFTimelineStep[];
+  /** Advisor (proposal creator) details for cover page */
+  advisorName?: string;
+  advisorTitle?: string;
+  advisorEmail?: string;
+  advisorPhone?: string;
+  /** Fees section intro paragraph */
+  feesIntroductionText?: string;
+  /** What happens next intro text */
+  whatHappensNextText?: string;
+  /** Payment terms text */
+  paymentTermsText?: string;
+  /** All firm service section names (for "All Services We Provide" page) */
+  allFirmServices?: { name: string; icon?: string }[];
+  /** Entities on this proposal */
+  entities?: { name: string; type: string }[];
+  /** Monthly / annual / once-off fee subtotals */
+  netMonthlyFee?: number;
+  netAnnualFee?: number;
+  netOnceOffFee?: number;
 }

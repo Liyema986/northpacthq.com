@@ -298,6 +298,7 @@ export default function ProposalViewPage() {
     firmName,
     clientName,
     clientEmail,
+    clientPhone,
     firmLogoUrl,
     brandColors,
     pdfFooterText,
@@ -308,7 +309,28 @@ export default function ProposalViewPage() {
     pdfCoverImageUrl,
     pdfFooterImageUrl,
     pdfLastPageImageUrl,
+    // New template fields
+    aboutUsHtml,
+    missionStatement,
+    whyChooseUsItems,
+    valuesStatement,
+    website,
+    coverQuote,
+    coverQuoteAuthor,
+    closingQuote,
+    closingQuoteAuthor,
+    feesIntroductionText,
+    whatHappensNextText,
+    paymentTermsText,
+    teamMembers,
+    allFirmServices,
+    advisorName,
+    advisorTitle,
+    advisorEmail,
+    advisorPhone,
+    timelineSteps,
   } = session as typeof session & {
+    clientPhone?: string;
     pdfFooterText?: string;
     pdfFooterAddress?: string;
     pdfDisclaimer?: string;
@@ -317,6 +339,25 @@ export default function ProposalViewPage() {
     pdfCoverImageUrl?: string;
     pdfFooterImageUrl?: string;
     pdfLastPageImageUrl?: string;
+    aboutUsHtml?: string;
+    missionStatement?: string;
+    whyChooseUsItems?: string[];
+    valuesStatement?: string;
+    website?: string;
+    coverQuote?: string;
+    coverQuoteAuthor?: string;
+    closingQuote?: string;
+    closingQuoteAuthor?: string;
+    feesIntroductionText?: string;
+    whatHappensNextText?: string;
+    paymentTermsText?: string;
+    teamMembers?: { name: string; role?: string; bio?: string; avatarUrl?: string }[];
+    allFirmServices?: { name: string; icon?: string }[];
+    advisorName?: string;
+    advisorTitle?: string;
+    advisorEmail?: string;
+    advisorPhone?: string;
+    timelineSteps?: { marker: string; title: string; description: string }[];
   };
 
   if (!proposal) {
@@ -337,14 +378,18 @@ export default function ProposalViewPage() {
     firmName: firmNameSafe,
     clientName: clientNameSafe,
     clientEmail: clientEmail ?? "",
+    clientPhone: clientPhone ?? "",
     proposalNumber: proposal.proposalNumber,
     title: proposal.title,
     services: (proposal.services ?? []).map(
-      (s: { serviceName: string; quantity: number; unitPrice?: number; subtotal: number }) => ({
+      (s: { serviceName: string; quantity: number; unitPrice?: number; subtotal: number; description?: string; billingCategory?: string; workPlanEntityLabels?: string[] }) => ({
         serviceName: s.serviceName,
         quantity: s.quantity,
         unitPrice: s.unitPrice ?? (s.quantity ? s.subtotal / s.quantity : 0),
         subtotal: s.subtotal,
+        description: s.description,
+        billingCategory: s.billingCategory,
+        entityLabels: s.workPlanEntityLabels,
       })
     ),
     total: proposal.total ?? 0,
@@ -363,6 +408,29 @@ export default function ProposalViewPage() {
     coverImageUrl: pdfCoverImageUrl,
     footerImageUrl: pdfFooterImageUrl,
     lastPageImageUrl: pdfLastPageImageUrl,
+    // New template fields
+    aboutUsHtml,
+    missionStatement,
+    whyChooseUsItems,
+    valuesStatement,
+    website,
+    coverQuote,
+    coverQuoteAuthor,
+    closingQuote,
+    closingQuoteAuthor,
+    feesIntroductionText,
+    whatHappensNextText,
+    paymentTermsText,
+    teamMembers,
+    allFirmServices,
+    advisorName,
+    advisorTitle,
+    advisorEmail,
+    advisorPhone,
+    timelineSteps,
+    entities: (proposal as { entities?: { name: string; type: string }[] }).entities,
+    netMonthlyFee: (proposal as { netMonthlyFee?: number }).netMonthlyFee,
+    netOnceOffFee: (proposal as { oneOffFee?: number }).oneOffFee,
   };
 
   // Just accepted or rejected - show outcome page (confetti for accepted)

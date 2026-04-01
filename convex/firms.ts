@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getUserFirmIdSafe, requirePermission } from "./lib/permissions";
+import type { Id } from "./_generated/dataModel";
 
 /**
  * Get the current user's firm settings.
@@ -112,6 +113,164 @@ export const updateFirmSettings = mutation({
     if (args.vatNumber !== undefined) updates.vatNumber = args.vatNumber;
 
     await ctx.db.patch(user.firmId, updates);
+    return { success: true };
+  },
+});
+
+// ─── Proposal Template Builder ─────────────────────────────────────────────
+
+/**
+ * Get all proposal template data for the builder.
+ */
+export const getProposalTemplateData = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const firmId = await getUserFirmIdSafe(ctx, args.userId);
+    if (!firmId) return null;
+    const firm = await ctx.db.get(firmId);
+    if (!firm) return null;
+
+    // Resolve logo URLs
+    let logoUrl: string | null = firm.logoUrl ?? null;
+    if (!logoUrl && firm.logo) logoUrl = await ctx.storage.getUrl(firm.logo);
+    let coverImageUrl: string | null = null;
+    if (firm.pdfCoverImage) coverImageUrl = await ctx.storage.getUrl(firm.pdfCoverImage);
+    let lastPageImageUrl: string | null = null;
+    if (firm.pdfLastPageImage) lastPageImageUrl = await ctx.storage.getUrl(firm.pdfLastPageImage);
+    let footerImageUrl: string | null = null;
+    if (firm.pdfFooterImage) footerImageUrl = await ctx.storage.getUrl(firm.pdfFooterImage);
+
+    // Team members
+    const users = await ctx.db.query("users").withIndex("by_firm", (q) => q.eq("firmId", firmId)).collect();
+    const teamMembers = users
+      .filter((u) => !u.deactivatedAt)
+      .map((u) => ({
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        role: u.jobTitle ?? "",
+        bio: u.bio ?? "",
+        phone: u.phone ?? "",
+        avatar: u.avatar ?? "",
+      }));
+
+    return {
+      firmName: firm.name,
+      brandColors: firm.brandColors,
+      headingsFont: firm.headingsFont ?? "",
+      generalTextFont: firm.generalTextFont ?? "",
+      logoUrl,
+      coverImageUrl,
+      lastPageImageUrl,
+      footerImageUrl,
+      // Template content
+      coverQuote: firm.coverQuote ?? "",
+      coverQuoteAuthor: firm.coverQuoteAuthor ?? "",
+      closingQuote: firm.closingQuote ?? "",
+      closingQuoteAuthor: firm.closingQuoteAuthor ?? "",
+      aboutUsHtml: firm.aboutUsHtml ?? "",
+      missionStatement: firm.missionStatement ?? "",
+      whyChooseUsItems: firm.whyChooseUsItems ?? [],
+      valuesStatement: firm.valuesStatement ?? "",
+      website: firm.website ?? "",
+      feesIntroductionText: firm.feesIntroductionText ?? "",
+      whatHappensNextText: firm.whatHappensNextText ?? "",
+      paymentTermsText: firm.paymentTermsText ?? "",
+      defaultTimelineSteps: firm.defaultTimelineSteps ?? [],
+      proposalBuilderDefaultIntro: firm.proposalBuilderDefaultIntro ?? "",
+      // Footer / branding
+      pdfFooterText: firm.pdfFooterText ?? "",
+      pdfFooterAddress: firm.pdfFooterAddress ?? "",
+      pdfDisclaimer: firm.pdfDisclaimer ?? "",
+      pdfSignOffBlock: firm.pdfSignOffBlock ?? "",
+      pdfBankingDetails: firm.pdfBankingDetails ?? "",
+      // Section toggles
+      proposalTemplateSections: firm.proposalTemplateSections ?? {},
+      // Team
+      teamMembers,
+    };
+  },
+});
+
+const templateSectionsValidator = v.optional(v.object({
+  coverPage: v.optional(v.boolean()),
+  introduction: v.optional(v.boolean()),
+  aboutUs: v.optional(v.boolean()),
+  team: v.optional(v.boolean()),
+  fees: v.optional(v.boolean()),
+  serviceSummary: v.optional(v.boolean()),
+  timeline: v.optional(v.boolean()),
+  allServices: v.optional(v.boolean()),
+  nextSteps: v.optional(v.boolean()),
+  closingPage: v.optional(v.boolean()),
+}));
+
+/**
+ * Update proposal template settings.
+ */
+export const updateProposalTemplate = mutation({
+  args: {
+    userId: v.id("users"),
+    coverQuote: v.optional(v.string()),
+    coverQuoteAuthor: v.optional(v.string()),
+    closingQuote: v.optional(v.string()),
+    closingQuoteAuthor: v.optional(v.string()),
+    aboutUsHtml: v.optional(v.string()),
+    missionStatement: v.optional(v.string()),
+    whyChooseUsItems: v.optional(v.array(v.string())),
+    valuesStatement: v.optional(v.string()),
+    website: v.optional(v.string()),
+    feesIntroductionText: v.optional(v.string()),
+    whatHappensNextText: v.optional(v.string()),
+    paymentTermsText: v.optional(v.string()),
+    defaultTimelineSteps: v.optional(v.array(v.object({
+      marker: v.string(),
+      title: v.string(),
+      description: v.string(),
+    }))),
+    proposalBuilderDefaultIntro: v.optional(v.string()),
+    pdfFooterText: v.optional(v.string()),
+    pdfFooterAddress: v.optional(v.string()),
+    pdfDisclaimer: v.optional(v.string()),
+    pdfSignOffBlock: v.optional(v.string()),
+    pdfBankingDetails: v.optional(v.string()),
+    headingsFont: v.optional(v.string()),
+    generalTextFont: v.optional(v.string()),
+    brandColors: v.optional(v.object({ primary: v.string(), secondary: v.string() })),
+    proposalTemplateSections: templateSectionsValidator,
+  },
+  handler: async (ctx, args) => {
+    const user = await requirePermission(ctx, args.userId, "canManageFirm");
+    const { userId: _, ...fields } = args;
+    const updates: Record<string, unknown> = { updatedAt: Date.now() };
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) updates[key] = value;
+    }
+    await ctx.db.patch(user.firmId, updates);
+    return { success: true };
+  },
+});
+
+/**
+ * Update a team member's proposal-visible fields (job title, bio, phone).
+ */
+export const updateTeamMember = mutation({
+  args: {
+    userId: v.id("users"),
+    targetUserId: v.id("users"),
+    jobTitle: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    phone: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requirePermission(ctx, args.userId, "canManageFirm");
+    const target = await ctx.db.get(args.targetUserId);
+    if (!target) return { success: false };
+    const updates: Record<string, unknown> = {};
+    if (args.jobTitle !== undefined) updates.jobTitle = args.jobTitle;
+    if (args.bio !== undefined) updates.bio = args.bio;
+    if (args.phone !== undefined) updates.phone = args.phone;
+    await ctx.db.patch(args.targetUserId, updates);
     return { success: true };
   },
 });

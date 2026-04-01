@@ -143,6 +143,50 @@ export default defineSchema({
     ),
     /** Letterhead: directors / partners / members block (engagement letters) */
     letterheadDirectorsList: v.optional(v.string()),
+    // ── Proposal PDF template content ──
+    /** About Us page content (HTML) */
+    aboutUsHtml: v.optional(v.string()),
+    /** Firm mission statement */
+    missionStatement: v.optional(v.string()),
+    /** "Why choose us" bullet items */
+    whyChooseUsItems: v.optional(v.array(v.string())),
+    /** Firm values statement */
+    valuesStatement: v.optional(v.string()),
+    /** Firm website URL */
+    website: v.optional(v.string()),
+    /** Cover page quote text */
+    coverQuote: v.optional(v.string()),
+    /** Cover page quote author */
+    coverQuoteAuthor: v.optional(v.string()),
+    /** Closing page quote text */
+    closingQuote: v.optional(v.string()),
+    /** Closing page quote author */
+    closingQuoteAuthor: v.optional(v.string()),
+    /** Default onboarding timeline steps for proposals */
+    defaultTimelineSteps: v.optional(v.array(v.object({
+      marker: v.string(),
+      title: v.string(),
+      description: v.string(),
+    }))),
+    /** Introduction to fees section */
+    feesIntroductionText: v.optional(v.string()),
+    /** "What happens next" / next steps intro text */
+    whatHappensNextText: v.optional(v.string()),
+    /** Payment terms text for fee summary */
+    paymentTermsText: v.optional(v.string()),
+    /** Which proposal PDF sections are enabled (all default to true if missing) */
+    proposalTemplateSections: v.optional(v.object({
+      coverPage: v.optional(v.boolean()),
+      introduction: v.optional(v.boolean()),
+      aboutUs: v.optional(v.boolean()),
+      team: v.optional(v.boolean()),
+      fees: v.optional(v.boolean()),
+      serviceSummary: v.optional(v.boolean()),
+      timeline: v.optional(v.boolean()),
+      allServices: v.optional(v.boolean()),
+      nextSteps: v.optional(v.boolean()),
+      closingPage: v.optional(v.boolean()),
+    })),
   }).index("by_subscription_status", ["subscriptionStatus"]),
 
   // Engagement Letter Versions (Scope Library - each letter version)
@@ -180,6 +224,12 @@ export default defineSchema({
     lastLoginAttempt: v.optional(v.number()),
     lockedUntil: v.optional(v.number()), // Timestamp when lockout expires
     deactivatedAt: v.optional(v.number()), // When set, user is deactivated (admin-only)
+    /** Job title shown on proposals (e.g. "Senior Accountant") */
+    jobTitle: v.optional(v.string()),
+    /** Short bio for proposal team page */
+    bio: v.optional(v.string()),
+    /** Contact phone number */
+    phone: v.optional(v.string()),
     // Pending invite (email link → /auth?invite=…); cleared when Clerk account links
     inviteToken: v.optional(v.string()),
     inviteExpiresAt: v.optional(v.number()),
@@ -456,6 +506,8 @@ export default defineSchema({
         ),
       })
     ),
+    /** Team members to display on proposal PDF */
+    teamMemberIds: v.optional(v.array(v.id("users"))),
     createdBy: v.id("users"),
     approvedBy: v.optional(v.id("users")),
     sentAt: v.optional(v.number()),

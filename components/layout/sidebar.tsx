@@ -91,11 +91,13 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Workspace",   href: "",                           section: true, businessOnly: true },
       { label: "Org profile", href: "/settings?tab=org",                           businessOnly: true },
+      { label: "Proposal", href: "/settings/proposal-template",           businessOnly: true },
       { label: "People",      href: "/settings?tab=people",                        proOnly: true },
       { label: "Billing",     href: "/settings?tab=billing",                       proOnly: true },
       { label: "Apps Map",    href: "/appsmap",                                    proOnly: true },
       { label: "Account",     href: "",                           section: true, businessOnly: true },
       { label: "Profile",     href: "/settings?tab=account" },
+      { label: "Proposal", href: "/settings/proposal-template",           starterOnly: true },
       { label: "Billing",     href: "/settings?tab=billing",     starterOnly: true },
       { label: "Apps Map",    href: "/appsmap",                   starterOnly: true },
     ],
