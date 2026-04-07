@@ -59,10 +59,13 @@ export function getItemTotalPrice(
   item: ProposalItem,
   entities: ProposalBuilderEntity[]
 ): number {
-  if (entities.length === 0) return item.totalPrice ?? item.subtotal ?? 0;
+  // Yearly services store the monthly rate; total reflects the annual amount
+  const yearlyFactor = item.billingCategory === "yearly" ? 12 : 1;
+
+  if (entities.length === 0) return (item.totalPrice ?? item.subtotal ?? 0) * yearlyFactor;
 
   const assignedIds = resolveAssignedEntityIds(item, entities);
-  if (assignedIds.length === 0) return item.totalPrice ?? 0;
+  if (assignedIds.length === 0) return (item.totalPrice ?? 0) * yearlyFactor;
 
   const mode = item.entityPricingMode as EntityPricingMode;
 
@@ -72,18 +75,19 @@ export function getItemTotalPrice(
       const custom = item.customEntityPrices?.[id];
       if (custom != null) return sum + custom;
       return sum + (item.subtotal ?? 0) / n;
-    }, 0);
+    }, 0) * yearlyFactor;
   }
 
   if (mode === "price_per_entity") {
-    return (item.subtotal ?? 0) * assignedIds.length;
+    return (item.subtotal ?? 0) * assignedIds.length * yearlyFactor;
   }
 
   // single_price (default)
-  return item.totalPrice ?? item.subtotal ?? 0;
+  return (item.totalPrice ?? item.subtotal ?? 0) * yearlyFactor;
 }
 
-/** Share of this line's fee attributed to one entity (for grids & per-entity live summary). */
+/** Share of this line's fee attributed to one entity (for grids & per-entity live summary).
+ *  Yearly items store the monthly rate — this function returns the annualised amount (× 12). */
 export function getItemContributionForEntity(
   item: ProposalItem,
   entityId: string,
@@ -93,17 +97,20 @@ export function getItemContributionForEntity(
   if (!assignedIds.includes(entityId)) return 0;
 
   const mode = item.entityPricingMode as EntityPricingMode;
+  // Yearly services store the monthly rate; display the annual total
+  const yearlyFactor = item.billingCategory === "yearly" ? 12 : 1;
+
   if (mode === "custom_price_by_entity") {
     const custom = item.customEntityPrices?.[entityId];
-    if (custom != null) return custom;
+    if (custom != null) return custom * yearlyFactor;
     const n = assignedIds.length || 1;
-    return (item.subtotal ?? 0) / n;
+    return ((item.subtotal ?? 0) / n) * yearlyFactor;
   }
   if (mode === "price_per_entity") {
-    return item.subtotal ?? 0;
+    return (item.subtotal ?? 0) * yearlyFactor;
   }
   const total = item.totalPrice ?? item.subtotal ?? 0;
-  return total / (assignedIds.length || 1);
+  return (total / (assignedIds.length || 1)) * yearlyFactor;
 }
 
 /** Share of estimated hours for one entity (matches contribution logic for reporting). */
@@ -223,7 +230,11 @@ export function buildEntitySummaries(
     const acv = monthly * 12 + yearly + onceoff;
     const year1 = monthly * 12 + yearly + onceoff;
     const hours = requiredItems.reduce(
-      (s, i) => s + getItemHoursContributionForEntity(i, entity.id, entities),
+      (s, i) => {
+        const h = getItemHoursContributionForEntity(i, entity.id, entities);
+        // Monthly hours × 12 to annualise
+        return s + (i.billingCategory === "monthly" ? h * 12 : h);
+      },
       0
     );
 

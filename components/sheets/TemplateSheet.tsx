@@ -154,6 +154,24 @@ export function TemplateSheet({
       toast.error("Not authenticated");
       return;
     }
+
+    // Minimum fee
+    const feeNum = typeof minimumFee === "number" ? minimumFee : parseFloat(String(minimumFee));
+    if (isNaN(feeNum) || feeNum < 0) {
+      toast.error("Minimum monthly fee must be 0 or a positive amount");
+      return;
+    }
+
+    // Redirect URL — validate format if provided
+    if (redirectUrl.trim()) {
+      try {
+        new URL(redirectUrl.trim());
+      } catch {
+        toast.error("Redirect URL must be a valid URL (e.g. https://yourfirm.co.za/thank-you)");
+        return;
+      }
+    }
+
     const sectionConfig = parseSectionConfig();
     if (sectionConfigJson.trim() && sectionConfig === undefined) return;
 

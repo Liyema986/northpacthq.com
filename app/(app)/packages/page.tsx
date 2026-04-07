@@ -24,6 +24,10 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -50,6 +54,7 @@ export default function PackagesPage() {
   const [editPackageId, setEditPackageId] = useState<Id<"packageTemplates"> | undefined>();
   const [sortBy, setSortBy] = useState<SortId>("manual");
   const [templateFilter, setTemplateFilter] = useState<string>("all");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<Id<"packageTemplates"> | null>(null);
 
   const loading = convexPackages === undefined;
   const packages = useMemo(() => convexPackages ?? [], [convexPackages]);
@@ -113,6 +118,8 @@ export default function PackagesPage() {
       toast.success("Package deleted");
     } catch {
       toast.error("Failed to delete");
+    } finally {
+      setDeleteConfirmId(null);
     }
   }
 
@@ -270,7 +277,7 @@ export default function PackagesPage() {
                     <button
                       type="button"
                       className="h-8 w-8 flex items-center justify-center rounded text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                      onClick={() => handleDelete(pkg._id)}
+                      onClick={() => setDeleteConfirmId(pkg._id)}
                       title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -314,6 +321,26 @@ export default function PackagesPage() {
           editPackageId={editPackageId}
         />
       </div>
+
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(o) => !o && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this package?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &ldquo;{packages.find((p) => p._id === deleteConfirmId)?.name}&rdquo; will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

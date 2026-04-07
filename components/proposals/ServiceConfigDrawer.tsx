@@ -89,8 +89,7 @@ interface ServiceConfigDrawerProps {
 }
 
 const deliveryOptions: Frequency[] = [
-  "monthly", "bi_monthly", "quarterly", "semi_annually",
-  "annually", "once_off", "on_demand",
+  "monthly", "bi_monthly", "quarterly", "semi_annually", "annually",
 ];
 
 const entityPricingModeLabels: Record<EntityPricingMode, string> = {
@@ -99,8 +98,30 @@ const entityPricingModeLabels: Record<EntityPricingMode, string> = {
   custom_price_by_entity: "Custom price by entity",
 };
 
+const FREQUENCY_LABELS: Record<string, string> = {
+  monthly:        "Monthly",
+  bi_monthly:     "Bi monthly",
+  quarterly:      "Quarterly",
+  semi_annually:  "Six monthly",
+  annually:       "Annually",
+  once_off:       "Once off",
+  on_demand:      "On demand",
+};
+
+const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function getDerivedMonths(startMonth: string, frequency: string): string {
+  const idx = MONTHS_FULL.indexOf(startMonth);
+  if (idx === -1) return "";
+  const step = frequency === "bi_monthly" ? 2 : frequency === "quarterly" ? 3 : frequency === "semi_annually" ? 6 : 12;
+  const result: string[] = [];
+  for (let i = idx; i < 12; i += step) result.push(MONTHS_SHORT[i]);
+  return result.join(", ");
+}
+
 function humanizeFrequency(v: string) {
-  return v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return FREQUENCY_LABELS[v] ?? v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 const fieldInput =
@@ -257,51 +278,68 @@ export function ServiceConfigDrawer({
                     </SelectContent>
                   </Select>
                 </div>
-                {pricingOptions.length > 1 ? (
-                  <div className="space-y-1.5">
-                    <Label className="text-[13px]">Pricing option</Label>
-                    <Select
-                      value={pricingOptions.find((o) => o.price === item.unitPrice)?.label ?? ""}
-                      onValueChange={(v) => {
-                        const opt = pricingOptions.find((o) => o.label === v);
-                        if (!opt) return;
-                        // Reset manualPrice so calculations reapply on new base
-                        const updates: Partial<ProposalItem> = {
-                          unitPrice: opt.price,
-                          manualPrice: undefined,
-                          calculationInputs: undefined,
-                          ...(opt.hours != null ? { timeInputHours: opt.hours, timeInputMinutes: Math.round(opt.hours * 60) } : {}),
-                        };
-                        onUpdate(item.id, updates);
-                      }}
-                    >
-                      <SelectTrigger className={selectTrigger}>
-                        <SelectValue placeholder="Select option" />
-                      </SelectTrigger>
-                      <SelectContent className="z-[100] max-h-[min(60vh,360px)]">
-                        {pricingOptions.map((opt) => (
-                          <SelectItem key={opt.label} value={opt.label} className="text-[13px]">
-                            {opt.label} — {formatCurrency(opt.price)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <div className="space-y-1.5">
-                    <Label className="text-[13px]">Unit price (R)</Label>
-                    <input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      className={fieldInput}
-                      value={item.unitPrice || ""}
-                      onChange={(e) => handleChange("unitPrice", Number(e.target.value))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                )}
+                <div className="space-y-1.5">
+                  <Label className="text-[13px]">Unit price (R)</Label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    className={fieldInput}
+                    value={item.unitPrice || ""}
+                    onChange={(e) => {
+                      const newPrice = Number(e.target.value);
+                      const calcInputs = item.calculationInputs ?? {};
+                      let price = newPrice;
+                      for (const c of calculations) {
+                        const v = c.valueType === "static" ? (c.staticValue ?? 0) : (calcInputs[c.id] ?? null);
+                        if (v == null) continue;
+                        switch (c.operation) {
+                          case "multiply": price *= v; break;
+                          case "divide":   price = v !== 0 ? price / v : price; break;
+                          case "add":      price += v; break;
+                          case "subtract": price -= v; break;
+                        }
+                      }
+                      onUpdate(item.id, {
+                        unitPrice: newPrice,
+                        manualPrice: price !== newPrice ? price : undefined,
+                      });
+                    }}
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
+
+              {pricingOptions.length > 1 && (
+                <div className="space-y-1.5">
+                  <Label className="text-[13px]">Pricing option</Label>
+                  <Select
+                    value={pricingOptions.find((o) => o.price === item.unitPrice)?.label ?? ""}
+                    onValueChange={(v) => {
+                      const opt = pricingOptions.find((o) => o.label === v);
+                      if (!opt) return;
+                      // Only update time estimates from the option — unit price stays as-is
+                      if (opt.hours != null) {
+                        onUpdate(item.id, {
+                          timeInputHours: opt.hours,
+                          timeInputMinutes: Math.round(opt.hours * 60),
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className={selectTrigger}>
+                      <SelectValue placeholder="Select option" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[100] max-h-[min(60vh,360px)]">
+                      {pricingOptions.map((opt) => (
+                        <SelectItem key={opt.label} value={opt.label} className="text-[13px]">
+                          {opt.label} — {formatCurrency(opt.price)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Calculation layers */}
               {calculations.length > 0 && (
@@ -456,47 +494,94 @@ export function ServiceConfigDrawer({
                     Total minutes = hours × 60. Editing hours or minutes updates the other so both stay in sync.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-2 items-end">
-                    <div className="space-y-1.5">
-                      <Label className="text-[13px]">Estimated hours</Label>
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.25"
-                        className={fieldInput}
-                        value={item.timeInputHours || ""}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          const hours = Number.isFinite(v) ? Math.max(0, v) : 0;
-                          onUpdate(item.id, {
-                            timeInputHours: hours,
-                            timeInputMinutes: Math.round(hours * 60),
-                          });
-                        }}
-                        placeholder="0"
-                      />
-                    </div>
-                    <span className="hidden sm:block pb-2.5 text-center text-muted-foreground text-lg font-medium">
-                      =
-                    </span>
-                    <div className="space-y-1.5">
-                      <Label className="text-[13px]">Total minutes</Label>
-                      <input
-                        type="number"
-                        min={0}
-                        step={1}
-                        className={fieldInput}
-                        value={item.timeInputMinutes || ""}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          const mins = Number.isFinite(v) ? Math.max(0, Math.round(v)) : 0;
-                          onUpdate(item.id, {
-                            timeInputMinutes: mins,
-                            timeInputHours: mins / 60,
-                          });
-                        }}
-                        placeholder="0"
-                      />
-                    </div>
+                    {(() => {
+                      const inputs = item.calculationInputs ?? {};
+                      const opSym = { multiply: "×", divide: "÷", add: "+", subtract: "−" } as const;
+                      const parts: string[] = [];
+                      const hours = item.timeInputHours ?? 0;
+                      const mins = item.timeInputMinutes ?? 0;
+                      let hoursResult = hours;
+                      let minsResult = mins;
+                      for (const calc of calculations) {
+                        const val = calc.valueType === "static" ? (calc.staticValue ?? 0) : (inputs[calc.id] ?? null);
+                        if (val == null) continue;
+                        parts.push(`${opSym[calc.operation]} ${val}`);
+                        switch (calc.operation) {
+                          case "multiply": hoursResult *= val; minsResult *= val; break;
+                          case "divide":   hoursResult = val !== 0 ? hoursResult / val : hoursResult; minsResult = val !== 0 ? minsResult / val : minsResult; break;
+                          case "add":      hoursResult += val; minsResult += val; break;
+                          case "subtract": hoursResult -= val; minsResult -= val; break;
+                        }
+                      }
+                      const hasCalc = parts.length > 0;
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-[13px]">Estimated hours</Label>
+                            <input
+                              type="number"
+                              min={0}
+                              step="0.25"
+                              className={fieldInput}
+                              value={item.timeInputHours || ""}
+                              onChange={(e) => {
+                                const v = Number(e.target.value);
+                                const h = Number.isFinite(v) ? Math.max(0, v) : 0;
+                                onUpdate(item.id, {
+                                  timeInputHours: h,
+                                  timeInputMinutes: Math.round(h * 60),
+                                });
+                              }}
+                              placeholder="0"
+                            />
+                            {hasCalc && hours > 0 && (
+                              <>
+                                <div className="border-t border-slate-200" />
+                                <div className="flex justify-end">
+                                  <span className="text-[11px] text-slate-500">
+                                    {hours} {parts.join(" ")} ={" "}
+                                    <span className="font-medium text-slate-700">{parseFloat(hoursResult.toFixed(2))} h</span>
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          <span className="hidden sm:block pb-2.5 text-center text-muted-foreground text-lg font-medium">
+                            =
+                          </span>
+                          <div className="space-y-1.5">
+                            <Label className="text-[13px]">Total minutes</Label>
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              className={fieldInput}
+                              value={item.timeInputMinutes || ""}
+                              onChange={(e) => {
+                                const v = Number(e.target.value);
+                                const m = Number.isFinite(v) ? Math.max(0, Math.round(v)) : 0;
+                                onUpdate(item.id, {
+                                  timeInputMinutes: m,
+                                  timeInputHours: m / 60,
+                                });
+                              }}
+                              placeholder="0"
+                            />
+                            {hasCalc && mins > 0 && (
+                              <>
+                                <div className="border-t border-slate-200" />
+                                <div className="flex justify-end">
+                                  <span className="text-[11px] text-slate-500">
+                                    {mins} {parts.join(" ")} ={" "}
+                                    <span className="font-medium text-slate-700">{Math.round(minsResult)} min</span>
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
@@ -683,83 +768,125 @@ export function ServiceConfigDrawer({
             <ConfigSection
               icon={Clock}
               title="Timing & scope"
-              hint="When work is delivered and any extra notes."
+              hint="Set work planning frequency and cash flow billing cycle."
             >
-              {item.billingCategory === "yearly" && (
-                <div className="space-y-1.5">
-                  <Label className="text-[13px]">Planned delivery / commitment date</Label>
-                  <DatePicker
-                    value={item.commitmentDate ?? ""}
-                    onChange={(v) => handleChange("commitmentDate", v)}
-                    placeholder="Select a date"
-                  />
-                  <p className="text-[11px] text-slate-500">
-                    Used for yearly work and cash-flow planning (e.g. when financials are due).
-                  </p>
-                </div>
-              )}
-              <div className="space-y-1.5">
-                <Label className="text-[13px]">Scheduled work month (work planning)</Label>
-                <MonthPicker
-                  value={item.scheduledWorkMonth ?? ""}
-                  onChange={(v) => handleChange("scheduledWorkMonth", v)}
-                  placeholder="Select a month"
-                />
-                <p className="text-[11px] text-slate-500">
-                  Appears on Work Planning when you save the proposal (e.g. May for annual financials).
-                  If empty, the firm uses proposal start / year-end settings or the current month.
-                </p>
+              {/* Work Planner */}
+              <div className="space-y-3">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-slate-500">Work planner</p>
+                <Select
+                  value={item.frequency ?? "monthly"}
+                  onValueChange={(v) => {
+                    handleChange("frequency", v as Frequency);
+                    handleChange("scheduledWorkMonth", "");
+                  }}
+                >
+                  <SelectTrigger className={selectTrigger}><SelectValue /></SelectTrigger>
+                  <SelectContent className="z-[100]">
+                    {deliveryOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt} className="text-[13px]">{FREQUENCY_LABELS[opt]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Starting month select for periodic frequencies */}
+                {["bi_monthly", "quarterly", "semi_annually", "annually"].includes(item.frequency ?? "") && (
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">
+                      {item.frequency === "annually" ? "Month" : "Starting month"}
+                    </Label>
+                    <Select
+                      value={item.scheduledWorkMonth ?? ""}
+                      onValueChange={(v) => handleChange("scheduledWorkMonth", v)}
+                    >
+                      <SelectTrigger className={selectTrigger}><SelectValue placeholder="Select month" /></SelectTrigger>
+                      <SelectContent className="z-[100]">
+                        {MONTHS_FULL.map((m) => (
+                          <SelectItem key={m} value={m} className="text-[13px]">{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {item.scheduledWorkMonth && item.frequency !== "annually" && (
+                      <p className="text-[11px] text-slate-500">
+                        Scheduled: <span className="font-medium text-slate-700">{getDerivedMonths(item.scheduledWorkMonth, item.frequency ?? "")}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-[13px]">Delivery frequency</Label>
-                  <Select
-                    value={item.frequency ?? "monthly"}
-                    onValueChange={(v) => handleChange("frequency", v as Frequency)}
-                  >
-                    <SelectTrigger className={selectTrigger}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="z-[100] max-h-[min(60vh,320px)]">
-                      {deliveryOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt} className="text-[13px]">
-                          {humanizeFrequency(opt)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-[13px]">Service delivery timing</Label>
-                  <input
-                    className={fieldInput}
-                    value={item.duePattern ?? ""}
-                    onChange={(e) => handleChange("duePattern", e.target.value)}
-                    placeholder="e.g. By the 7th working day of each month"
-                  />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-[13px]">Notes</Label>
-                  <textarea
-                    className={cn(fieldTextarea, "min-h-[80px]")}
-                    rows={3}
-                    value={item.itemNotes ?? ""}
-                    onChange={(e) => handleChange("itemNotes", e.target.value)}
-                    placeholder="Internal notes, assumptions, or exclusions"
-                  />
-                </div>
+
+              <div className="border-t border-slate-100" />
+
+              {/* Cash Flow */}
+              {(() => {
+                const cfFreq = (item.duePattern ?? "monthly") as Frequency;
+                const cfMonth = (item.commitmentDate ?? "").startsWith("cf:") ? item.commitmentDate!.slice(3) : "";
+                return (
+                  <div className="space-y-3">
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-slate-500">Cash flow</p>
+                    <Select
+                      value={cfFreq}
+                      onValueChange={(v) => {
+                        handleChange("duePattern", v);
+                        if (!(item.commitmentDate ?? "").startsWith("cf:")) return;
+                        handleChange("commitmentDate", "cf:");
+                      }}
+                    >
+                      <SelectTrigger className={selectTrigger}><SelectValue /></SelectTrigger>
+                      <SelectContent className="z-[100]">
+                        {deliveryOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt} className="text-[13px]">{FREQUENCY_LABELS[opt]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Starting month for periodic cash flow */}
+                    {["bi_monthly", "quarterly", "semi_annually", "annually"].includes(cfFreq) && (
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">
+                          {cfFreq === "annually" ? "Billing month" : "Starting billing month"}
+                        </Label>
+                        <Select
+                          value={cfMonth}
+                          onValueChange={(v) => handleChange("commitmentDate", `cf:${v}`)}
+                        >
+                          <SelectTrigger className={selectTrigger}><SelectValue placeholder="Select month" /></SelectTrigger>
+                          <SelectContent className="z-[100]">
+                            {MONTHS_FULL.map((m) => (
+                              <SelectItem key={m} value={m} className="text-[13px]">{m}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {cfMonth && cfFreq !== "annually" && (
+                          <p className="text-[11px] text-slate-500">
+                            Billing: <span className="font-medium text-slate-700">{getDerivedMonths(cfMonth, cfFreq)}</span>
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                  </div>
+                );
+              })()}
+
+              <div className="border-t border-slate-100" />
+
+              {/* Notes */}
+              <div className="space-y-1.5">
+                <Label className="text-[13px]">Notes</Label>
+                <textarea
+                  className={cn(fieldTextarea, "min-h-[80px]")}
+                  rows={3}
+                  value={item.itemNotes ?? ""}
+                  onChange={(e) => handleChange("itemNotes", e.target.value)}
+                  placeholder="Internal notes, assumptions, or exclusions"
+                />
               </div>
             </ConfigSection>
 
             {/* Summary metrics */}
-            <div className="rounded-xl border border-slate-100 bg-gradient-to-b from-slate-50/90 to-white p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Layers className="h-4 w-4 text-slate-500" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  Summary
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+              <div className="grid grid-cols-4 divide-x divide-slate-200">
                 <MetricPill label="Base time" value={formatHoursMinutesClock(baseHours)} />
                 <MetricPill label="Total value" value={formatCurrency(totalValue)} />
                 <MetricPill label="Est. time" value={formatHoursMinutesClock(totalHours)} />
@@ -830,9 +957,9 @@ function ConfigSection({
 
 function MetricPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-white px-3 py-2.5">
-      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-1 text-[13px] font-semibold tabular-nums text-slate-900">{value}</p>
+    <div className="flex flex-col items-center px-2 py-1.5">
+      <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">{label}</p>
+      <p className="mt-0.5 text-[12px] font-semibold tabular-nums text-slate-800">{value}</p>
     </div>
   );
 }

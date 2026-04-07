@@ -87,7 +87,7 @@ function itemFromTemplate(
     discount:          0,
     taxRate:           15,
     frequency:         "monthly",
-    entityPricingMode: "single_price" as EntityPricingMode,
+    entityPricingMode: "price_per_entity" as EntityPricingMode,
     ...assignment,
     customEntityPrices:{},
     timeMethod:        "fixed_hours",
@@ -372,7 +372,12 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
     };
 
     const totalHours = roundHoursUpOneDecimal(
-      required.reduce((s, i) => s + getItemTotalHours(i, entities), 0)
+      required.reduce((s, i) => {
+        const h = getItemTotalHours(i, entities);
+        // Monthly hours × 12 to annualise; yearly & once-off are already total
+        if (i.billingCategory === "monthly") return s + h * 12;
+        return s + h;
+      }, 0)
     );
 
     const entityTotals =
@@ -391,18 +396,59 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
     };
   }, [items, entities, paymentFrequency]);
 
-  // ── Cash flow ──────────────────────────────────────────────────────────────
+  // ── Cash flow — driven by per-item Work Planner & Cash Flow frequencies ──
   const cashFlowByMonth = useMemo(() => {
-    const now = new Date();
-    return MONTHS.map((m, idx) => {
-      const isYearlyMonth = idx === 0; // dump all yearly in Jan for simplicity
-      const revenue =
-        summary.monthlyTotal +
-        (isYearlyMonth ? summary.yearlyTotal + summary.onceoffTotal : 0);
-      const hours = roundHoursUpOneDecimal(summary.totalHours / 12);
-      return { month: m, revenue, hours };
+    const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const required = items.filter((i) => !i.isOptional);
+
+    /** Compute which month indices (0-11) are active for a given frequency + start month. */
+    function activeIndices(freq: string, startMonth: string): number[] {
+      if (!freq || freq === "monthly") return [0,1,2,3,4,5,6,7,8,9,10,11];
+      const startIdx = MONTHS_FULL.indexOf(startMonth);
+      if (startIdx === -1) return [0,1,2,3,4,5,6,7,8,9,10,11];
+      const step = freq === "bi_monthly" ? 2 : freq === "quarterly" ? 3 : freq === "semi_annually" ? 6 : 12;
+      const indices: number[] = [];
+      for (let i = 0; i < 12; i += step) indices.push((startIdx + i) % 12);
+      return indices;
+    }
+
+    return MONTHS.map((m, monthIdx) => {
+      let revenue = 0;
+      let hours = 0;
+
+      for (const item of required) {
+        const price = getItemTotalPrice(item, entities);
+        const hrs   = getItemTotalHours(item, entities);
+
+        // Cash flow months (drives revenue bars)
+        const cfFreq  = item.duePattern || "monthly";
+        const cfStart = (item.commitmentDate ?? "").startsWith("cf:") ? item.commitmentDate!.slice(3) : "";
+        const cfMonths = activeIndices(cfFreq, cfStart);
+
+        // Work planner months (drives hours)
+        const wpFreq  = item.frequency || "monthly";
+        const wpStart = item.scheduledWorkMonth || "";
+        const wpMonths = activeIndices(wpFreq, wpStart);
+
+        if (item.billingCategory === "monthly") {
+          // price = per-month total; annual = price × 12
+          const annual = price * 12;
+          if (cfMonths.includes(monthIdx)) revenue += annual / cfMonths.length;
+          const annualHrs = hrs * 12;
+          if (wpMonths.includes(monthIdx)) hours += annualHrs / wpMonths.length;
+        } else if (item.billingCategory === "yearly") {
+          // price already annualised (×12 in getItemTotalPrice)
+          if (cfMonths.includes(monthIdx)) revenue += price / cfMonths.length;
+          if (wpMonths.includes(monthIdx)) hours += hrs / wpMonths.length;
+        } else {
+          // once-off: first month
+          if (monthIdx === 0) { revenue += price; hours += hrs; }
+        }
+      }
+
+      return { month: m, revenue: Math.round(revenue * 100) / 100, hours: roundHoursUpOneDecimal(hours) };
     });
-  }, [summary]);
+  }, [items, entities]);
 
   return {
     items,

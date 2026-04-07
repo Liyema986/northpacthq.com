@@ -27,7 +27,7 @@ import {
   matchesEntityFilter,
   resolveAssignedEntityIds,
 } from "@/lib/proposal-entities";
-import { formatCurrency } from "@/lib/service-metrics";
+import { formatCurrency, formatHoursMinutesClock } from "@/lib/service-metrics";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -63,9 +63,9 @@ interface ProposalCanvasProps {
   onUpdateEntity:         (id: string, u: Partial<ProposalBuilderEntity>) => void;
   onRemoveEntity:         (id: string) => void;
   replaceEntities?:       (entities: ProposalBuilderEntity[]) => void;
-  onEditItem:             (item: ProposalItem) => void;
-  onRemoveItem:           (id: string) => void;
-  onDuplicateItem:        (id: string) => void;
+  onEditItem:             (item: ProposalItem, contextEntityId?: string) => void;
+  onRemoveItem:           (id: string, contextEntityId?: string) => void;
+  onDuplicateItem:        (id: string, contextEntityId?: string) => void;
   onToggleOptional:       (id: string) => void;
   clientGroupMode:        ClientGroupMode;
   onClientGroupModeChange:(mode: ClientGroupMode) => void;
@@ -184,8 +184,8 @@ function EntityGridView({
   items, entities, onEditItem, onRemoveItem, onDuplicateItem, onToggleOptional,
 }: {
   items: ProposalItem[]; entities: ProposalBuilderEntity[];
-  onEditItem: (i: ProposalItem) => void; onRemoveItem: (id: string) => void;
-  onDuplicateItem: (id: string) => void; onToggleOptional: (id: string) => void;
+  onEditItem: (i: ProposalItem, contextEntityId?: string) => void; onRemoveItem: (id: string, contextEntityId?: string) => void;
+  onDuplicateItem: (id: string, contextEntityId?: string) => void; onToggleOptional: (id: string) => void;
 }) {
   const [collapsedCards, setCollapsedCards] = useState<Set<string>>(new Set());
   const toggleCard = (key: string) => setCollapsedCards((prev) => {
@@ -214,11 +214,16 @@ function EntityGridView({
               </h3>
             </div>
 
-            {/* One Droppable per entity column so drops target that entity only */}
-            <div
-              className="grid gap-4"
-              style={{ gridTemplateColumns: `repeat(${entities.length}, minmax(0, 1fr))` }}
-            >
+            {/* One Droppable per entity column — horizontal scroll when many entities */}
+            <div className="overflow-x-auto pb-2 show-scrollbar">
+              <div
+                className="grid gap-4"
+                style={{
+                  gridTemplateColumns: entities.length === 1
+                    ? "1fr"
+                    : `repeat(${entities.length}, 200px)`,
+                }}
+              >
               {entities.map((entity) => {
                 const entityItems = items.filter(
                   (i) =>
@@ -242,7 +247,7 @@ function EntityGridView({
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className={cn(
-                          "min-w-0 rounded-xl p-1 transition-colors -m-1",
+                          "rounded-xl p-1 transition-colors -m-1",
                           snapshot.isDraggingOver && style.bg
                         )}
                       >
@@ -313,14 +318,14 @@ function EntityGridView({
                                       {!isCollapsed && (
                                         <div className="border-t border-slate-100 px-3 pb-2 pt-1.5">
                                           <div className="text-[10px] text-muted-foreground">
-                                            {cellHours}h
+                                            {formatHoursMinutesClock(cellHours)}
                                             {item.isOptional && " · Optional"}
                                           </div>
                                           <div className="mt-1.5 flex items-center gap-1">
-                                            <button type="button" onClick={() => onEditItem(item)} className="rounded p-0.5 hover:bg-slate-100 text-[10px] text-slate-400" title="Edit">✎</button>
-                                            <button type="button" onClick={() => onDuplicateItem(item.id)} className="rounded p-0.5 hover:bg-slate-100 text-[10px] text-slate-400" title="Duplicate">⧉</button>
+                                            <button type="button" onClick={() => onEditItem(item, entity.id)} className="rounded p-0.5 hover:bg-slate-100 text-[10px] text-slate-400" title="Edit">✎</button>
+                                            <button type="button" onClick={() => onDuplicateItem(item.id, entity.id)} className="rounded p-0.5 hover:bg-slate-100 text-[10px] text-slate-400" title="Duplicate">⧉</button>
                                             <button type="button" onClick={() => onToggleOptional(item.id)} className="rounded p-0.5 hover:bg-slate-100 text-[10px] text-slate-400" title="Toggle optional">{item.isOptional ? "☐" : "☑"}</button>
-                                            <button type="button" onClick={() => onRemoveItem(item.id)} className="rounded p-0.5 hover:bg-red-50 text-[10px] text-red-500" title="Remove">✕</button>
+                                            <button type="button" onClick={() => onRemoveItem(item.id, entity.id)} className="rounded p-0.5 hover:bg-red-50 text-[10px] text-red-500" title="Remove">✕</button>
                                           </div>
                                         </div>
                                       )}
@@ -337,6 +342,7 @@ function EntityGridView({
                   </Droppable>
                 );
               })}
+              </div>
             </div>
           </section>
         );

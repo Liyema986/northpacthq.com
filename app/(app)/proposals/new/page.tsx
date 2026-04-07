@@ -881,9 +881,76 @@ function NewProposalInner() {
             onUpdateEntity={proposal.updateEntity}
             onRemoveEntity={handleRemoveEntity}
             replaceEntities={proposal.replaceEntities}
-            onEditItem={setEditingItem}
-            onRemoveItem={proposal.removeItem}
-            onDuplicateItem={proposal.duplicateItem}
+            onEditItem={(item, contextEntityId) => {
+                // If editing from a specific entity column and the service covers all entities,
+                // split it: original keeps all OTHER entities, new copy is just for this entity.
+                if (
+                  contextEntityId &&
+                  item.entityAssignmentMode === "all_entities" &&
+                  proposal.entities.length > 1
+                ) {
+                  const otherEntityIds = proposal.entities
+                    .map((e) => e.id)
+                    .filter((id) => id !== contextEntityId);
+                  const newId = `item_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+                  const newItem: ProposalItem = {
+                    ...item,
+                    id: newId,
+                    entityAssignmentMode: "selected_entities",
+                    assignedEntityIds: [contextEntityId],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  };
+                  proposal.replaceItems(
+                    proposal.items.flatMap((i) =>
+                      i.id !== item.id
+                        ? [i]
+                        : [
+                            { ...i, entityAssignmentMode: "selected_entities", assignedEntityIds: otherEntityIds },
+                            newItem,
+                          ]
+                    )
+                  );
+                  setEditingItem(newItem);
+                  return;
+                }
+                setEditingItem(item);
+              }}
+            onRemoveItem={(id, contextEntityId) => {
+                const item = proposal.items.find((i) => i.id === id);
+                if (contextEntityId && item) {
+                  if (item.entityAssignmentMode === "all_entities" && proposal.entities.length > 1) {
+                    const otherEntityIds = proposal.entities.map((e) => e.id).filter((eid) => eid !== contextEntityId);
+                    proposal.updateItem(id, { entityAssignmentMode: "selected_entities", assignedEntityIds: otherEntityIds });
+                    return;
+                  }
+                  if (item.entityAssignmentMode === "selected_entities") {
+                    const remaining = (item.assignedEntityIds ?? []).filter((eid) => eid !== contextEntityId);
+                    if (remaining.length > 0) {
+                      proposal.updateItem(id, { assignedEntityIds: remaining });
+                      return;
+                    }
+                  }
+                }
+                proposal.removeItem(id);
+              }}
+            onDuplicateItem={(id, contextEntityId) => {
+                const item = proposal.items.find((i) => i.id === id);
+                if (contextEntityId && item?.entityAssignmentMode === "all_entities") {
+                  const newId = `item_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+                  const newItem: ProposalItem = {
+                    ...item,
+                    id: newId,
+                    entityAssignmentMode: "selected_entities",
+                    assignedEntityIds: [contextEntityId],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  };
+                  proposal.replaceItems([...proposal.items, newItem]);
+                } else {
+                  proposal.duplicateItem(id);
+                }
+              }}
             onToggleOptional={(id) => {
               const item = proposal.items.find((i) => i.id === id);
               if (item) proposal.updateItem(id, { isOptional: !item.isOptional });

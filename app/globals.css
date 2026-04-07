@@ -231,6 +231,27 @@
   display: none;
 }
 
+/* ── show-scrollbar — visible only when content overflows ───────────── */
+.show-scrollbar {
+  -ms-overflow-style: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+.show-scrollbar::-webkit-scrollbar {
+  display: block;
+  height: 5px;
+}
+.show-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.show-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 9999px;
+}
+.show-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #C8A96E;
+}
+
 /* ── Font smoothing ─────────────────────────────────────────────────── */
 body {
   -webkit-font-smoothing: antialiased;

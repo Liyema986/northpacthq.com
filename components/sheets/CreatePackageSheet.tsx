@@ -291,8 +291,16 @@ export function CreatePackageSheet({
       setNameError("Package name is required");
       return;
     }
+    if (name.trim().length < 2) {
+      setNameError("Package name must be at least 2 characters");
+      return;
+    }
     if (!userId) {
       toast.error("Not authenticated");
+      return;
+    }
+    if (selectedServiceIds.size === 0) {
+      toast.error("Select at least one service to include in this package");
       return;
     }
     setSaving(true);

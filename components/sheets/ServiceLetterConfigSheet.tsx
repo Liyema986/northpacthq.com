@@ -59,6 +59,22 @@ export function ServiceLetterConfigSheet({
 
   async function handleSave() {
     if (!section) return;
+
+    const templateLinked = linkedId !== NONE_VALUE;
+    const hasOur  = ourText.trim().length > 0;
+    const hasYour = yourText.trim().length > 0;
+
+    // A linked template with no responsibility text does nothing
+    if (templateLinked && !hasOur && !hasYour) {
+      toast.error("Add at least one responsibility paragraph — Our Responsibility or Your Responsibility — when linking a template");
+      return;
+    }
+    // Text filled but no template linked — the text won't be used anywhere
+    if (!templateLinked && (hasOur || hasYour)) {
+      toast.error("Link a letter template so the responsibility text gets injected when generating engagement letters");
+      return;
+    }
+
     setSaving(true);
     try {
       const result = await updateSection({

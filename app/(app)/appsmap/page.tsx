@@ -38,6 +38,10 @@ import {
   ExternalLink,
   X,
 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -155,6 +159,8 @@ function AppsMapContent() {
   const [xeroSyncPending, setXeroSyncPending] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "connected" | "not-connected">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "accounting" | "payments" | "crm">("all");
+  const [removeConfirmIntegration, setRemoveConfirmIntegration] = useState<{ provider: string; firmIntegrationId: Id<"firmIntegrations">; name: string } | null>(null);
+  const [xeroDisconnectConfirmOpen, setXeroDisconnectConfirmOpen] = useState(false);
 
   const loading = firmSettings === undefined || addedIntegrations === undefined || stats === undefined;
 
@@ -241,6 +247,7 @@ function AppsMapContent() {
       await removeIntegrationMut({ firmId, firmIntegrationId });
       toast.success(`${meta?.name ?? "Integration"} removed`);
     } catch { toast.error("Failed to remove integration"); }
+    finally { setRemoveConfirmIntegration(null); }
   }
 
   return (
@@ -364,7 +371,7 @@ function AppsMapContent() {
               >
                 {/* Remove button */}
                 <button
-                  onClick={() => handleRemove(row.provider, row.firmIntegrationId)}
+                  onClick={() => row.firmIntegrationId && setRemoveConfirmIntegration({ provider: row.provider, firmIntegrationId: row.firmIntegrationId, name: row.name })}
                   className="absolute top-2 right-2 h-7 w-7 flex items-center justify-center rounded text-red-500 hover:bg-red-50 transition-colors"
                   aria-label="Remove integration"
                 >
@@ -417,7 +424,7 @@ function AppsMapContent() {
                     {row.provider === "xero" ? (
                       row.connected ? (
                         <button
-                          onClick={() => handleToggle(row.provider, true, row.firmIntegrationId)}
+                          onClick={() => setXeroDisconnectConfirmOpen(true)}
                           className="cursor-pointer block rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:brightness-95 active:scale-[0.97] transition-all p-0 leading-none"
                           aria-label="Disconnect from Xero"
                         >
@@ -634,14 +641,7 @@ function AppsMapContent() {
             </Button>
             {xeroConn ? (
               <button
-                onClick={async () => {
-                  if (!userId) return;
-                  try {
-                    await disconnectXeroMut({ userId });
-                    toast.success("Xero disconnected");
-                  } catch { toast.error("Failed to disconnect Xero"); }
-                  setXeroSheetOpen(false);
-                }}
+                onClick={() => setXeroDisconnectConfirmOpen(true)}
                 className="flex-1 cursor-pointer flex items-center justify-center h-11 rounded-xl border border-slate-200 bg-white hover:brightness-95 active:scale-[0.98] transition-all shadow-sm overflow-hidden"
                 aria-label="Disconnect from Xero"
               >
@@ -662,6 +662,59 @@ function AppsMapContent() {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      {/* Remove Integration confirm */}
+      <AlertDialog open={!!removeConfirmIntegration} onOpenChange={(o) => !o && setRemoveConfirmIntegration(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {removeConfirmIntegration?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {removeConfirmIntegration?.provider === "xero" && xeroConnected
+                ? `This will disconnect your Xero account and remove ${removeConfirmIntegration.name} from your Apps Map.`
+                : `${removeConfirmIntegration?.name ?? "This integration"} will be removed from your Apps Map.`}
+              {" "}This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removeConfirmIntegration && handleRemove(removeConfirmIntegration.provider, removeConfirmIntegration.firmIntegrationId)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Xero disconnect confirm */}
+      <AlertDialog open={xeroDisconnectConfirmOpen} onOpenChange={setXeroDisconnectConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect from Xero?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your Xero account will be unlinked. Existing synced data stays in NorthPact. You can reconnect at any time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!userId) return;
+                try {
+                  await disconnectXeroMut({ userId });
+                  toast.success("Xero disconnected");
+                  setXeroSheetOpen(false);
+                } catch { toast.error("Failed to disconnect Xero"); }
+                finally { setXeroDisconnectConfirmOpen(false); }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
