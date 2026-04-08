@@ -260,8 +260,9 @@ function NewProposalInner() {
     for (const sec of catalogSections) {
       for (const row of sec.lineItems) {
         if (row.pricingTiers && row.pricingTiers.length > 0) {
-          map.set(String(row._id), row.pricingTiers.map((t: { name: string; price: number; hours?: number; minutes?: number }) => ({
-            label: t.name, price: t.price, hours: t.hours, minutes: t.minutes,
+          map.set(String(row._id), row.pricingTiers.map((t: { name: string; description?: string; price: number; criteria?: string; hours?: number; minutes?: number }) => ({
+            label: t.criteria === "number_range" && t.description ? `${t.name} – ${t.description}` : t.name,
+            price: t.price, hours: t.hours, minutes: t.minutes,
           })));
         } else if (row.fixedPrice != null && row.fixedPrice > 0) {
           map.set(String(row._id), [{ label: "Fixed Price", price: row.fixedPrice }]);

@@ -979,7 +979,7 @@ function ClientGroupLayout({
 
       <FullWidthCollapsible
         title="Canvas view"
-        tooltip="Optional. Group or filter how service rows appear while you drag into Monthly / Yearly / Once-off."
+        tooltip="Optional. Group or filter how service rows appear while you drag into Monthly / Annual / Once-off."
       >
         <div className={formGrid2}>
           <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">

@@ -307,6 +307,8 @@ export interface ProposalItem {
   scheduledWorkMonth?: string;
   /** User’s selected values for each calculation layer (calc ID → selected numeric value) */
   calculationInputs?: Record<string, number>;
+  /** Tracks which pricing option label was selected (for reliable dropdown matching) */
+  selectedPricingLabel?: string;
   // Computed (stored for display)
   baseAmount: number;
   subtotal: number;
@@ -629,7 +631,7 @@ export interface ProposalBuilderSummary {
 
 export const CATEGORY_LABELS: Record<BillingCategory, string> = {
   monthly: "Recurring",
-  yearly: "Yearly",
+  yearly: "Annual",
   onceoff: "Once-off",
 };
 

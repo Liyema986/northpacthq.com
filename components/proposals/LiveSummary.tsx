@@ -61,7 +61,7 @@ export function LiveSummary({
         ) : (
           <div className="space-y-2">
             <SummaryRow label="Recurring Services"  value={formatCurrency(summary.monthlyTotal)} sublabel="/month" dotColor="bg-blue-400" />
-            <SummaryRow label="Yearly Services"   value={formatCurrency(summary.yearlyTotal)}  sublabel="/year"  dotColor="bg-violet-400" />
+            <SummaryRow label="Annual Services"   value={formatCurrency(summary.yearlyTotal)}  sublabel="/year"  dotColor="bg-violet-400" />
             <SummaryRow label="Once-off Services" value={formatCurrency(summary.onceoffTotal)} sublabel=""       dotColor="bg-amber-400" />
           </div>
         )}
@@ -245,7 +245,7 @@ function EntitySummarySection({ entity }: { entity: ProposalBuilderSummary["enti
       {open && (
         <div className="space-y-2 border-t border-slate-100 px-3 pb-3 pt-2">
           <SummaryRow label="Monthly"  value={formatCurrency(entity.monthlyTotal)} sublabel="/mo" dotColor="bg-blue-400" />
-          <SummaryRow label="Yearly"   value={formatCurrency(entity.yearlyTotal)}  sublabel="/yr" dotColor="bg-violet-400" />
+          <SummaryRow label="Annual"   value={formatCurrency(entity.yearlyTotal)}  sublabel="/yr" dotColor="bg-violet-400" />
           <SummaryRow label="Once-off" value={formatCurrency(entity.onceoffTotal)} sublabel=""    dotColor="bg-amber-400" />
           <div className="mt-1 border-t border-slate-100 pt-1.5">
             <div className="flex items-baseline justify-between">

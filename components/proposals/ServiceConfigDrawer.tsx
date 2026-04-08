@@ -180,6 +180,7 @@ export function ServiceConfigDrawer({
     onUpdate(itemId, {
       unitPrice: opt.price,
       manualPrice: price !== opt.price ? price : undefined,
+      selectedPricingLabel: opt.label,
       ...(opt.hours != null ? { timeInputHours: opt.hours, timeInputMinutes: Math.round(opt.hours * 60) } : {}),
     });
   };
@@ -326,10 +327,10 @@ export function ServiceConfigDrawer({
                     <div key={`po-${e.id}`} className="px-3 py-2 border-l border-slate-100">
                       {pricingOptions.length > 1 ? (
                         <Select key={`po-sel-${e.id}`}
-                          value={pricingOptions.find((o) => o.price === ei.unitPrice)?.label ?? ""}
+                          value={ei.selectedPricingLabel ?? pricingOptions.find((o) => o.price === ei.unitPrice)?.label ?? ""}
                           onValueChange={(v) => {
                             const opt = pricingOptions.find((o) => o.label === v);
-                            if (opt) applyPricingOption(ei.id, opt);
+                            if (opt) { applyPricingOption(ei.id, opt); onUpdate(ei.id, { selectedPricingLabel: opt.label }); }
                           }}
                         >
                           <SelectTrigger className={cellSelect}><SelectValue placeholder="Select" /></SelectTrigger>
@@ -807,7 +808,7 @@ function SingleEntityForm({
       <Row label={pricingOptions.length > 1 ? "Pricing option" : "Unit price"}>
         {pricingOptions.length > 1 ? (
           <Select
-            value={pricingOptions.find((o) => o.price === item.unitPrice)?.label ?? ""}
+            value={item.selectedPricingLabel ?? pricingOptions.find((o) => o.price === item.unitPrice)?.label ?? ""}
             onValueChange={(v) => {
               const opt = pricingOptions.find((o) => o.label === v);
               if (!opt) return;
@@ -817,7 +818,7 @@ function SingleEntityForm({
                 if (val == null) continue;
                 switch (c.operation) { case "multiply": price *= val; break; case "divide": price = val !== 0 ? price / val : price; break; case "add": price += val; break; case "subtract": price -= val; break; }
               }
-              onUpdate(item.id, { unitPrice: opt.price, manualPrice: price !== opt.price ? price : undefined, ...(opt.hours != null ? { timeInputHours: opt.hours, timeInputMinutes: Math.round(opt.hours * 60) } : {}) });
+              onUpdate(item.id, { unitPrice: opt.price, manualPrice: price !== opt.price ? price : undefined, selectedPricingLabel: opt.label, ...(opt.hours != null ? { timeInputHours: opt.hours, timeInputMinutes: Math.round(opt.hours * 60) } : {}) });
             }}
           >
             <SelectTrigger className={sel}><SelectValue placeholder="Select option" /></SelectTrigger>

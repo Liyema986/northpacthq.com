@@ -409,30 +409,65 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
     }));
   }
 
+  // ── Evaluate formula strings like "[previous]*1.35" ────────────────────
+  function evalFormula(formula: string, previousPrice: number): number {
+    try {
+      const expr = formula.replace(/\[previous\]/gi, String(previousPrice));
+      // Only allow digits, decimal points, operators, spaces, and parens
+      if (/[^0-9.+\-*/() \t]/.test(expr)) return 0;
+      const result = new Function(`return (${expr})`)() as number;
+      return Number.isFinite(result) && result >= 0 ? Math.round(result * 100) / 100 : 0;
+    } catch { return 0; }
+  }
+
   // ── Build pricingTiers payload ─────────────────────────────────────────
   function buildPricingTiers() {
     switch (pricingType) {
-      case "variation":
-        return variations.filter(v => v.name.trim()).map(v => ({
-          name: v.name.trim(), price: parseFloat(v.price) || 0, description: "",
-          hours: parseFloat(v.hours) || undefined, minutes: parseFloat(v.minutes) || undefined,
-        }));
+      case "variation": {
+        let prevPrice = 0;
+        return variations.filter(v => v.name.trim()).map(v => {
+          const price = v.priceMode === "formula" && v.formula.trim()
+            ? evalFormula(v.formula, prevPrice)
+            : (parseFloat(v.price) || 0);
+          prevPrice = price;
+          return {
+            name: v.name.trim(), price, description: "", criteria: "variation" as const,
+            hours: parseFloat(v.hours) || undefined, minutes: parseFloat(v.minutes) || undefined,
+          };
+        });
+      }
       case "tiered":
         return tierRanges.filter(r => r.from.trim() || r.to.trim()).map(r => ({
           name: r.from.trim(), price: parseFloat(r.price) || 0,
           description: r.to.trim(), criteria: "number_range",
           hours: parseFloat(r.hours) || undefined, minutes: parseFloat(r.minutes) || undefined,
         }));
-      case "recurring":
-        return annualRevenueTiers.map(t => ({
-          name: t.label, price: parseFloat(t.price) || 0, description: "", criteria: "annual_revenue",
-          hours: parseFloat(t.hours) || undefined, minutes: parseFloat(t.minutes) || undefined,
-        }));
-      case "income_range":
-        return incomeTiers.map(t => ({
-          name: t.label, price: parseFloat(t.price) || 0, description: "", criteria: "income_range",
-          hours: parseFloat(t.hours) || undefined, minutes: parseFloat(t.minutes) || undefined,
-        }));
+      case "recurring": {
+        let prevPrice = 0;
+        return annualRevenueTiers.map(t => {
+          const price = t.priceMode === "formula" && t.formula.trim()
+            ? evalFormula(t.formula, prevPrice)
+            : (parseFloat(t.price) || 0);
+          prevPrice = price;
+          return {
+            name: t.label, price, description: "", criteria: "annual_revenue",
+            hours: parseFloat(t.hours) || undefined, minutes: parseFloat(t.minutes) || undefined,
+          };
+        });
+      }
+      case "income_range": {
+        let prevPrice = 0;
+        return incomeTiers.map(t => {
+          const price = t.priceMode === "formula" && t.formula.trim()
+            ? evalFormula(t.formula, prevPrice)
+            : (parseFloat(t.price) || 0);
+          prevPrice = price;
+          return {
+            name: t.label, price, description: "", criteria: "income_range",
+            hours: parseFloat(t.hours) || undefined, minutes: parseFloat(t.minutes) || undefined,
+          };
+        });
+      }
       default:
         return undefined;
     }
