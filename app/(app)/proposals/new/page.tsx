@@ -38,12 +38,13 @@ import {
   parseBillingDroppableId,
   getItemTotalHours,
   getAssignedEntityNames,
+  resolveAssignedEntityIds,
 } from "@/lib/proposal-entities";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   PanelLeftOpen, PanelRightOpen, PanelLeftClose, PanelRightClose,
-  ChevronLeft, Save, Send,
+  ChevronLeft, Save, Send, Eye,
 } from "lucide-react";
 
 // Map Convex pricingType → PricingMethod (closest match)
@@ -80,8 +81,15 @@ function NewProposalInner() {
   const editProposalIdParam = searchParams.get("editProposalId") ?? "";
   const urlClientId = searchParams.get("clientId") ?? "";
 
-  // Fresh proposal (no URL loading context) — restore draft from sessionStorage
   const hasUrlParams = Boolean(packageIdParam || templateIdParam || fromProposalIdParam || editProposalIdParam);
+
+  // Always start fresh — clear any previous draft when landing on /proposals/new
+  useEffect(() => {
+    if (!hasUrlParams) {
+      clearProposalDraft();
+      try { sessionStorage.removeItem(PROPOSAL_META_KEY); } catch {}
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { user }      = useNorthPactAuth();
   const userId        = user?.id as Id<"users"> | undefined;
@@ -100,8 +108,12 @@ function NewProposalInner() {
     } catch { return ""; }
   });
 
-  // Editing item
-  const [editingItem, setEditingItem] = useState<ProposalItem | null>(null);
+  // Separate snapshots for single-entity vs client-group so switching preserves work
+  const singleSnapshot = useRef<{ items: ProposalItem[]; entities: ProposalBuilderEntity[] }>({ items: [], entities: [] });
+  const groupSnapshot  = useRef<{ items: ProposalItem[]; entities: ProposalBuilderEntity[] }>({ items: [], entities: [] });
+
+  // Editing items (per-entity: one item per entity for the service being configured)
+  const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
 
   // Entity view state
   const [entityFilter,    setEntityFilter]    = useState("all");
@@ -169,6 +181,7 @@ function NewProposalInner() {
   );
   const createProposalMutation = useMutation(api.proposals.createProposal);
   const updateProposalMutation = useMutation(api.proposals.updateProposal);
+  const getOrCreatePreviewToken = useMutation(api.proposalAccept.getOrCreatePreviewToken);
 
   const appliedPackageFromUrl = useRef(false);
   const appliedTemplateFromUrl = useRef(false);
@@ -548,13 +561,27 @@ function NewProposalInner() {
       const templateId = draggableId.replace("template:", "");
       const template   = templates.find((t) => t.id === templateId);
       if (!template) return;
-      const newItem = proposal.addService(
-        template,
-        destParsed.category,
-        destination.index,
-        destParsed.entityId ? { targetEntityId: destParsed.entityId } : undefined
-      );
-      setEditingItem(newItem);
+      // Create one item per entity so each is independent from the start
+      const allEntityIds = proposal.entities.map((e) => e.id);
+      const baseItem = proposal.addService(template, destParsed.category, destination.index);
+      if (allEntityIds.length > 1) {
+        const perEntityItems: ProposalItem[] = allEntityIds.map((eid, idx) => ({
+          ...baseItem,
+          id: idx === 0 ? baseItem.id : `item_${Date.now()}_${Math.random().toString(36).slice(2)}_${idx}`,
+          entityAssignmentMode: "selected_entities" as const,
+          assignedEntityIds: [eid],
+        }));
+        // Use setTimeout to let addService's state settle first
+        setTimeout(() => {
+          proposal.replaceItems([
+            ...proposal.items.filter((i) => i.id !== baseItem.id),
+            ...perEntityItems,
+          ]);
+          setEditingItemIds(perEntityItems.map((i) => i.id));
+        }, 0);
+      } else {
+        setEditingItemIds([baseItem.id]);
+      }
       return;
     }
 
@@ -632,7 +659,7 @@ function NewProposalInner() {
   }
 
   // ── Save handler ─────────────────────────────────────────────────────────
-  async function handleSave(status: "draft" | "pending-approval" = "draft") {
+  async function handleSave(status: "draft" | "pending-approval" = "draft", opts?: { openPreview?: boolean }): Promise<string | undefined> {
     if (!userId) {
       toast.error("Not authenticated");
       return;
@@ -764,6 +791,22 @@ function NewProposalInner() {
 
       clearProposalDraft();
       try { sessionStorage.removeItem(PROPOSAL_META_KEY); } catch {}
+
+      if (opts?.openPreview) {
+        try {
+          const { token } = await getOrCreatePreviewToken({
+            proposalId: result.proposalId as Id<"proposals">,
+            firmId: firmId as Id<"firms">,
+          });
+          window.open(`/proposals/view/${token}`, "_blank");
+          toast.success("Draft saved — proposal preview opened");
+        } catch {
+          window.open(`/proposals/${result.proposalId}`, "_blank");
+          toast.success("Draft saved — preview opened");
+        }
+        return result.proposalId;
+      }
+
       toast.success(
         status === "pending-approval"
           ? "Proposal submitted for approval"
@@ -778,9 +821,10 @@ function NewProposalInner() {
     }
   }
 
-  const currentEditingItem = editingItem
-    ? proposal.items.find((i) => i.id === editingItem.id) ?? null
-    : null;
+  const editingItems = editingItemIds.length > 0
+    ? proposal.items.filter((i) => editingItemIds.includes(i.id))
+    : [];
+  const primaryEditingItem = editingItems[0] ?? null;
 
   const activeEntityFilter =
     entityFilter === "all" || proposal.entities.some((e) => e.id === entityFilter)
@@ -816,6 +860,13 @@ function NewProposalInner() {
               className="flex items-center gap-1.5 h-8 px-3.5 rounded-lg border border-slate-200 text-[13px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors"
             >
               <Save className="h-3.5 w-3.5" />Save draft
+            </button>
+            <button
+              onClick={() => handleSave("draft", { openPreview: true })}
+              disabled={saving}
+              className="flex items-center gap-1.5 h-8 px-3.5 rounded-lg border border-[#C8A96E] text-[13px] font-medium text-[#C8A96E] hover:bg-[#C8A96E]/10 disabled:opacity-40 transition-colors"
+            >
+              <Eye className="h-3.5 w-3.5" />Review PDF
             </button>
             <button
               onClick={() => handleSave("pending-approval")}
@@ -881,40 +932,64 @@ function NewProposalInner() {
             onUpdateEntity={proposal.updateEntity}
             onRemoveEntity={handleRemoveEntity}
             replaceEntities={proposal.replaceEntities}
-            onEditItem={(item, contextEntityId) => {
-                // If editing from a specific entity column and the service covers all entities,
-                // split it: original keeps all OTHER entities, new copy is just for this entity.
-                if (
-                  contextEntityId &&
-                  item.entityAssignmentMode === "all_entities" &&
-                  proposal.entities.length > 1
-                ) {
-                  const otherEntityIds = proposal.entities
-                    .map((e) => e.id)
-                    .filter((id) => id !== contextEntityId);
-                  const newId = `item_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-                  const newItem: ProposalItem = {
-                    ...item,
-                    id: newId,
-                    entityAssignmentMode: "selected_entities",
-                    assignedEntityIds: [contextEntityId],
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                  };
-                  proposal.replaceItems(
-                    proposal.items.flatMap((i) =>
-                      i.id !== item.id
-                        ? [i]
-                        : [
-                            { ...i, entityAssignmentMode: "selected_entities", assignedEntityIds: otherEntityIds },
-                            newItem,
-                          ]
-                    )
-                  );
-                  setEditingItem(newItem);
+            onEditItem={(item) => {
+                const allEntityIds = proposal.entities.map((e) => e.id);
+                const templateId = item.serviceTemplateId;
+
+                // Find all existing per-entity items for this service template
+                const siblings = proposal.items.filter(
+                  (i) => i.serviceTemplateId === templateId
+                );
+                const coveredEntityIds = new Set<string>();
+                const existingPerEntity: ProposalItem[] = [];
+
+                for (const sib of siblings) {
+                  const assigned = sib.assignedEntityIds ?? [];
+                  if (sib.entityAssignmentMode === "selected_entities" && assigned.length === 1) {
+                    coveredEntityIds.add(assigned[0]);
+                    existingPerEntity.push(sib);
+                  }
+                }
+
+                // If all entities already have per-entity items, just open them
+                if (allEntityIds.every((eid) => coveredEntityIds.has(eid))) {
+                  setEditingItemIds(existingPerEntity.map((i) => i.id));
                   return;
                 }
-                setEditingItem(item);
+
+                // Split multi-entity items + create items for uncovered entities
+                const multiEntityItems = siblings.filter(
+                  (i) => i.entityAssignmentMode !== "selected_entities" || (i.assignedEntityIds ?? []).length !== 1
+                );
+                const newItems: ProposalItem[] = [];
+                const idsToRemove = new Set(multiEntityItems.map((i) => i.id));
+
+                for (const multi of multiEntityItems) {
+                  const assigned = resolveAssignedEntityIds(multi, proposal.entities);
+                  assigned.forEach((eid, idx) => {
+                    if (coveredEntityIds.has(eid)) return;
+                    coveredEntityIds.add(eid);
+                    newItems.push({
+                      ...multi,
+                      id: idx === 0 && !existingPerEntity.some((e) => e.id === multi.id) ? multi.id : `item_${Date.now()}_${Math.random().toString(36).slice(2)}_${idx}`,
+                      entityAssignmentMode: "selected_entities" as const,
+                      assignedEntityIds: [eid],
+                      updatedAt: new Date().toISOString(),
+                    });
+                  });
+                }
+
+                if (idsToRemove.size > 0 || newItems.length > 0) {
+                  proposal.replaceItems([
+                    ...proposal.items.filter((i) => !idsToRemove.has(i.id)),
+                    ...newItems,
+                  ]);
+                }
+
+                setEditingItemIds([
+                  ...existingPerEntity.map((i) => i.id),
+                  ...newItems.map((i) => i.id),
+                ]);
               }}
             onRemoveItem={(id, contextEntityId) => {
                 const item = proposal.items.find((i) => i.id === id);
@@ -956,7 +1031,19 @@ function NewProposalInner() {
               if (item) proposal.updateItem(id, { isOptional: !item.isOptional });
             }}
             clientGroupMode={proposal.clientGroupMode}
-            onClientGroupModeChange={proposal.setClientGroupMode}
+            onClientGroupModeChange={(mode) => {
+                // Save current mode's data, restore target mode's data
+                const currentMode = proposal.clientGroupMode;
+                if (currentMode === "single_entity") {
+                  singleSnapshot.current = { items: [...proposal.items], entities: [...proposal.entities] };
+                } else {
+                  groupSnapshot.current = { items: [...proposal.items], entities: [...proposal.entities] };
+                }
+                const target = mode === "single_entity" ? singleSnapshot.current : groupSnapshot.current;
+                proposal.replaceItems(target.items);
+                proposal.replaceEntities(target.entities);
+                proposal.setClientGroupMode(mode);
+              }}
             clientGroup={proposal.clientGroup}
             onUpdateClientGroup={proposal.updateClientGroup}
             contactOptions={contactOptions}
@@ -1006,19 +1093,23 @@ function NewProposalInner() {
 
       {/* Service config drawer */}
       <ServiceConfigDrawer
-        item={currentEditingItem}
+        items={editingItems}
         entities={proposal.entities}
-        open={!!currentEditingItem}
-        onClose={() => setEditingItem(null)}
+        open={editingItems.length > 0}
+        onClose={() => setEditingItemIds([])}
         onUpdate={proposal.updateItem}
+        onRemoveItem={(id) => {
+          proposal.removeItem(id);
+          setEditingItemIds((prev) => prev.filter((pid) => pid !== id));
+        }}
         pricingOptions={
-          currentEditingItem?.serviceTemplateId
-            ? servicePricingMap.get(currentEditingItem.serviceTemplateId)
+          primaryEditingItem?.serviceTemplateId
+            ? servicePricingMap.get(primaryEditingItem.serviceTemplateId)
             : undefined
         }
         calculations={
-          currentEditingItem?.serviceTemplateId
-            ? serviceCalculationsMap.get(currentEditingItem.serviceTemplateId)
+          primaryEditingItem?.serviceTemplateId
+            ? serviceCalculationsMap.get(primaryEditingItem.serviceTemplateId)
             : undefined
         }
       />

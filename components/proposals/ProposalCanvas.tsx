@@ -96,6 +96,8 @@ export function ProposalCanvas({
   packageOptions, selectedPackageId, onSelectPackage,
 }: ProposalCanvasProps) {
   const useGridLayout = entities.length > 1 && entityFilter === "all";
+  const isClientGroup = clientGroupMode === "client_group" && entities.length > 1;
+  const groupName = clientGroup.name || "Client Group";
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
@@ -153,7 +155,17 @@ export function ProposalCanvas({
         onSelectPackage={onSelectPackage}
       />
 
-      {useGridLayout ? (
+      {isClientGroup ? (
+        <ClientGroupView
+          items={items}
+          entities={entities}
+          groupName={groupName}
+          onEditItem={onEditItem}
+          onRemoveItem={onRemoveItem}
+          onDuplicateItem={onDuplicateItem}
+          onToggleOptional={onToggleOptional}
+        />
+      ) : useGridLayout ? (
         <EntityGridView
           items={items}
           entities={entities}
@@ -344,6 +356,123 @@ function EntityGridView({
               })}
               </div>
             </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Client group view: one column with group name, services aggregated ────────
+
+function ClientGroupView({
+  items, entities, groupName, onEditItem, onRemoveItem, onDuplicateItem, onToggleOptional,
+}: {
+  items: ProposalItem[]; entities: ProposalBuilderEntity[]; groupName: string;
+  onEditItem: (i: ProposalItem, contextEntityId?: string) => void;
+  onRemoveItem: (id: string, contextEntityId?: string) => void;
+  onDuplicateItem: (id: string, contextEntityId?: string) => void;
+  onToggleOptional: (id: string) => void;
+}) {
+  // Group items by serviceTemplateId to show one card per service
+  const groupedByTemplate = new Map<string, ProposalItem[]>();
+  for (const item of items) {
+    const key = item.serviceTemplateId || item.id;
+    const arr = groupedByTemplate.get(key) ?? [];
+    arr.push(item);
+    groupedByTemplate.set(key, arr);
+  }
+
+  return (
+    <div className="space-y-6">
+      {CATEGORIES.map((cat) => {
+        const style = categoryStyles[cat];
+        const catServices: { representative: ProposalItem; allItems: ProposalItem[]; totalPrice: number; totalHours: number }[] = [];
+        groupedByTemplate.forEach((serviceItems) => {
+          const catItems = serviceItems.filter((i) => i.billingCategory === cat);
+          if (catItems.length === 0) return;
+          const representative = catItems[0];
+          const totalPrice = catItems.reduce((s, i) => s + getItemTotalPrice(i, entities), 0);
+          const totalHours = catItems.reduce((s, i) => s + getItemTotalHours(i, entities), 0);
+          catServices.push({ representative, allItems: catItems, totalPrice, totalHours });
+        });
+
+        const catTotal = catServices.filter((s) => !s.representative.isOptional).reduce((s, svc) => s + svc.totalPrice, 0);
+
+        return (
+          <section
+            key={cat}
+            className={cn("rounded-2xl border p-5 transition-colors", style.border, "bg-white")}
+          >
+            {/* Section header with count + total */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={cn("h-2 w-2 rounded-full", style.dot)} />
+                <h3 className={cn("text-sm font-semibold", style.text)}>
+                  {CATEGORY_LABELS[cat]} Services
+                </h3>
+                <span className="text-xs text-muted-foreground">({catServices.length})</span>
+              </div>
+              {catTotal > 0 && (
+                <span className="text-sm font-semibold text-slate-800">
+                  {formatCurrency(catTotal)}{cat === "monthly" ? "/mo" : cat === "yearly" ? "/yr" : ""}
+                </span>
+              )}
+            </div>
+
+            {/* Group name card */}
+            <div className="mb-3 rounded-lg bg-slate-100 px-4 py-2.5">
+              <h4 className="text-xs font-semibold text-slate-800">{groupName}</h4>
+              {catTotal > 0 && (
+                <p className="mt-0.5 text-[11px] font-medium text-emerald-600">
+                  {formatCurrency(catTotal)}{cat === "monthly" ? "/mo" : cat === "yearly" ? "/yr" : ""}
+                </p>
+              )}
+            </div>
+
+            <Droppable droppableId={billingDroppableId(cat)}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={cn("rounded-xl transition-colors", snapshot.isDraggingOver && style.bg)}
+                >
+                  <div className="space-y-3">
+                    {catServices.length === 0 ? (
+                      <div className="flex min-h-[80px] items-center justify-center rounded-xl border border-dashed border-slate-200 p-4 text-center">
+                        <p className="text-xs text-slate-400">Drop services here</p>
+                      </div>
+                    ) : (
+                      catServices.map((svc, index) => {
+                        const item = svc.representative;
+                        const entityCount = svc.allItems.length;
+                        const effectiveRate = svc.totalHours > 0 ? svc.totalPrice / svc.totalHours : 0;
+                        return (
+                          <Draggable key={item.serviceTemplateId || item.id} draggableId={item.id} index={index} isDragDisabled>
+                            {(dp) => (
+                              <ProposalCard
+                                item={item}
+                                assignmentLabel={`${entityCount} ${entityCount === 1 ? "entity" : "entities"}`}
+                                pricingModeLabel={getItemPricingModeLabel(item.entityPricingMode)}
+                                serviceValue={svc.totalPrice}
+                                estimatedHours={svc.totalHours}
+                                onEdit={() => onEditItem(item)}
+                                onRemove={() => { for (const i of svc.allItems) onRemoveItem(i.id); }}
+                                onDuplicate={() => onDuplicateItem(item.id)}
+                                onToggleOptional={() => { for (const i of svc.allItems) onToggleOptional(i.id); }}
+                                innerRef={dp.innerRef}
+                                draggableProps={dp.draggableProps}
+                              />
+                            )}
+                          </Draggable>
+                        );
+                      })
+                    )}
+                  </div>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
           </section>
         );
       })}

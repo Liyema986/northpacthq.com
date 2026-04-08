@@ -60,7 +60,7 @@ export function LiveSummary({
           </div>
         ) : (
           <div className="space-y-2">
-            <SummaryRow label="Monthly Services"  value={formatCurrency(summary.monthlyTotal)} sublabel="/month" dotColor="bg-blue-400" />
+            <SummaryRow label="Recurring Services"  value={formatCurrency(summary.monthlyTotal)} sublabel="/month" dotColor="bg-blue-400" />
             <SummaryRow label="Yearly Services"   value={formatCurrency(summary.yearlyTotal)}  sublabel="/year"  dotColor="bg-violet-400" />
             <SummaryRow label="Once-off Services" value={formatCurrency(summary.onceoffTotal)} sublabel=""       dotColor="bg-amber-400" />
           </div>

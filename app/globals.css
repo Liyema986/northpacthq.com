@@ -239,7 +239,7 @@
 }
 .show-scrollbar::-webkit-scrollbar {
   display: block;
-  height: 5px;
+  height: 6px;
 }
 .show-scrollbar::-webkit-scrollbar-track {
   background: transparent;

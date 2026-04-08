@@ -628,7 +628,7 @@ export interface ProposalBuilderSummary {
 }
 
 export const CATEGORY_LABELS: Record<BillingCategory, string> = {
-  monthly: "Monthly",
+  monthly: "Recurring",
   yearly: "Yearly",
   onceoff: "Once-off",
 };

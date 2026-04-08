@@ -183,6 +183,42 @@ export const getProposalAcceptSession = query({
 });
 
 /**
+ * Get or create a preview token for a proposal (authenticated — firm user only).
+ * Used by the "Review PDF" button so the firm can preview the client portal view.
+ */
+export const getOrCreatePreviewToken = mutation({
+  args: {
+    proposalId: v.id("proposals"),
+    firmId: v.id("firms"),
+  },
+  returns: v.object({ token: v.string() }),
+  handler: async (ctx, args) => {
+    // Check for existing session
+    const existing = await ctx.db
+      .query("proposalAcceptSessions")
+      .withIndex("by_proposal", (q) => q.eq("proposalId", args.proposalId))
+      .first();
+    if (existing) return { token: existing.token };
+
+    // Create a new session
+    const array = new Uint8Array(32);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = Math.floor(Math.random() * 256);
+    }
+    const token = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+    await ctx.db.insert("proposalAcceptSessions", {
+      firmId: args.firmId,
+      proposalId: args.proposalId,
+      token,
+      status: "pending",
+      expiresAt: Date.now() + 90 * 24 * 60 * 60 * 1000,
+      createdAt: Date.now(),
+    });
+    return { token };
+  },
+});
+
+/**
  * Accept proposal (public - client uses token)
  */
 export const acceptProposal = mutation({

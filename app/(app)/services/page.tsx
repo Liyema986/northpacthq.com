@@ -43,9 +43,11 @@ type LineItemRow = {
   name: string;
   description?: string;
   serviceSchedule?: string;
-  pricingType: "fixed" | "hourly" | "tiered" | "recurring";
+  pricingType: string;
   fixedPrice?: number;
   hourlyRate?: number;
+  fieldLabel?: string;
+  pricingTiers?: { name: string; price: number; description: string; criteria?: string; hours?: number; minutes?: number }[];
   isActive: boolean;
   sortOrder: number;
   status: string;
@@ -119,8 +121,42 @@ const SORT_LABELS: Record<SortOption, string> = {
   price_asc: "Price (low–high)",
 };
 
-function priceOfItem(i: LineItemRow) {
+function priceOfItem(i: LineItemRow): number {
+  if (i.pricingType === "fixed") return i.fixedPrice ?? 0;
+  if (i.pricingType === "hourly") return i.hourlyRate ?? 0;
+  if (i.pricingTiers && i.pricingTiers.length > 0) {
+    const prices = i.pricingTiers.map((t) => t.price).filter((p) => p > 0);
+    return prices.length > 0 ? Math.min(...prices) : 0;
+  }
   return i.fixedPrice ?? i.hourlyRate ?? 0;
+}
+
+function pricingDisplayLabel(i: LineItemRow): string {
+  if (i.pricingType === "fixed") return formatCurrency(i.fixedPrice ?? 0);
+  if (i.pricingType === "hourly") return `${formatCurrency(i.hourlyRate ?? 0)}/hr`;
+  if (i.pricingType === "variation" && i.pricingTiers && i.pricingTiers.length > 0) {
+    const prices = i.pricingTiers.map((t) => t.price).filter((p) => p > 0);
+    if (prices.length === 0) return "No prices set";
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return min === max ? formatCurrency(min) : `${formatCurrency(min)} – ${formatCurrency(max)}`;
+  }
+  if ((i.pricingType === "tiered" || i.pricingType === "recurring" || i.pricingType === "income_range") && i.pricingTiers && i.pricingTiers.length > 0) {
+    return `${i.pricingTiers.length} ${i.pricingTiers.length === 1 ? "tier" : "tiers"}`;
+  }
+  return formatCurrency(i.fixedPrice ?? i.hourlyRate ?? 0);
+}
+
+function pricingTypeBadge(type: string): string {
+  const labels: Record<string, string> = {
+    fixed: "Fixed Price",
+    hourly: "Hourly",
+    variation: "Variation",
+    tiered: "Tiered",
+    recurring: "Recurring",
+    income_range: "Income Range",
+  };
+  return labels[type] ?? type;
 }
 
 function sectionPriceRange(sec: SectionRow) {
@@ -826,12 +862,38 @@ export default function ServicesPage() {
                                         </DropdownMenuContent>
                                       </DropdownMenu>
                                     </div>
+                                    {/* Variation tiers preview */}
+                                    {service.pricingType === "variation" && service.pricingTiers && service.pricingTiers.length > 0 && (
+                                      <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {service.pricingTiers.map((tier, ti) => (
+                                          <span key={ti} className="inline-flex items-center rounded-full bg-slate-50 border border-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
+                                            {tier.name} <span className="ml-1 font-semibold text-slate-800">{formatCurrency(tier.price)}</span>
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {/* Range tiers preview */}
+                                    {(service.pricingType === "tiered" || service.pricingType === "recurring" || service.pricingType === "income_range") && service.pricingTiers && service.pricingTiers.length > 0 && (
+                                      <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {service.pricingTiers.slice(0, 3).map((tier, ti) => (
+                                          <span key={ti} className="inline-flex items-center rounded-full bg-slate-50 border border-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
+                                            {tier.name} <span className="ml-1 font-semibold text-slate-800">{formatCurrency(tier.price)}</span>
+                                          </span>
+                                        ))}
+                                        {service.pricingTiers.length > 3 && (
+                                          <span className="inline-flex items-center rounded-full bg-slate-50 border border-slate-100 px-2 py-0.5 text-[10px] text-slate-400">
+                                            +{service.pricingTiers.length - 3} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
                                     <div className="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
                                       <p className="text-[15px] font-bold text-slate-900 tabular-nums">
-                                        {formatCurrency(price)}
-                                        {service.pricingType === "hourly" && <span className="text-[11px] font-normal text-slate-400">/hr</span>}
+                                        {pricingDisplayLabel(service)}
                                       </p>
-                                      <p className="text-[11px] text-slate-400">{pmLabel}</p>
+                                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                        {pricingTypeBadge(service.pricingType)}
+                                      </span>
                                     </div>
                                   </div>
                                 );

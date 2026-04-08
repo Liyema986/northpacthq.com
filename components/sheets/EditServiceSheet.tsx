@@ -932,8 +932,8 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
               </Select>
             </div>
 
-            {/* Add Calculation — hidden for fixed price */}
-            {pricingType !== "fixed" && <div className="space-y-3">
+            {/* Add Calculation */}
+            <div className="space-y-3">
               <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input type="checkbox" checked={addCalc} onChange={(e) => setAddCalc(e.target.checked)} disabled={saving}
                   className="h-4 w-4 rounded border-slate-300 accent-[#C8A96E]" />
@@ -1045,7 +1045,7 @@ export function EditServiceSheet({ open, onOpenChange, service, sectionName, use
                   )}
                 </div>
               )}
-            </div>}
+            </div>
 
             {/* Min monthly fee — only for Monthly billing */}
             {billingFreq === "monthly" && (
