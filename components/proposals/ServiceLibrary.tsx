@@ -168,7 +168,7 @@ export function ServiceLibrary({ templates, sections, sectionNames }: ServiceLib
               <TooltipContent
                 side="bottom"
                 align="start"
-                className="max-w-[280px] text-left text-[12px] font-normal leading-relaxed text-slate-700"
+                className="max-w-[280px] text-left text-[12px] font-normal leading-relaxed text-white"
               >
                 Sections match Services. Expand a section to see its line items, then drag into
                 Monthly, Annual, or Once-off.

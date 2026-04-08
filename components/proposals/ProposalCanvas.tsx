@@ -118,7 +118,7 @@ export function ProposalCanvas({
               <TooltipContent
                 side="bottom"
                 align="start"
-                className="max-w-[320px] text-left text-[13px] font-normal leading-relaxed text-slate-700"
+                className="max-w-[320px] text-left text-[13px] font-normal leading-relaxed text-white"
               >
                 Set up entities, then drag services into each billing section. In the multi-entity
                 grid, drop on a column to assign that service to that entity only.
