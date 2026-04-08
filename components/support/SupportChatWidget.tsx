@@ -832,7 +832,7 @@ export function SupportChatWidget() {
                           className="rounded-xl h-10 w-10 shrink-0"
                           style={{ background: "#243E63" }}
                         >
-                          {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                          {isSending ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4 text-white" />}
                         </Button>
                       </div>
                     </div>
