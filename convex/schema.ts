@@ -370,6 +370,9 @@ export default defineSchema({
     minFeeType: v.optional(v.union(v.literal("fixed"), v.literal("calculation"))),
     minFeeCurrency: v.optional(v.string()),
     minFeeCalculation: v.optional(v.string()),
+    // Service Billing & Planning: default service type and recurrence
+    defaultBillingCategory: v.optional(v.string()), // "monthly" | "yearly" | "onceoff"
+    defaultFrequency: v.optional(v.string()),       // "monthly" | "bi_monthly" | "quarterly" | etc.
     // Calculation variations: when Add Calculation is checked, these define dropdowns shown in Edit Package
     addCalculation: v.optional(v.boolean()),
     calculationVariations: v.optional(
@@ -424,6 +427,7 @@ export default defineSchema({
         workPlanEntityLabels: v.optional(v.array(v.string())),
         billingCategory: v.optional(v.string()),
         frequency: v.optional(v.string()),
+        paymentSchedule: v.optional(v.string()),
       })
     ),
     subtotal: v.number(),

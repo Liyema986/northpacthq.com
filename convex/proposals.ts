@@ -21,6 +21,7 @@ const proposalServiceLine = v.object({
   workPlanEntityLabels: v.optional(v.array(v.string())),
   billingCategory: v.optional(v.string()),
   frequency: v.optional(v.string()),
+  paymentSchedule: v.optional(v.string()),
 });
 
 /**

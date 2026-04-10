@@ -22,6 +22,7 @@ import type {
   ProposalBuilderContactOption,
   ServiceTemplate,
   BillingCategory,
+  Frequency,
 } from "@/types";
 
 import {
@@ -34,6 +35,7 @@ import {
 } from "@/components/proposals/ProposalCanvas";
 import { LiveSummary }         from "@/components/proposals/LiveSummary";
 import { ServiceConfigDrawer } from "@/components/proposals/ServiceConfigDrawer";
+import { FrequencySelectorDialog } from "@/components/proposals/FrequencySelectorDialog";
 import {
   parseBillingDroppableId,
   getItemTotalHours,
@@ -114,6 +116,14 @@ function NewProposalInner() {
 
   // Editing items (per-entity: one item per entity for the service being configured)
   const [editingItemIds, setEditingItemIds] = useState<string[]>([]);
+
+  // Pending recurring drop — awaits frequency selection before placement
+  const [pendingRecurringDrop, setPendingRecurringDrop] = useState<{
+    template: ServiceTemplate;
+    destCategory: BillingCategory;
+    destIndex: number;
+    entityId?: string;
+  } | null>(null);
 
   // Entity view state
   const [entityFilter,    setEntityFilter]    = useState("all");
@@ -547,6 +557,47 @@ function NewProposalInner() {
     lastAppliedClientRef.current = clientId;
   }, [clientId, linkedClient, proposal.entities[0]?.id, applyContactToPrimaryEntity]);
 
+  // ── Place a service from the library onto the canvas ──────────────────
+  function placeServiceFromLibrary(
+    template: ServiceTemplate,
+    category: BillingCategory,
+    index: number,
+    entityId?: string,
+    frequencyOverride?: Frequency
+  ) {
+    const allEntityIds = proposal.entities.map((e) => e.id);
+    const baseItem = proposal.addService(template, category, index);
+    if (frequencyOverride) {
+      proposal.updateItem(baseItem.id, { frequency: frequencyOverride });
+    }
+    if (allEntityIds.length > 1) {
+      const perEntityItems: ProposalItem[] = allEntityIds.map((eid, idx) => ({
+        ...baseItem,
+        id: idx === 0 ? baseItem.id : `item_${Date.now()}_${Math.random().toString(36).slice(2)}_${idx}`,
+        entityAssignmentMode: "selected_entities" as const,
+        assignedEntityIds: [eid],
+        ...(frequencyOverride ? { frequency: frequencyOverride } : {}),
+      }));
+      setTimeout(() => {
+        proposal.replaceItems([
+          ...proposal.items.filter((i) => i.id !== baseItem.id),
+          ...perEntityItems,
+        ]);
+        setEditingItemIds(perEntityItems.map((i) => i.id));
+      }, 0);
+    } else {
+      setEditingItemIds([baseItem.id]);
+    }
+  }
+
+  // ── Handle frequency selection for pending recurring drop ───────────
+  function handleFrequencySelected(frequency: Frequency) {
+    if (!pendingRecurringDrop) return;
+    const { template, destCategory, destIndex, entityId } = pendingRecurringDrop;
+    placeServiceFromLibrary(template, destCategory, destIndex, entityId, frequency);
+    setPendingRecurringDrop(null);
+  }
+
   // ── Drag end handler ─────────────────────────────────────────────────────
   const handleDragEnd = ({ source, destination, draggableId }: DropResult) => {
     if (!destination) return;
@@ -562,27 +613,20 @@ function NewProposalInner() {
       const templateId = draggableId.replace("template:", "");
       const template   = templates.find((t) => t.id === templateId);
       if (!template) return;
-      // Create one item per entity so each is independent from the start
-      const allEntityIds = proposal.entities.map((e) => e.id);
-      const baseItem = proposal.addService(template, destParsed.category, destination.index);
-      if (allEntityIds.length > 1) {
-        const perEntityItems: ProposalItem[] = allEntityIds.map((eid, idx) => ({
-          ...baseItem,
-          id: idx === 0 ? baseItem.id : `item_${Date.now()}_${Math.random().toString(36).slice(2)}_${idx}`,
-          entityAssignmentMode: "selected_entities" as const,
-          assignedEntityIds: [eid],
-        }));
-        // Use setTimeout to let addService's state settle first
-        setTimeout(() => {
-          proposal.replaceItems([
-            ...proposal.items.filter((i) => i.id !== baseItem.id),
-            ...perEntityItems,
-          ]);
-          setEditingItemIds(perEntityItems.map((i) => i.id));
-        }, 0);
-      } else {
-        setEditingItemIds([baseItem.id]);
+
+      // Recurring zone: show frequency selector before placing
+      if (destParsed.category === "monthly") {
+        setPendingRecurringDrop({
+          template,
+          destCategory: destParsed.category,
+          destIndex: destination.index,
+          entityId: destParsed.entityId,
+        });
+        return;
       }
+
+      // Annual / Once-off: place immediately (no frequency selector needed)
+      placeServiceFromLibrary(template, destParsed.category, destination.index, destParsed.entityId);
       return;
     }
 
@@ -1091,6 +1135,14 @@ function NewProposalInner() {
           )}
         </div>
       </div>
+
+      {/* Frequency selector — shown when dragging a service into the Recurring zone */}
+      <FrequencySelectorDialog
+        open={!!pendingRecurringDrop}
+        serviceName={pendingRecurringDrop?.template.name ?? ""}
+        onSelect={handleFrequencySelected}
+        onCancel={() => setPendingRecurringDrop(null)}
+      />
 
       {/* Service config drawer */}
       <ServiceConfigDrawer

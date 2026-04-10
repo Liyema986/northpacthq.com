@@ -53,6 +53,7 @@ export type Frequency =
   | "monthly"
   | "bi_monthly"
   | "quarterly"
+  | "every_4_months"
   | "semi_annually"
   | "annually"
   | "once_off"
@@ -61,7 +62,9 @@ export type Frequency =
 export type PaymentFrequency =
   | "as_delivered"
   | "monthly"
+  | "bi_monthly"
   | "quarterly"
+  | "6_monthly"
   | "annually";
 
 export type EntityType =
@@ -309,6 +312,10 @@ export interface ProposalItem {
   calculationInputs?: Record<string, number>;
   /** Tracks which pricing option label was selected (for reliable dropdown matching) */
   selectedPricingLabel?: string;
+  /** Per-service payment schedule (overrides proposal-level default when set) */
+  paymentSchedule?: PaymentFrequency;
+  /** Pricing version: undefined = legacy (yearly items store monthly rate × 12), 2 = new (all items store price-per-cycle) */
+  pricingVersion?: number;
   // Computed (stored for display)
   baseAmount: number;
   subtotal: number;
@@ -650,5 +657,61 @@ export const PRICING_METHOD_LABELS: Record<PricingMethod, string> = {
   quantity_x_unit:    "Qty × Unit",
   tiered:             "Tiered",
   manual_override:    "Manual Override",
+};
+
+// ─── Service Billing & Planning Constants ────────────────────────────────────
+
+/** Number of delivery cycles per year for each work frequency. */
+export const RECURRENCE_MULTIPLIER: Record<Frequency, number> = {
+  monthly:         12,
+  bi_monthly:       6,
+  quarterly:        4,
+  every_4_months:   3,
+  semi_annually:    2,
+  annually:         1,
+  once_off:         1,
+  on_demand:        0,
+};
+
+export const FREQUENCY_DISPLAY_LABELS: Record<Frequency, string> = {
+  monthly:         "Monthly",
+  bi_monthly:      "Bi-monthly",
+  quarterly:       "Quarterly",
+  every_4_months:  "Every 4 months",
+  semi_annually:   "Bi-annually",
+  annually:        "Annually",
+  once_off:        "Once-off",
+  on_demand:       "On demand",
+};
+
+export const PAYMENT_SCHEDULE_LABELS: Record<PaymentFrequency, string> = {
+  as_delivered: "As Delivered",
+  monthly:      "Monthly",
+  bi_monthly:   "Bi-monthly",
+  quarterly:    "Quarterly",
+  "6_monthly":  "6-monthly",
+  annually:     "Annually",
+};
+
+/** Number of invoices per year for each payment schedule. 0 = derives from work frequency. */
+export const PAYMENT_PERIOD_COUNT: Record<PaymentFrequency, number> = {
+  monthly:      12,
+  bi_monthly:    6,
+  quarterly:     4,
+  "6_monthly":   2,
+  annually:      1,
+  as_delivered:  0,
+};
+
+/** Short suffix labels for per-cycle price display (e.g. "/mo", "/qtr"). */
+export const FREQUENCY_PRICE_SUFFIX: Record<Frequency, string> = {
+  monthly:        "/mo",
+  bi_monthly:     "/2mo",
+  quarterly:      "/qtr",
+  every_4_months: "/4mo",
+  semi_annually:  "/6mo",
+  annually:       "/yr",
+  once_off:       "",
+  on_demand:      "",
 };
 

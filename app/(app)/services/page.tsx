@@ -51,6 +51,8 @@ type LineItemRow = {
   isActive: boolean;
   sortOrder: number;
   status: string;
+  defaultBillingCategory?: string;
+  defaultFrequency?: string;
 };
 
 type SectionRow = {

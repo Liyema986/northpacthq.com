@@ -14,8 +14,10 @@ import { generateId } from "@/lib/utils";
 import {
   getItemTotalPrice,
   getItemTotalHours,
+  getItemAnnualTotal,
   buildEntitySummaries,
 } from "@/lib/proposal-entities";
+import { getRecurrenceMultiplier } from "@/lib/pricing-utils";
 import {
   calculateServiceHours,
   normalizeFixedTimeEstimate,
@@ -73,6 +75,12 @@ function itemFromTemplate(
           assignedEntityIds:    [] as string[],
         };
 
+  // Set frequency based on service type (billing category)
+  const defaultFrequency =
+    category === "yearly"  ? "annually" as const :
+    category === "onceoff" ? "once_off" as const :
+    (template.frequency ?? "monthly") as ProposalItem["frequency"];
+
   return {
     id:                generateId(),
     proposalId:        "",
@@ -86,7 +94,7 @@ function itemFromTemplate(
     quantity:          1,
     discount:          0,
     taxRate:           15,
-    frequency:         "monthly",
+    frequency:         defaultFrequency,
     entityPricingMode: "price_per_entity" as EntityPricingMode,
     ...assignment,
     customEntityPrices:{},
@@ -102,6 +110,7 @@ function itemFromTemplate(
     estimatedHours:    template.timeInputHours ?? 0,
     isOptional:        false,
     sortOrder,
+    pricingVersion:    2,
     createdAt:         new Date().toISOString(),
     updatedAt:         new Date().toISOString(),
   };
@@ -305,7 +314,13 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
       const item = prev.find((i) => i.id === id);
       if (!item) return prev;
       const without = prev.filter((i) => i.id !== id);
-      const moved = { ...item, billingCategory: category };
+      // Auto-set frequency when moving between service types
+      const frequency =
+        category === "yearly"  ? "annually" as const :
+        category === "onceoff" ? "once_off" as const :
+        (item.frequency === "annually" || item.frequency === "once_off")
+          ? "monthly" as const : item.frequency;
+      const moved = recalc({ ...item, billingCategory: category, frequency });
       const catItems = without.filter((i) => i.billingCategory === category);
       const others   = without.filter((i) => i.billingCategory !== category);
       const idx = toIndex ?? catItems.length;
@@ -362,20 +377,24 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
       .filter((i) => i.billingCategory === "onceoff")
       .reduce((s, i) => s + getItemTotalPrice(i, entities), 0);
 
-    const acv = monthly * 12 + yearly + onceoff;
+    const acv = required.reduce((s, i) => s + getItemAnnualTotal(i, entities), 0);
 
     const cycleMap: Record<PaymentFrequency, number> = {
-      monthly:      monthly,
-      quarterly:    (monthly * 3) + (yearly / 4),
+      monthly:      acv / 12,
+      bi_monthly:   acv / 6,
+      quarterly:    acv / 4,
+      "6_monthly":  acv / 2,
       annually:     acv,
-      as_delivered: monthly,
+      as_delivered: monthly, // per-cycle amount for recurring items
     };
 
     const totalHours = roundHoursUpOneDecimal(
       required.reduce((s, i) => {
         const h = getItemTotalHours(i, entities);
-        // Monthly hours × 12 to annualise; yearly & once-off are already total
-        if (i.billingCategory === "monthly") return s + h * 12;
+        if (i.billingCategory === "monthly") {
+          const freq = (i.frequency ?? "monthly") as import("@/types").Frequency;
+          return s + h * getRecurrenceMultiplier(freq);
+        }
         return s + h;
       }, 0)
     );
@@ -406,7 +425,12 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
       if (!freq || freq === "monthly") return [0,1,2,3,4,5,6,7,8,9,10,11];
       const startIdx = MONTHS_FULL.indexOf(startMonth);
       if (startIdx === -1) return [0,1,2,3,4,5,6,7,8,9,10,11];
-      const step = freq === "bi_monthly" ? 2 : freq === "quarterly" ? 3 : freq === "semi_annually" ? 6 : 12;
+      const step =
+        freq === "bi_monthly" ? 2 :
+        freq === "quarterly" ? 3 :
+        freq === "every_4_months" ? 4 :
+        freq === "semi_annually" ? 6 :
+        freq === "6_monthly" ? 6 : 12;
       const indices: number[] = [];
       for (let i = 0; i < 12; i += step) indices.push((startIdx + i) % 12);
       return indices;
@@ -420,10 +444,13 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
         const price = getItemTotalPrice(item, entities);
         const hrs   = getItemTotalHours(item, entities);
 
-        // Cash flow months (drives revenue bars)
-        const cfFreq  = item.duePattern || "monthly";
+        // Cash flow months (drives revenue bars) — use per-service payment schedule if set
+        const cfFreq  = item.paymentSchedule ?? (item.duePattern || "monthly");
         const cfStart = (item.commitmentDate ?? "").startsWith("cf:") ? item.commitmentDate!.slice(3) : "";
-        const cfMonths = activeIndices(cfFreq, cfStart);
+        const cfMonths = activeIndices(
+          cfFreq === "as_delivered" ? (item.frequency || "monthly") : cfFreq,
+          cfStart
+        );
 
         // Work planner months (drives hours)
         const wpFreq  = item.frequency || "monthly";
@@ -431,13 +458,13 @@ export function useProposalDraft(firmId: string, opts?: { restoreFromDraft?: boo
         const wpMonths = activeIndices(wpFreq, wpStart);
 
         if (item.billingCategory === "monthly") {
-          // price = per-month total; annual = price × 12
-          const annual = price * 12;
+          const annual = getItemAnnualTotal(item, entities);
           if (cfMonths.includes(monthIdx)) revenue += annual / cfMonths.length;
-          const annualHrs = hrs * 12;
+          const freq = (item.frequency ?? "monthly") as import("@/types").Frequency;
+          const annualHrs = hrs * getRecurrenceMultiplier(freq);
           if (wpMonths.includes(monthIdx)) hours += annualHrs / wpMonths.length;
         } else if (item.billingCategory === "yearly") {
-          // price already annualised (×12 in getItemTotalPrice)
+          // price already annualised via getItemTotalPrice
           if (cfMonths.includes(monthIdx)) revenue += price / cfMonths.length;
           if (wpMonths.includes(monthIdx)) hours += hrs / wpMonths.length;
         } else {

@@ -4,8 +4,11 @@ import type {
   ProposalEntitySummary,
   BillingCategory,
   EntityPricingMode,
+  Frequency,
 } from "@/types";
+import { RECURRENCE_MULTIPLIER } from "@/types";
 import { roundHoursUpOneDecimal } from "@/lib/service-metrics";
+import { getRecurrenceMultiplier } from "@/lib/pricing-utils";
 
 const BILLING_CATEGORIES: BillingCategory[] = ["monthly", "yearly", "onceoff"];
 
@@ -55,17 +58,23 @@ export function resolveAssignedEntityIds(
 }
 
 // ── Price for item considering entity assignment + pricing mode ───────────────
+/** Returns the per-cycle price for this item (before annualization).
+ *  For legacy yearly items (pricingVersion undefined), applies the ×12 factor
+ *  to maintain backward compatibility. New items (pricingVersion 2+) store
+ *  annual prices directly for yearly services. */
 export function getItemTotalPrice(
   item: ProposalItem,
   entities: ProposalBuilderEntity[]
 ): number {
-  // Yearly services store the monthly rate; total reflects the annual amount
-  const yearlyFactor = item.billingCategory === "yearly" ? 12 : 1;
+  // Legacy yearly items stored the monthly rate and relied on ×12 everywhere.
+  // New items (pricingVersion >= 2) store the full annual price directly.
+  const legacyYearlyFactor =
+    item.billingCategory === "yearly" && !item.pricingVersion ? 12 : 1;
 
-  if (entities.length === 0) return (item.totalPrice ?? item.subtotal ?? 0) * yearlyFactor;
+  if (entities.length === 0) return (item.totalPrice ?? item.subtotal ?? 0) * legacyYearlyFactor;
 
   const assignedIds = resolveAssignedEntityIds(item, entities);
-  if (assignedIds.length === 0) return (item.totalPrice ?? 0) * yearlyFactor;
+  if (assignedIds.length === 0) return (item.totalPrice ?? 0) * legacyYearlyFactor;
 
   const mode = item.entityPricingMode as EntityPricingMode;
 
@@ -75,19 +84,34 @@ export function getItemTotalPrice(
       const custom = item.customEntityPrices?.[id];
       if (custom != null) return sum + custom;
       return sum + (item.subtotal ?? 0) / n;
-    }, 0) * yearlyFactor;
+    }, 0) * legacyYearlyFactor;
   }
 
   if (mode === "price_per_entity") {
-    return (item.subtotal ?? 0) * assignedIds.length * yearlyFactor;
+    return (item.subtotal ?? 0) * assignedIds.length * legacyYearlyFactor;
   }
 
   // single_price (default)
-  return (item.totalPrice ?? item.subtotal ?? 0) * yearlyFactor;
+  return (item.totalPrice ?? item.subtotal ?? 0) * legacyYearlyFactor;
+}
+
+/** Returns the annualized total for this item.
+ *  Recurring items: perCyclePrice × recurrenceMultiplier
+ *  Annual / Once-off: already at annual/total level from getItemTotalPrice */
+export function getItemAnnualTotal(
+  item: ProposalItem,
+  entities: ProposalBuilderEntity[]
+): number {
+  const perCycle = getItemTotalPrice(item, entities);
+  if (item.billingCategory === "monthly") {
+    const freq = (item.frequency ?? "monthly") as Frequency;
+    return perCycle * getRecurrenceMultiplier(freq);
+  }
+  return perCycle; // yearly & onceoff already at annual/total level
 }
 
 /** Share of this line's fee attributed to one entity (for grids & per-entity live summary).
- *  Yearly items store the monthly rate — this function returns the annualised amount (× 12). */
+ *  Returns the annualized amount for the entity. */
 export function getItemContributionForEntity(
   item: ProposalItem,
   entityId: string,
@@ -97,20 +121,21 @@ export function getItemContributionForEntity(
   if (!assignedIds.includes(entityId)) return 0;
 
   const mode = item.entityPricingMode as EntityPricingMode;
-  // Yearly services store the monthly rate; display the annual total
-  const yearlyFactor = item.billingCategory === "yearly" ? 12 : 1;
+  // Legacy yearly items stored the monthly rate; new items store annual directly
+  const legacyYearlyFactor =
+    item.billingCategory === "yearly" && !item.pricingVersion ? 12 : 1;
 
   if (mode === "custom_price_by_entity") {
     const custom = item.customEntityPrices?.[entityId];
-    if (custom != null) return custom * yearlyFactor;
+    if (custom != null) return custom * legacyYearlyFactor;
     const n = assignedIds.length || 1;
-    return ((item.subtotal ?? 0) / n) * yearlyFactor;
+    return ((item.subtotal ?? 0) / n) * legacyYearlyFactor;
   }
   if (mode === "price_per_entity") {
-    return (item.subtotal ?? 0) * yearlyFactor;
+    return (item.subtotal ?? 0) * legacyYearlyFactor;
   }
   const total = item.totalPrice ?? item.subtotal ?? 0;
-  return (total / (assignedIds.length || 1)) * yearlyFactor;
+  return (total / (assignedIds.length || 1)) * legacyYearlyFactor;
 }
 
 /** Share of estimated hours for one entity (matches contribution logic for reporting). */
@@ -227,13 +252,24 @@ export function buildEntitySummaries(
       .filter((i) => i.billingCategory === "onceoff")
       .reduce((s, i) => s + getItemContributionForEntity(i, entity.id, entities), 0);
 
-    const acv = monthly * 12 + yearly + onceoff;
-    const year1 = monthly * 12 + yearly + onceoff;
+    // Annualize monthly items using their recurrence multiplier
+    const annualMonthly = requiredItems
+      .filter((i) => i.billingCategory === "monthly")
+      .reduce((s, i) => {
+        const contribution = getItemContributionForEntity(i, entity.id, entities);
+        const freq = (i.frequency ?? "monthly") as Frequency;
+        return s + contribution * getRecurrenceMultiplier(freq);
+      }, 0);
+    const acv = annualMonthly + yearly + onceoff;
+    const year1 = acv;
     const hours = requiredItems.reduce(
       (s, i) => {
         const h = getItemHoursContributionForEntity(i, entity.id, entities);
-        // Monthly hours × 12 to annualise
-        return s + (i.billingCategory === "monthly" ? h * 12 : h);
+        if (i.billingCategory === "monthly") {
+          const freq = (i.frequency ?? "monthly") as Frequency;
+          return s + h * getRecurrenceMultiplier(freq);
+        }
+        return s + h;
       },
       0
     );

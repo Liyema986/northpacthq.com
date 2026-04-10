@@ -32,6 +32,7 @@ export type ConvexProposalHydrateInput = {
     workPlanEntityLabels?: string[];
     billingCategory?: string;
     frequency?: string;
+    paymentSchedule?: string;
   }>;
   entities?: Array<{
     id: number;
@@ -59,6 +60,7 @@ function coerceFrequency(raw?: string): Frequency {
     "monthly",
     "bi_monthly",
     "quarterly",
+    "every_4_months",
     "semi_annually",
     "annually",
     "once_off",
@@ -167,6 +169,7 @@ function buildLineItem(
     updatedAt: new Date().toISOString(),
     scheduledWorkMonth: line.scheduledMonth,
     commitmentDate: line.scheduledMonth ? `${line.scheduledMonth}-01` : undefined,
+    ...(line.paymentSchedule && { paymentSchedule: line.paymentSchedule as import("@/types").PaymentFrequency }),
   };
   return recalcItem(item);
 }

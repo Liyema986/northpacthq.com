@@ -17,8 +17,18 @@ import type {
   BillingCategory,
   EntityPricingMode,
   Frequency,
+  PaymentFrequency,
 } from "@/types";
-import { CATEGORY_LABELS } from "@/types";
+import {
+  CATEGORY_LABELS,
+  RECURRENCE_MULTIPLIER,
+  PAYMENT_SCHEDULE_LABELS,
+} from "@/types";
+import {
+  getRecurrenceMultiplier,
+  calculateAnnualTotal,
+  calculateInvoiceAmount,
+} from "@/lib/pricing-utils";
 import {
   Sheet,
   SheetContent,
@@ -83,16 +93,21 @@ interface ServiceConfigDrawerProps {
 }
 
 const deliveryOptions: Frequency[] = [
-  "monthly", "bi_monthly", "quarterly", "semi_annually", "annually",
+  "monthly", "bi_monthly", "quarterly", "every_4_months", "semi_annually", "annually",
 ];
 
 const FREQUENCY_LABELS: Record<string, string> = {
   monthly: "Monthly",
-  bi_monthly: "Bi monthly",
+  bi_monthly: "Bi-monthly",
   quarterly: "Quarterly",
-  semi_annually: "Six monthly",
+  every_4_months: "Every 4 months",
+  semi_annually: "Bi-annually",
   annually: "Annually",
 };
+
+const PAYMENT_SCHEDULE_OPTIONS: PaymentFrequency[] = [
+  "as_delivered", "monthly", "bi_monthly", "quarterly", "6_monthly", "annually",
+];
 
 const MONTHS_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -100,7 +115,7 @@ const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct
 function getDerivedMonths(startMonth: string, frequency: string): string {
   const idx = MONTHS_FULL.indexOf(startMonth);
   if (idx === -1) return "";
-  const step = frequency === "bi_monthly" ? 2 : frequency === "quarterly" ? 3 : frequency === "semi_annually" ? 6 : 12;
+  const step = frequency === "bi_monthly" ? 2 : frequency === "quarterly" ? 3 : frequency === "every_4_months" ? 4 : frequency === "semi_annually" ? 6 : 12;
   const result: string[] = [];
   for (let i = idx; i < 12; i += step) result.push(MONTHS_SHORT[i]);
   return result.join(", ");
@@ -546,30 +561,39 @@ export function ServiceConfigDrawer({
               {/* ── SECTION: Timing & Scope ── */}
               <SectionHeader label="Timing & Scope" cols={colCount} gridCols={gridCols} />
 
-              {/* Work planner frequency — per entity */}
+              {/* Work planner frequency — per entity (read-only for Annual/Once-off) */}
               <div className="grid border-b border-slate-100 hover:bg-slate-50/50" style={{ gridTemplateColumns: gridCols }}>
                 <div className="px-4 py-2.5 text-[12px] font-medium text-slate-700 sticky left-0 z-[5] bg-white">Work planner</div>
                 {assignedEntities.map((e) => {
                   const ei = itemFor(e.id);
+                  const isFixedFreq = ei.billingCategory === "yearly" || ei.billingCategory === "onceoff";
                   return (
                     <div key={`wp-${e.id}`} className="px-3 py-2 border-l border-slate-100">
-                      <Select key={`wp-sel-${e.id}`} value={ei.frequency ?? "monthly"} onValueChange={(v) => onUpdate(ei.id, { frequency: v as Frequency, scheduledWorkMonth: "" })}>
-                        <SelectTrigger className={cellSelect}><SelectValue /></SelectTrigger>
-                        <SelectContent className="z-[200]">
-                          {deliveryOptions.map((opt) => (
-                            <SelectItem key={opt} value={opt} className="text-[12px]">{FREQUENCY_LABELS[opt]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {isFixedFreq ? (
+                        <span className="text-[12px] text-slate-400">{FREQUENCY_LABELS[ei.frequency ?? "monthly"] ?? ei.frequency}</span>
+                      ) : (
+                        <Select key={`wp-sel-${e.id}`} value={ei.frequency ?? "monthly"} onValueChange={(v) => onUpdate(ei.id, { frequency: v as Frequency, scheduledWorkMonth: "" })}>
+                          <SelectTrigger className={cellSelect}><SelectValue /></SelectTrigger>
+                          <SelectContent className="z-[200]">
+                            {deliveryOptions.map((opt) => (
+                              <SelectItem key={opt} value={opt} className="text-[12px]">
+                                {FREQUENCY_LABELS[opt]} <span className="text-slate-400 ml-1">×{RECURRENCE_MULTIPLIER[opt]}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   );
                 })}
                 <div className="px-3 py-2 border-l-2 border-slate-200 bg-slate-50/60 flex items-center justify-center">
-                  <ApplyAllPopover
-                    label="Work planner"
-                    options={deliveryOptions.map((o) => ({ value: o, label: FREQUENCY_LABELS[o] }))}
-                    onApply={(v) => { for (const itm of items) onUpdate(itm.id, { frequency: v as Frequency, scheduledWorkMonth: "" }); }}
-                  />
+                  {primaryItem.billingCategory === "monthly" && (
+                    <ApplyAllPopover
+                      label="Work planner"
+                      options={deliveryOptions.map((o) => ({ value: o, label: FREQUENCY_LABELS[o] }))}
+                      onApply={(v) => { for (const itm of items) onUpdate(itm.id, { frequency: v as Frequency, scheduledWorkMonth: "" }); }}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -579,7 +603,7 @@ export function ServiceConfigDrawer({
                 {assignedEntities.map((e) => {
                   const ei = itemFor(e.id);
                   const freq = ei.frequency ?? "monthly";
-                  const needsMonth = ["bi_monthly", "quarterly", "semi_annually", "annually"].includes(freq);
+                  const needsMonth = ["bi_monthly", "quarterly", "every_4_months", "semi_annually", "annually"].includes(freq);
                   return (
                     <div key={`wpm-${e.id}`} className="px-3 py-2 border-l border-slate-100">
                       {needsMonth ? (
@@ -613,19 +637,19 @@ export function ServiceConfigDrawer({
                 </div>
               </div>
 
-              {/* Cash flow frequency — per entity */}
+              {/* Payment schedule — per entity (independent of work frequency) */}
               <div className="grid border-b border-slate-100 hover:bg-slate-50/50" style={{ gridTemplateColumns: gridCols }}>
-                <div className="px-4 py-2.5 text-[12px] font-medium text-slate-700 sticky left-0 z-[5] bg-white">Cash flow</div>
+                <div className="px-4 py-2.5 text-[12px] font-medium text-slate-700 sticky left-0 z-[5] bg-white">Payment schedule</div>
                 {assignedEntities.map((e) => {
                   const ei = itemFor(e.id);
-                  const ecf = (ei.duePattern ?? "monthly") as Frequency;
+                  const ps = (ei.paymentSchedule ?? "as_delivered") as PaymentFrequency;
                   return (
-                    <div key={`cf-${e.id}`} className="px-3 py-2 border-l border-slate-100">
-                      <Select key={`cf-sel-${e.id}`} value={ecf} onValueChange={(v) => { onUpdate(ei.id, { duePattern: v }); if ((ei.commitmentDate ?? "").startsWith("cf:")) onUpdate(ei.id, { commitmentDate: "cf:" }); }}>
+                    <div key={`ps-${e.id}`} className="px-3 py-2 border-l border-slate-100">
+                      <Select key={`ps-sel-${e.id}`} value={ps} onValueChange={(v) => { onUpdate(ei.id, { paymentSchedule: v as PaymentFrequency }); if ((ei.commitmentDate ?? "").startsWith("cf:")) onUpdate(ei.id, { commitmentDate: "cf:" }); }}>
                         <SelectTrigger className={cellSelect}><SelectValue /></SelectTrigger>
                         <SelectContent className="z-[200]">
-                          {deliveryOptions.map((opt) => (
-                            <SelectItem key={opt} value={opt} className="text-[12px]">{FREQUENCY_LABELS[opt]}</SelectItem>
+                          {PAYMENT_SCHEDULE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt} value={opt} className="text-[12px]">{PAYMENT_SCHEDULE_LABELS[opt]}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -634,21 +658,21 @@ export function ServiceConfigDrawer({
                 })}
                 <div className="px-3 py-2 border-l-2 border-slate-200 bg-slate-50/60 flex items-center justify-center">
                   <ApplyAllPopover
-                    label="Cash flow"
-                    options={deliveryOptions.map((o) => ({ value: o, label: FREQUENCY_LABELS[o] }))}
-                    onApply={(v) => { for (const itm of items) onUpdate(itm.id, { duePattern: v, commitmentDate: "cf:" }); }}
+                    label="Payment schedule"
+                    options={PAYMENT_SCHEDULE_OPTIONS.map((o) => ({ value: o, label: PAYMENT_SCHEDULE_LABELS[o] }))}
+                    onApply={(v) => { for (const itm of items) onUpdate(itm.id, { paymentSchedule: v as PaymentFrequency, commitmentDate: "cf:" }); }}
                   />
                 </div>
               </div>
 
-              {/* Cash flow billing month — per entity (conditional) */}
+              {/* Payment schedule billing month — per entity (conditional) */}
               <div className="grid border-b border-slate-100 hover:bg-slate-50/50" style={{ gridTemplateColumns: gridCols }}>
                 <div className="px-4 py-2.5 text-[12px] text-slate-500 pl-8 sticky left-0 z-[5] bg-white">Billing month</div>
                 {assignedEntities.map((e) => {
                   const ei = itemFor(e.id);
-                  const ecf = (ei.duePattern ?? "monthly") as Frequency;
+                  const ps = (ei.paymentSchedule ?? "as_delivered") as PaymentFrequency;
                   const ecfMonth = (ei.commitmentDate ?? "").startsWith("cf:") ? ei.commitmentDate!.slice(3) : "";
-                  const needsMonth = ["bi_monthly", "quarterly", "semi_annually", "annually"].includes(ecf);
+                  const needsMonth = ["bi_monthly", "quarterly", "6_monthly", "annually"].includes(ps);
                   return (
                     <div key={`cfm-${e.id}`} className="px-3 py-2 border-l border-slate-100">
                       {needsMonth ? (
@@ -661,9 +685,9 @@ export function ServiceConfigDrawer({
                               ))}
                             </SelectContent>
                           </Select>
-                          {ecfMonth && ecf !== "annually" && (
+                          {ecfMonth && ps !== "annually" && (
                             <p className="text-[10px] text-slate-400 leading-tight">
-                              {getDerivedMonths(ecfMonth, ecf)}
+                              {getDerivedMonths(ecfMonth, ps)}
                             </p>
                           )}
                         </div>
@@ -758,8 +782,9 @@ function SingleEntityForm({
 }) {
   const [calcOpen, setCalcOpen] = useState(true);
   const ci = item.calculationInputs ?? {};
-  const cfFreq = (item.duePattern ?? "monthly") as Frequency;
+  const paySchedule = (item.paymentSchedule ?? "as_delivered") as PaymentFrequency;
   const cfMonth = (item.commitmentDate ?? "").startsWith("cf:") ? item.commitmentDate!.slice(3) : "";
+  const isFixedFreq = item.billingCategory === "yearly" || item.billingCategory === "onceoff";
 
   const inp = "w-full h-9 px-3 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] transition-colors bg-white";
   const sel = "h-9 w-full rounded-lg border border-slate-200 bg-white text-[13px] font-normal text-left";
@@ -890,13 +915,21 @@ function SingleEntityForm({
 
       <SectionLabel>Timing & Scope</SectionLabel>
       <Row label="Work planner">
-        <Select value={item.frequency ?? "monthly"} onValueChange={(v) => onUpdate(item.id, { frequency: v as Frequency, scheduledWorkMonth: "" })}>
-          <SelectTrigger className={sel}><SelectValue /></SelectTrigger>
-          <SelectContent className="z-[200]">
-            {deliveryOptions.map((opt) => (<SelectItem key={opt} value={opt} className="text-[13px]">{FREQUENCY_LABELS[opt]}</SelectItem>))}
-          </SelectContent>
-        </Select>
-        {["bi_monthly","quarterly","semi_annually","annually"].includes(item.frequency ?? "") && (
+        {isFixedFreq ? (
+          <span className="text-[13px] text-slate-400">{FREQUENCY_LABELS[item.frequency ?? "monthly"] ?? item.frequency}</span>
+        ) : (
+          <Select value={item.frequency ?? "monthly"} onValueChange={(v) => onUpdate(item.id, { frequency: v as Frequency, scheduledWorkMonth: "" })}>
+            <SelectTrigger className={sel}><SelectValue /></SelectTrigger>
+            <SelectContent className="z-[200]">
+              {deliveryOptions.map((opt) => (
+                <SelectItem key={opt} value={opt} className="text-[13px]">
+                  {FREQUENCY_LABELS[opt]} <span className="text-slate-400 ml-1">×{RECURRENCE_MULTIPLIER[opt]}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {!isFixedFreq && ["bi_monthly","quarterly","every_4_months","semi_annually","annually"].includes(item.frequency ?? "") && (
           <div className="mt-2">
             <Select value={item.scheduledWorkMonth ?? ""} onValueChange={(v) => onUpdate(item.id, { scheduledWorkMonth: v })}>
               <SelectTrigger className={sel}><SelectValue placeholder="Starting month" /></SelectTrigger>
@@ -908,21 +941,21 @@ function SingleEntityForm({
           </div>
         )}
       </Row>
-      <Row label="Cash flow">
-        <Select value={cfFreq} onValueChange={(v) => { onUpdate(item.id, { duePattern: v }); if ((item.commitmentDate ?? "").startsWith("cf:")) onUpdate(item.id, { commitmentDate: "cf:" }); }}>
+      <Row label="Payment schedule">
+        <Select value={paySchedule} onValueChange={(v) => { onUpdate(item.id, { paymentSchedule: v as PaymentFrequency }); if ((item.commitmentDate ?? "").startsWith("cf:")) onUpdate(item.id, { commitmentDate: "cf:" }); }}>
           <SelectTrigger className={sel}><SelectValue /></SelectTrigger>
           <SelectContent className="z-[200]">
-            {deliveryOptions.map((opt) => (<SelectItem key={opt} value={opt} className="text-[13px]">{FREQUENCY_LABELS[opt]}</SelectItem>))}
+            {PAYMENT_SCHEDULE_OPTIONS.map((opt) => (<SelectItem key={opt} value={opt} className="text-[13px]">{PAYMENT_SCHEDULE_LABELS[opt]}</SelectItem>))}
           </SelectContent>
         </Select>
-        {["bi_monthly","quarterly","semi_annually","annually"].includes(cfFreq) && (
+        {["bi_monthly","quarterly","6_monthly","annually"].includes(paySchedule) && (
           <div className="mt-2">
             <Select value={cfMonth} onValueChange={(v) => onUpdate(item.id, { commitmentDate: `cf:${v}` })}>
               <SelectTrigger className={sel}><SelectValue placeholder="Billing month" /></SelectTrigger>
               <SelectContent className="z-[200]">{MONTHS_FULL.map((m) => (<SelectItem key={m} value={m} className="text-[13px]">{m}</SelectItem>))}</SelectContent>
             </Select>
-            {cfMonth && cfFreq !== "annually" && (
-              <p className={hint}>Billing: {getDerivedMonths(cfMonth, cfFreq)}</p>
+            {cfMonth && paySchedule !== "annually" && (
+              <p className={hint}>Billing: {getDerivedMonths(cfMonth, paySchedule)}</p>
             )}
           </div>
         )}
@@ -935,13 +968,37 @@ function SingleEntityForm({
       </div>
 
       {/* Summary */}
-      <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2 mt-2 mb-4">
-        <div className="grid grid-cols-3 divide-x divide-slate-200 text-center">
-          <div className="px-2 py-1"><p className="text-[9px] font-semibold uppercase text-slate-400">Total value</p><p className="text-[13px] font-bold text-slate-800">{formatCurrency(totalValue)}</p></div>
-          <div className="px-2 py-1"><p className="text-[9px] font-semibold uppercase text-slate-400">Est. time</p><p className="text-[13px] font-bold text-slate-800">{formatHoursMinutesClock(totalHours)}</p></div>
-          <div className="px-2 py-1"><p className="text-[9px] font-semibold uppercase text-slate-400">Rate</p><p className="text-[13px] font-bold text-slate-800">{totalHours > 0 ? formatCurrency(totalValue / totalHours) : "—"}/h</p></div>
-        </div>
-      </div>
+      {(() => {
+        const freq = (item.frequency ?? "monthly") as Frequency;
+        const multiplier = getRecurrenceMultiplier(freq);
+        const annualTotal = item.billingCategory === "monthly"
+          ? totalValue * multiplier
+          : totalValue;
+        const invoiceAmt = calculateInvoiceAmount(annualTotal, paySchedule, freq);
+        return (
+          <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2 mt-2 mb-4 space-y-2">
+            <div className="grid grid-cols-3 divide-x divide-slate-200 text-center">
+              <div className="px-2 py-1"><p className="text-[9px] font-semibold uppercase text-slate-400">Per cycle</p><p className="text-[13px] font-bold text-slate-800">{formatCurrency(totalValue)}</p></div>
+              <div className="px-2 py-1"><p className="text-[9px] font-semibold uppercase text-slate-400">Est. time</p><p className="text-[13px] font-bold text-slate-800">{formatHoursMinutesClock(totalHours)}</p></div>
+              <div className="px-2 py-1"><p className="text-[9px] font-semibold uppercase text-slate-400">Rate</p><p className="text-[13px] font-bold text-slate-800">{totalHours > 0 ? formatCurrency(totalValue / totalHours) : "—"}/h</p></div>
+            </div>
+            {item.billingCategory === "monthly" && multiplier > 1 && (
+              <div className="grid grid-cols-2 divide-x divide-slate-200 text-center border-t border-slate-200 pt-2">
+                <div className="px-2 py-1">
+                  <p className="text-[9px] font-semibold uppercase text-slate-400">Annual total</p>
+                  <p className="text-[13px] font-bold text-slate-800">{formatCurrency(annualTotal)}</p>
+                  <p className="text-[9px] text-slate-400">×{multiplier} {FREQUENCY_LABELS[freq]?.toLowerCase()}</p>
+                </div>
+                <div className="px-2 py-1">
+                  <p className="text-[9px] font-semibold uppercase text-slate-400">Per invoice</p>
+                  <p className="text-[13px] font-bold text-slate-800">{formatCurrency(invoiceAmt)}</p>
+                  <p className="text-[9px] text-slate-400">{PAYMENT_SCHEDULE_LABELS[paySchedule]}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

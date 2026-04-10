@@ -200,6 +200,8 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
   const [calculations,       setCalculations]       = useState<Calculation[]>([newCalc()]);
   const [applyMinFee,        setApplyMinFee]        = useState(false);
   const [minFee,             setMinFee]             = useState("");
+  const [defaultCategory,    setDefaultCategory]    = useState<"monthly" | "yearly" | "onceoff">("monthly");
+  const [defaultFrequency,   setDefaultFrequency]   = useState("monthly");
   const [nameError,          setNameError]          = useState("");
   const [saving,             setSaving]             = useState(false);
 
@@ -239,6 +241,7 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
     setIncomeTiers(defaultIncomeTiers());
     setAddCalc(false); setCalculations([newCalc()]);
     setApplyMinFee(false); setMinFee("");
+    setDefaultCategory("monthly"); setDefaultFrequency("monthly");
     setNameError("");
   }
   function handleClose() { onOpenChange(false); reset(); }
@@ -502,6 +505,8 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
           : [],
         applyMinimumFee: billingFreq === "monthly" ? applyMinFee : false,
         minMonthlyFee:   billingFreq === "monthly" && applyMinFee ? (parseFloat(minFee) || 0) : undefined,
+        defaultBillingCategory: defaultCategory,
+        defaultFrequency: defaultCategory === "monthly" ? defaultFrequency : undefined,
       });
 
       if (!result.success) { toast.error(result.error || "Failed to add service"); return; }
@@ -587,6 +592,51 @@ export function AddServiceSheet({ open, onOpenChange, sectionId, sectionName, us
               <textarea value={schedule} onChange={(e) => setSchedule(e.target.value)} rows={2} disabled={saving}
                 placeholder="e.g. Monthly, within 5 business days of month-end"
                 className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-[13px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#C8A96E] transition-colors bg-white resize-none" />
+            </div>
+
+            {/* Service type & default frequency */}
+            <div className="border-t border-slate-100 pt-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Service Type</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[13px]">Default category</Label>
+                <Select value={defaultCategory} onValueChange={(v) => setDefaultCategory(v as typeof defaultCategory)} disabled={saving}>
+                  <SelectTrigger className="w-full h-10 text-[13px] border-slate-200 bg-white rounded-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="z-[100]">
+                    <SelectItem value="monthly" className="text-[13px]">
+                      <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2" />Recurring
+                    </SelectItem>
+                    <SelectItem value="yearly" className="text-[13px]">
+                      <span className="inline-block w-2 h-2 rounded-full bg-violet-500 mr-2" />Annual
+                    </SelectItem>
+                    <SelectItem value="onceoff" className="text-[13px]">
+                      <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-2" />Once-off
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {defaultCategory === "monthly" && (
+                <div className="space-y-1.5">
+                  <Label className="text-[13px]">Default frequency</Label>
+                  <Select value={defaultFrequency} onValueChange={(v) => setDefaultFrequency(v)} disabled={saving}>
+                    <SelectTrigger className="w-full h-10 text-[13px] border-slate-200 bg-white rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="z-[100]">
+                      <SelectItem value="monthly" className="text-[13px]">Monthly (×12)</SelectItem>
+                      <SelectItem value="bi_monthly" className="text-[13px]">Bi-monthly (×6)</SelectItem>
+                      <SelectItem value="quarterly" className="text-[13px]">Quarterly (×4)</SelectItem>
+                      <SelectItem value="every_4_months" className="text-[13px]">Every 4 months (×3)</SelectItem>
+                      <SelectItem value="semi_annually" className="text-[13px]">Bi-annually (×2)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Pricing divider */}

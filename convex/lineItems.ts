@@ -41,6 +41,8 @@ const lineItemReturn = v.object({
   status: v.string(), // "complete" | "field-missing" | "price-missing"
   addCalculation: v.optional(v.boolean()),
   calculationVariations: v.optional(v.array(calculationVariation)),
+  defaultBillingCategory: v.optional(v.string()),
+  defaultFrequency: v.optional(v.string()),
 });
 
 const sectionReturn = v.object({
@@ -122,6 +124,8 @@ export const listSectionsWithItems = query({
             status,
             addCalculation: s.addCalculation ?? false,
             calculationVariations: s.calculationVariations ?? [],
+            defaultBillingCategory: s.defaultBillingCategory,
+            defaultFrequency: s.defaultFrequency,
           };
         });
 
@@ -310,6 +314,8 @@ export const createLineItem = mutation({
     minFeeCalculation: v.optional(v.string()),
     addCalculation: v.optional(v.boolean()),
     calculationVariations: v.optional(v.array(calculationVariation)),
+    defaultBillingCategory: v.optional(v.string()),
+    defaultFrequency: v.optional(v.string()),
   },
   returns: v.object({ success: v.boolean(), lineItemId: v.optional(v.id("services")), error: v.optional(v.string()) }),
   handler: async (ctx, args) => {
@@ -350,6 +356,8 @@ export const createLineItem = mutation({
       ...(args.minFeeCalculation !== undefined && { minFeeCalculation: args.minFeeCalculation }),
       ...(args.addCalculation !== undefined && { addCalculation: args.addCalculation }),
       ...(args.calculationVariations !== undefined && { calculationVariations: args.calculationVariations }),
+      ...(args.defaultBillingCategory !== undefined && { defaultBillingCategory: args.defaultBillingCategory }),
+      ...(args.defaultFrequency !== undefined && { defaultFrequency: args.defaultFrequency }),
       createdAt: now,
       updatedAt: now,
     });
@@ -403,6 +411,8 @@ export const updateLineItem = mutation({
     minFeeCalculation: v.optional(v.string()),
     addCalculation: v.optional(v.boolean()),
     calculationVariations: v.optional(v.array(calculationVariation)),
+    defaultBillingCategory: v.optional(v.string()),
+    defaultFrequency: v.optional(v.string()),
   },
   returns: v.object({ success: v.boolean(), error: v.optional(v.string()) }),
   handler: async (ctx, args) => {
@@ -432,6 +442,8 @@ export const updateLineItem = mutation({
     if (args.minFeeCalculation !== undefined) updates.minFeeCalculation = args.minFeeCalculation;
     if (args.addCalculation !== undefined) updates.addCalculation = args.addCalculation;
     if (args.calculationVariations !== undefined) updates.calculationVariations = args.calculationVariations;
+    if (args.defaultBillingCategory !== undefined) updates.defaultBillingCategory = args.defaultBillingCategory;
+    if (args.defaultFrequency !== undefined) updates.defaultFrequency = args.defaultFrequency;
 
     await ctx.db.patch(args.lineItemId, updates);
     return { success: true };
@@ -493,6 +505,8 @@ export const duplicateLineItem = mutation({
       ...(source.minFeeType !== undefined && { minFeeType: source.minFeeType }),
       ...(source.minFeeCurrency !== undefined && { minFeeCurrency: source.minFeeCurrency }),
       ...(source.minFeeCalculation !== undefined && { minFeeCalculation: source.minFeeCalculation }),
+      ...(source.defaultBillingCategory !== undefined && { defaultBillingCategory: source.defaultBillingCategory }),
+      ...(source.defaultFrequency !== undefined && { defaultFrequency: source.defaultFrequency }),
       createdAt: now,
       updatedAt: now,
     });

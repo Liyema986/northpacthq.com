@@ -16,7 +16,9 @@ interface LiveSummaryProps {
 const freqLabels: Record<PaymentFrequency, string> = {
   as_delivered: "As Delivered",
   monthly:      "Monthly",
+  bi_monthly:   "Bi-monthly",
   quarterly:    "Quarterly",
+  "6_monthly":  "6-monthly",
   annually:     "Annually",
 };
 
@@ -87,7 +89,7 @@ export function LiveSummary({
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
             Payment Frequency
           </p>
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-3 gap-1.5">
             {(Object.keys(freqLabels) as PaymentFrequency[]).map((freq) => (
               <button
                 key={freq}

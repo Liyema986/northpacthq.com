@@ -4,8 +4,14 @@ import type {
   DraggableProvidedDragHandleProps,
   DraggableProvidedDraggableProps,
 } from "@hello-pangea/dnd";
-import type { ProposalItem, ProposalBuilderEntity } from "@/types";
-import { CATEGORY_LABELS } from "@/types";
+import type { ProposalItem, ProposalBuilderEntity, Frequency } from "@/types";
+import {
+  CATEGORY_LABELS,
+  FREQUENCY_DISPLAY_LABELS,
+  RECURRENCE_MULTIPLIER,
+  PAYMENT_SCHEDULE_LABELS,
+  type PaymentFrequency,
+} from "@/types";
 import { Edit3, Copy, Trash2, ToggleLeft, ToggleRight, GripVertical } from "lucide-react";
 import { formatCurrency, formatHoursMinutesClock } from "@/lib/service-metrics";
 import { cn } from "@/lib/utils";
@@ -76,6 +82,12 @@ export function ProposalCard({
           <div className="mb-1 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
               <h4 className="text-sm font-semibold text-foreground truncate">{item.name}</h4>
+              {item.billingCategory === "monthly" && item.frequency && item.frequency !== "monthly" && (
+                <span className="shrink-0 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600">
+                  {FREQUENCY_DISPLAY_LABELS[item.frequency as Frequency] ?? item.frequency}
+                  <span className="ml-0.5 text-blue-400">×{RECURRENCE_MULTIPLIER[item.frequency as Frequency] ?? 1}</span>
+                </span>
+              )}
               {item.isOptional && (
                 <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                   Optional
@@ -130,11 +142,13 @@ export function ProposalCard({
             </span>
             {item.frequency && (
               <span className="rounded-full bg-secondary px-2 py-0.5">
-                {item.frequency.replace(/_/g, " ")}
+                {FREQUENCY_DISPLAY_LABELS[item.frequency as Frequency] ?? item.frequency.replace(/_/g, " ")}
               </span>
             )}
-            {item.duePattern && (
-              <span className="rounded-full bg-secondary px-2 py-0.5">{item.duePattern}</span>
+            {item.paymentSchedule && item.paymentSchedule !== "as_delivered" && (
+              <span className="rounded-full bg-secondary px-2 py-0.5">
+                Billed {PAYMENT_SCHEDULE_LABELS[item.paymentSchedule as PaymentFrequency] ?? item.paymentSchedule}
+              </span>
             )}
           </div>
         </div>

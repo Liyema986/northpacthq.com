@@ -11,7 +11,12 @@ import type {
   BillingCategory,
   ClientGroupMode,
 } from "@/types";
-import { CATEGORY_LABELS } from "@/types";
+import {
+  CATEGORY_LABELS,
+  FREQUENCY_DISPLAY_LABELS,
+  FREQUENCY_PRICE_SUFFIX,
+  type Frequency,
+} from "@/types";
 import { DropZone } from "./DropZone";
 import { ProposalCard } from "./ProposalCard";
 import { EntitySetupPanel, type PackageOption } from "./EntitySetupPanel";
@@ -31,6 +36,23 @@ import { formatCurrency, formatHoursMinutesClock } from "@/lib/service-metrics";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Id } from "@/convex/_generated/dataModel";
+
+/** Price suffix based on item frequency (for recurring items). */
+function priceSuffix(cat: BillingCategory, item?: ProposalItem): string {
+  if (cat === "onceoff") return "";
+  if (cat === "yearly") return "/yr";
+  if (!item) return "/mo";
+  const freq = (item.frequency ?? "monthly") as Frequency;
+  return FREQUENCY_PRICE_SUFFIX[freq] || "/mo";
+}
+
+/** Frequency badge label for recurring items (returns empty for non-monthly frequencies). */
+function freqBadgeLabel(item: ProposalItem): string | null {
+  if (item.billingCategory !== "monthly") return null;
+  const freq = (item.frequency ?? "monthly") as Frequency;
+  if (freq === "monthly") return null; // No badge needed for the default
+  return FREQUENCY_DISPLAY_LABELS[freq] ?? null;
+}
 
 /** Grid view lists the same item under multiple entity columns; keys and DnD ids must be unique per cell. */
 export const PROPOSAL_GRID_DRAG_PREFIX = "gridcell:";
@@ -270,7 +292,7 @@ function EntityGridView({
                           {entityTotal > 0 && (
                             <p className="mt-0.5 text-[10px] font-medium text-emerald-600">
                               {formatCurrency(entityTotal)}
-                              {cat === "monthly" ? "/mo" : cat === "yearly" ? "/yr" : ""}
+                              {priceSuffix(cat)}
                             </p>
                           )}
                         </div>
@@ -415,7 +437,7 @@ function ClientGroupView({
               </div>
               {catTotal > 0 && (
                 <span className="text-sm font-semibold text-slate-800">
-                  {formatCurrency(catTotal)}{cat === "monthly" ? "/mo" : cat === "yearly" ? "/yr" : ""}
+                  {formatCurrency(catTotal)}{priceSuffix(cat)}
                 </span>
               )}
             </div>
@@ -425,7 +447,7 @@ function ClientGroupView({
               <h4 className="text-xs font-semibold text-slate-800">{groupName}</h4>
               {catTotal > 0 && (
                 <p className="mt-0.5 text-[11px] font-medium text-emerald-600">
-                  {formatCurrency(catTotal)}{cat === "monthly" ? "/mo" : cat === "yearly" ? "/yr" : ""}
+                  {formatCurrency(catTotal)}{priceSuffix(cat)}
                 </p>
               )}
             </div>
@@ -533,7 +555,7 @@ function SingleColumnView({
                   {total > 0 && (
                     <span className="text-sm font-semibold text-emerald-600">
                       {formatCurrency(total)}
-                      {cat === "monthly" ? "/mo" : cat === "yearly" ? "/yr" : ""}
+                      {priceSuffix(cat)}
                     </span>
                   )}
                 </div>
