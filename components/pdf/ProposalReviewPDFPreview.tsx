@@ -203,8 +203,8 @@ export function ProposalReviewPDFPreview({
 
       // ── Resolve data ──
       const pd = proposalData;
-      const primary = pd?.brandColors?.primary || "#2563EB";
-      const secondary = pd?.brandColors?.secondary || "#10B981";
+      const primary = pd?.brandColors?.primary || "#2DD4BF";
+      const secondary = pd?.brandColors?.secondary || "#818CF8";
       const currency = pd?.currency || "ZAR";
 
       let clientName: string;

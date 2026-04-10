@@ -97,8 +97,8 @@ export default function ProposalTemplatePage() {
   const [disclaimer, setDisclaimer] = useState("");
   const [signOffBlock, setSignOffBlock] = useState("");
   const [bankingDetails, setBankingDetails] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("#2563EB");
-  const [secondaryColor, setSecondaryColor] = useState("#10B981");
+  const [primaryColor, setPrimaryColor] = useState("#2DD4BF");
+  const [secondaryColor, setSecondaryColor] = useState("#818CF8");
   const [timelineSteps, setTimelineSteps] = useState<{ marker: string; title: string; description: string }[]>([]);
   const [sections, setSections] = useState<Record<string, boolean>>({});
   const [teamEdits, setTeamEdits] = useState<Record<string, { jobTitle: string; bio: string; phone: string }>>({});
@@ -158,8 +158,8 @@ export default function ProposalTemplatePage() {
     setDisclaimer(data.pdfDisclaimer);
     setSignOffBlock(data.pdfSignOffBlock);
     setBankingDetails(data.pdfBankingDetails);
-    setPrimaryColor(data.brandColors?.primary || "#2563EB");
-    setSecondaryColor(data.brandColors?.secondary || "#10B981");
+    setPrimaryColor(data.brandColors?.primary || "#2DD4BF");
+    setSecondaryColor(data.brandColors?.secondary || "#818CF8");
     setTimelineSteps(data.defaultTimelineSteps.length > 0 ? data.defaultTimelineSteps : [
       { marker: "W1", title: "Week 1: Onboarding & Setup", description: "Initial meeting, system setup, and team introductions." },
       { marker: "W2", title: "Week 2-4: First Month Transition", description: "Daily processing begins, weekly check-ins." },

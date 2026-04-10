@@ -60,8 +60,8 @@ export const registerFirm = mutation({
     const firmId = await ctx.db.insert("firms", {
       name: args.firmName,
       brandColors: {
-        primary: "#2563EB", // PRD default blue
-        secondary: "#10B981", // PRD default green
+        primary: "#2DD4BF", // Default teal
+        secondary: "#818CF8", // Default indigo
       },
       billingEmail: args.email.toLowerCase(),
       subscriptionStatus: "trial",
