@@ -27,19 +27,15 @@ export function formatHours(hours: number): string {
 }
 
 /**
- * Format decimal hours for cards/summaries: `00h:00M` (e.g. `100h:00M`, `05h:30M`).
- * Hours under 100 are zero-padded to two digits; 100 and above use full width (e.g. `100h:00M`).
+ * Format decimal hours for cards/summaries: `01h:60M`.
+ * Shows hours (floored) and **total minutes** (hours × 60).
  */
 export function formatHoursMinutesClock(hours: number): string {
   if (!Number.isFinite(hours) || hours <= 0) return "00h:00M";
-  let h = Math.floor(hours);
-  let m = Math.round((hours - h) * 60);
-  if (m >= 60) {
-    h += Math.floor(m / 60);
-    m = m % 60;
-  }
+  const h = Math.floor(hours);
+  const totalMin = Math.round(hours * 60);
   const hourPart = h < 100 ? String(h).padStart(2, "0") : String(h);
-  return `${hourPart}h:${String(m).padStart(2, "0")}M`;
+  return `${hourPart}h:${String(totalMin).padStart(2, "0")}M`;
 }
 
 /** Whether this pricing method uses minutes-per-unit for time estimation */
