@@ -100,14 +100,16 @@ function itemFromTemplate(
     customEntityPrices:{},
     timeMethod:        "fixed_hours",
     timeInputHours:    template.timeInputHours ?? 0,
-    timeInputMinutes:  Math.round((template.timeInputHours ?? 0) * 60),
+    timeInputMinutes:  template.timeInputMinutes ?? Math.round((template.timeInputHours ?? 0) * 60),
     pricingDriver:     "",
     duePattern:        "",
     itemNotes:         "",
     baseAmount:        template.unitPrice ?? 0,
     subtotal:          template.unitPrice ?? 0,
     totalPrice:        template.unitPrice ?? 0,
-    estimatedHours:    template.timeInputHours ?? 0,
+    estimatedHours:    (template.timeInputMinutes ?? 0) > 0
+                         ? (template.timeInputMinutes ?? 0) / 60
+                         : (template.timeInputHours ?? 0),
     isOptional:        false,
     sortOrder,
     pricingVersion:    2,

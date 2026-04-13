@@ -61,6 +61,15 @@ function mapPricingType(pt: string): ServiceTemplate["pricingMethod"] {
   }
 }
 
+// Extract hours/minutes from the first pricing tier (if any)
+function extractTimeFromTier(row: { pricingTiers?: { hours?: number; minutes?: number }[] }): { hours: number; minutes: number } {
+  const tier = row.pricingTiers?.[0];
+  if (tier?.hours != null || tier?.minutes != null) {
+    return { hours: tier.hours ?? 0, minutes: tier.minutes ?? 0 };
+  }
+  return { hours: 0, minutes: 0 };
+}
+
 // Extract a representative unit price from any pricing type
 function extractUnitPrice(row: { fixedPrice?: number; hourlyRate?: number; pricingTiers?: { price: number }[] }): number {
   if (row.fixedPrice != null)  return row.fixedPrice;
@@ -245,8 +254,8 @@ function NewProposalInner() {
           frequency:         "monthly" as const,
           entityPricingMode: "single_price" as const,
           timeMethod:        "fixed_hours" as const,
-          timeInputHours:    0,
-          timeInputMinutes:  0,
+          timeInputHours:    extractTimeFromTier(row).hours,
+          timeInputMinutes:  extractTimeFromTier(row).minutes,
           isActive:          row.isActive,
           isOptional:        false,
           sortOrder:         row.sortOrder,
