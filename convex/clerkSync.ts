@@ -71,8 +71,8 @@ export const syncClerkUser = internalMutation({
     const firmId = await ctx.db.insert("firms", {
       name: `${args.name}'s Firm`,
       brandColors: {
-        primary: "#2DD4BF",
-        secondary: "#818CF8",
+        primary: "#5DBEB4",
+        secondary: "#4A90E2",
       },
       billingEmail: args.email.toLowerCase(),
       subscriptionStatus: "trial",
@@ -202,8 +202,8 @@ export const ensureCurrentUser = mutation({
     const firmId = await ctx.db.insert("firms", {
       name: `${name}'s Firm`,
       brandColors: {
-        primary: "#2DD4BF",
-        secondary: "#818CF8",
+        primary: "#5DBEB4",
+        secondary: "#4A90E2",
       },
       billingEmail: email.toLowerCase(),
       subscriptionStatus: "trial",

@@ -148,7 +148,7 @@ export const getProposalAcceptSession = query({
       clientPhone: client?.phone ?? undefined,
       brandColors: firm?.brandColors
         ? { primary: firm.brandColors.primary, secondary: firm.brandColors.secondary }
-        : { primary: "#2DD4BF", secondary: "#818CF8" },
+        : { primary: "#5DBEB4", secondary: "#4A90E2" },
       firmLogoUrl,
       pdfFooterText: firm?.pdfFooterText ?? undefined,
       pdfFooterAddress: firm?.pdfFooterAddress ?? undefined,

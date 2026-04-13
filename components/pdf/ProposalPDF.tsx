@@ -4,7 +4,7 @@ import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/render
 import type { ProposalPDFData } from "@/lib/pdf-types";
 
 // Create dynamic styles function that accepts brand colors
-const createStyles = (primaryColor: string = "#2DD4BF", secondaryColor: string = "#818CF8") =>
+const createStyles = (primaryColor: string = "#5DBEB4", secondaryColor: string = "#4A90E2") =>
   StyleSheet.create({
     page: {
       padding: 40,
@@ -167,8 +167,8 @@ export const ProposalPDF = ({
 }: ProposalPDFProps) => {
   // Create styles with brand colors
   const styles = createStyles(
-    brandColors?.primary || "#2DD4BF",
-    brandColors?.secondary || "#818CF8"
+    brandColors?.primary || "#5DBEB4",
+    brandColors?.secondary || "#4A90E2"
   );
   const formatCurrency = (amount: number) => {
     const n = Number(amount);

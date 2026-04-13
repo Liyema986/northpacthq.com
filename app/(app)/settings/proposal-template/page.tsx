@@ -97,8 +97,8 @@ export default function ProposalTemplatePage() {
   const [disclaimer, setDisclaimer] = useState("");
   const [signOffBlock, setSignOffBlock] = useState("");
   const [bankingDetails, setBankingDetails] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("#2DD4BF");
-  const [secondaryColor, setSecondaryColor] = useState("#818CF8");
+  const [primaryColor, setPrimaryColor] = useState("#5DBEB4");
+  const [secondaryColor, setSecondaryColor] = useState("#4A90E2");
   const [timelineSteps, setTimelineSteps] = useState<{ marker: string; title: string; description: string }[]>([]);
   const [sections, setSections] = useState<Record<string, boolean>>({});
   const [teamEdits, setTeamEdits] = useState<Record<string, { jobTitle: string; bio: string; phone: string }>>({});
@@ -158,8 +158,8 @@ export default function ProposalTemplatePage() {
     setDisclaimer(data.pdfDisclaimer);
     setSignOffBlock(data.pdfSignOffBlock);
     setBankingDetails(data.pdfBankingDetails);
-    setPrimaryColor(data.brandColors?.primary || "#2DD4BF");
-    setSecondaryColor(data.brandColors?.secondary || "#818CF8");
+    setPrimaryColor(data.brandColors?.primary || "#5DBEB4");
+    setSecondaryColor(data.brandColors?.secondary || "#4A90E2");
     setTimelineSteps(data.defaultTimelineSteps.length > 0 ? data.defaultTimelineSteps : [
       { marker: "W1", title: "Week 1: Onboarding & Setup", description: "Initial meeting, system setup, and team introductions." },
       { marker: "W2", title: "Week 2-4: First Month Transition", description: "Daily processing begins, weekly check-ins." },
@@ -215,11 +215,12 @@ export default function ProposalTemplatePage() {
     clientName: "Sample Client (Pty) Ltd",
     clientEmail: "client@example.com",
     clientPhone: "+27 12 345 6789",
+    entities: [{ name: "Entity A", type: "pty" }, { name: "Entity B", type: "pty" }],
     services: [
-      { serviceName: "Monthly Bookkeeping", quantity: 1, subtotal: 5000, billingCategory: "monthly", description: "Full monthly accounting and reconciliation services." },
-      { serviceName: "VAT Returns", quantity: 1, subtotal: 1500, billingCategory: "monthly", description: "Preparation and submission of bi-monthly VAT returns." },
-      { serviceName: "Annual Financial Statements", quantity: 1, subtotal: 15000, billingCategory: "yearly", description: "Preparation of annual financial statements." },
-      { serviceName: "Income Tax Return", quantity: 1, subtotal: 5000, billingCategory: "yearly", description: "Annual income tax return preparation and submission." },
+      { serviceName: "Monthly Bookkeeping", quantity: 1, subtotal: 5000, billingCategory: "monthly", description: "Full monthly accounting and reconciliation services.", entityLabels: ["Entity A"] },
+      { serviceName: "VAT Returns", quantity: 1, subtotal: 1500, billingCategory: "monthly", description: "Preparation and submission of bi-monthly VAT returns.", entityLabels: ["Entity A"] },
+      { serviceName: "Annual Financial Statements", quantity: 1, subtotal: 15000, billingCategory: "yearly", description: "Preparation of annual financial statements.", entityLabels: ["Entity B"] },
+      { serviceName: "Income Tax Return", quantity: 1, subtotal: 5000, billingCategory: "yearly", description: "Annual income tax return preparation and submission.", entityLabels: ["Entity B"] },
     ],
     total: 26500, currency: "ZAR", introText: introText || undefined, createdAt: Date.now(),
     firmLogo: data?.logoUrl ?? undefined,
@@ -244,7 +245,17 @@ export default function ProposalTemplatePage() {
     feesIntroductionText: feesIntroText || undefined, paymentTermsText: paymentTermsText || undefined,
     whatHappensNextText: whatHappensNextText || undefined,
     timelineSteps: isSectionEnabled("timeline") ? timelineSteps : undefined,
-    allFirmServices: [{ name: "Monthly Accounting" }, { name: "Payroll" }, { name: "Tax Services" }, { name: "Audit & Assurance" }, { name: "Business Advisory" }],
+    allFirmServices: [
+      { name: "Monthly Financial Accounting Services" }, { name: "Payroll Services" },
+      { name: "Annual Financial Accounting Services" }, { name: "Tax Services" },
+      { name: "Audit and Assurance Services" }, { name: "Estate Planning & Executor Services" },
+      { name: "Business Advisory Services" }, { name: "Family Business Consulting" },
+      { name: "Trust Administration Services" }, { name: "Forensic Analysis" },
+    ],
+    advisorName: data?.teamMembers?.[0]?.name ?? "[ADVISOR NAME]",
+    advisorTitle: data?.teamMembers?.[0]?.role ?? "[ADVISOR TITLE]",
+    advisorEmail: data?.teamMembers?.[0]?.email ?? "[EMAIL]",
+    advisorPhone: data?.teamMembers?.[0]?.phone ?? "[MOBILE]",
     netMonthlyFee: 6500, netAnnualFee: 20000,
   }), [
     data?.firmName, data?.logoUrl, data?.coverImageUrl, data?.footerImageUrl, data?.teamMembers,
