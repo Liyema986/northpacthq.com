@@ -1413,7 +1413,7 @@ export function ProposalReviewPDFPreview({
             const blH = 20;
             const blW = blH * footerImg.aspectRatio;
             const blX = W - M - blW; // aligned with content right margin
-            const blY = H - blH - 3;
+            const blY = H - blH - 14;
             doc.addImage(footerImg.dataUrl, "PNG", blX, blY, blW, blH, undefined, "FAST");
           } catch { /* skip */ }
         }
