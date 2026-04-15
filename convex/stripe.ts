@@ -72,8 +72,8 @@ export const createCheckoutSession = action({
     }
 
     const priceId = getPriceId(args.planId, args.billingPeriod);
-    const successUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=pricing&success=true`;
-    const cancelUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=pricing&canceled=true`;
+    const successUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=billing&success=true`;
+    const cancelUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=billing&canceled=true`;
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
@@ -153,7 +153,7 @@ export const createCustomerPortalSession = action({
       };
     }
 
-    const returnUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=pricing`;
+    const returnUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=billing`;
 
     try {
       const session: Stripe.BillingPortal.Session = await stripe.billingPortal.sessions.create({

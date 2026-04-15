@@ -163,6 +163,15 @@ function SettingsPageInner() {
       router.replace("/settings?tab=org", { scroll: false });
     }
     setActiveTab(normalizeSettingsTab(raw));
+
+    // Handle Stripe checkout redirect params
+    if (searchParams.get("success") === "true") {
+      toast.success("Subscription activated! Your plan will update shortly.");
+      router.replace("/settings?tab=billing", { scroll: false });
+    } else if (searchParams.get("canceled") === "true") {
+      toast.info("Checkout canceled — no changes were made.");
+      router.replace("/settings?tab=billing", { scroll: false });
+    }
   }, [searchParams, router]);
 
   const { user } = useNorthPactAuth();
@@ -1703,15 +1712,19 @@ function SettingsPageInner() {
                       }}
                       className={cn(
                         "group w-full h-[48px] rounded-full font-semibold text-[14px] mt-auto transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2",
-                        isCurrent
+                        isCurrent && (plan.id === "professional" || plan.id === "enterprise")
                           ? plan.highlight
-                            ? "bg-white/20 text-white/60 cursor-default"
-                            : "bg-slate-100 text-slate-500 cursor-default"
-                          : isDowngrade
-                            ? "bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
-                            : plan.highlight
-                              ? "bg-white text-north-navy hover:opacity-90"
-                              : "bg-white border border-slate-200 text-slate-900 hover:border-north-gold hover:text-north-gold"
+                            ? "bg-white/20 text-white hover:bg-white/30 cursor-pointer"
+                            : "bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                          : isCurrent
+                            ? plan.highlight
+                              ? "bg-white/20 text-white/60 cursor-default"
+                              : "bg-slate-100 text-slate-500 cursor-default"
+                            : isDowngrade
+                              ? "bg-white border border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                              : plan.highlight
+                                ? "bg-white text-north-navy hover:opacity-90"
+                                : "bg-white border border-slate-200 text-slate-900 hover:border-north-gold hover:text-north-gold"
                       )}
                     >
                       {savingPlan === plan.id ? (
@@ -1719,15 +1732,17 @@ function SettingsPageInner() {
                       ) : (
                         <>
                           <span>
-                            {isCurrent
-                              ? "Current plan"
-                              : isDowngrade
-                                ? "Downgrade"
-                                : plan.id === "starter"
-                                  ? "Get started free"
-                                  : plan.id === "professional"
-                                    ? "Upgrade to Pro"
-                                    : "Upgrade to Business"}
+                            {isCurrent && (plan.id === "professional" || plan.id === "enterprise")
+                              ? "Manage subscription"
+                              : isCurrent
+                                ? "Current plan"
+                                : isDowngrade
+                                  ? "Downgrade"
+                                  : plan.id === "starter"
+                                    ? "Get started free"
+                                    : plan.id === "professional"
+                                      ? "Upgrade to Pro"
+                                      : "Upgrade to Business"}
                           </span>
                           {!isCurrent && (
                             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 shrink-0 opacity-90" />
