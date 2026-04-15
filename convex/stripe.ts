@@ -169,6 +169,65 @@ export const createCustomerPortalSession = action({
 });
 
 /**
+ * Cancel the active Stripe subscription and downgrade to Starter.
+ */
+export const cancelSubscription = action({
+  args: {
+    userId: v.id("users"),
+    firmId: v.id("firms"),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    error: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      return { success: false, error: "Stripe not configured" };
+    }
+
+    const firm = await ctx.runQuery(api.authFunctions.getFirmForUser, {
+      userId: args.userId,
+    });
+    if (!firm || firm._id !== args.firmId) {
+      return { success: false, error: "Access denied" };
+    }
+
+    if (!firm.stripeSubscriptionId) {
+      // No active subscription — just reset the plan locally
+      await ctx.runMutation(internal.stripe.applyDowngrade, { firmId: args.firmId });
+      return { success: true };
+    }
+
+    const stripe = new Stripe(secretKey);
+
+    try {
+      await stripe.subscriptions.cancel(firm.stripeSubscriptionId);
+      await ctx.runMutation(internal.stripe.applyDowngrade, { firmId: args.firmId });
+      return { success: true };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to cancel subscription";
+      return { success: false, error: msg };
+    }
+  },
+});
+
+/**
+ * Internal mutation to downgrade firm to Starter plan.
+ */
+export const applyDowngrade = internalMutation({
+  args: { firmId: v.id("firms") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.firmId, {
+      subscriptionPlan: "starter",
+      subscriptionStatus: "cancelled",
+      stripeSubscriptionId: undefined,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
  * Internal mutation to update firm subscription after verifying a checkout session.
  */
 export const applyCheckoutResult = internalMutation({

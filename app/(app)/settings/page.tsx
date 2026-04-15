@@ -191,6 +191,7 @@ function SettingsPageInner() {
   const updateNotifPrefsMut            = useMutation(api.users.updateNotificationPreferences);
   const createCheckoutAction           = useAction(api.stripe.createCheckoutSession);
   const createPortalAction             = useAction(api.stripe.createCustomerPortalSession);
+  const cancelSubscriptionAction       = useAction(api.stripe.cancelSubscription);
   const clearFirmLogoMut               = useMutation(api.authFunctions.clearFirmLogo);
   const generateLogoUploadUrl          = useMutation(api.authFunctions.generateLogoUploadUrl);
   const updateFirmMut                  = useMutation(api.authFunctions.updateFirm);
@@ -543,10 +544,12 @@ function SettingsPageInner() {
     finally { setInviting(false); }
   }
 
+  const [downgradeConfirmOpen, setDowngradeConfirmOpen] = useState(false);
+
   async function handleSelectPlan(planId: SubscriptionPlan) {
     if (!userId || !firmId) return;
     if (planId === "starter") {
-      toast.info("Contact support to downgrade to the Starter plan.");
+      setDowngradeConfirmOpen(true);
       return;
     }
     setSavingPlan(planId);
@@ -564,6 +567,24 @@ function SettingsPageInner() {
       }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed to start checkout");
+    } finally {
+      setSavingPlan(null);
+    }
+  }
+
+  async function handleDowngradeToStarter() {
+    if (!userId || !firmId) return;
+    setDowngradeConfirmOpen(false);
+    setSavingPlan("starter");
+    try {
+      const result = await cancelSubscriptionAction({ userId, firmId });
+      if (result.success) {
+        toast.success("Downgraded to Starter. Your subscription has been cancelled.");
+      } else {
+        toast.error(result.error ?? "Failed to downgrade");
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to cancel subscription");
     } finally {
       setSavingPlan(null);
     }
@@ -2011,6 +2032,26 @@ function SettingsPageInner() {
         )}
 
       </div>
+
+      <AlertDialog open={downgradeConfirmOpen} onOpenChange={(o) => !o && setDowngradeConfirmOpen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Downgrade to Starter?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your current subscription will be cancelled and you will lose access to paid features immediately. You can upgrade again at any time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep my plan</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleDowngradeToStarter}
+            >
+              Downgrade
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!removeConfirmMember} onOpenChange={(o) => !o && setRemoveConfirmMember(null)}>
         <AlertDialogContent>
