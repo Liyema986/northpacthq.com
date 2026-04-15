@@ -2,7 +2,7 @@
 // Stripe Checkout and Customer Portal actions for subscription billing.
 // Requires: STRIPE_SECRET_KEY and NEXT_PUBLIC_SITE_URL in Convex env.
 
-import { action } from "./_generated/server";
+import { action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -72,7 +72,7 @@ export const createCheckoutSession = action({
     }
 
     const priceId = getPriceId(args.planId, args.billingPeriod);
-    const successUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=billing&success=true`;
+    const successUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=billing&success=true&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${siteUrl.replace(/\/$/, "")}/settings?tab=billing&canceled=true`;
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -164,6 +164,93 @@ export const createCustomerPortalSession = action({
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Stripe portal failed";
       return { error: msg };
+    }
+  },
+});
+
+/**
+ * Internal mutation to update firm subscription after verifying a checkout session.
+ */
+export const applyCheckoutResult = internalMutation({
+  args: {
+    firmId: v.id("firms"),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.string(),
+    subscriptionPlan: v.union(v.literal("professional"), v.literal("enterprise")),
+    subscriptionStatus: v.union(v.literal("active"), v.literal("trial")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.firmId, {
+      stripeCustomerId: args.stripeCustomerId,
+      stripeSubscriptionId: args.stripeSubscriptionId,
+      subscriptionPlan: args.subscriptionPlan,
+      subscriptionStatus: args.subscriptionStatus,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Verify a completed Stripe Checkout session and activate the subscription.
+ * Called from the client after returning from Stripe with a session_id.
+ */
+export const verifyCheckoutSession = action({
+  args: {
+    userId: v.id("users"),
+    firmId: v.id("firms"),
+    sessionId: v.string(),
+  },
+  returns: v.object({
+    success: v.boolean(),
+    error: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      return { success: false, error: "Stripe not configured" };
+    }
+
+    const firm = await ctx.runQuery(api.authFunctions.getFirmForUser, {
+      userId: args.userId,
+    });
+    if (!firm || firm._id !== args.firmId) {
+      return { success: false, error: "Access denied" };
+    }
+
+    const stripe = new Stripe(secretKey);
+
+    try {
+      const session = await stripe.checkout.sessions.retrieve(args.sessionId);
+
+      // Verify this session belongs to this firm
+      if (session.client_reference_id !== args.firmId && session.metadata?.firmId !== args.firmId) {
+        return { success: false, error: "Session does not match firm" };
+      }
+
+      if (session.payment_status !== "paid") {
+        return { success: false, error: "Payment not completed" };
+      }
+
+      const planId = (session.metadata?.planId === "enterprise" ? "enterprise" : "professional") as "professional" | "enterprise";
+      const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? "";
+      const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? "";
+
+      if (!customerId || !subscriptionId) {
+        return { success: false, error: "Missing Stripe IDs" };
+      }
+
+      await ctx.runMutation(internal.stripe.applyCheckoutResult, {
+        firmId: args.firmId,
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscriptionId,
+        subscriptionPlan: planId,
+        subscriptionStatus: "active",
+      });
+
+      return { success: true };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Verification failed";
+      return { success: false, error: msg };
     }
   },
 });

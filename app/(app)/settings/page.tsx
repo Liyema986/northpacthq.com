@@ -157,6 +157,8 @@ function SettingsPageInner() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(() => normalizeSettingsTab(searchParams.get("tab")));
 
+  const verifyCheckoutAction = useAction(api.stripe.verifyCheckoutSession);
+
   useEffect(() => {
     const raw = searchParams.get("tab");
     if (raw === "overview") {
@@ -164,11 +166,8 @@ function SettingsPageInner() {
     }
     setActiveTab(normalizeSettingsTab(raw));
 
-    // Handle Stripe checkout redirect params
-    if (searchParams.get("success") === "true") {
-      toast.success("Subscription activated! Your plan will update shortly.");
-      router.replace("/settings?tab=billing", { scroll: false });
-    } else if (searchParams.get("canceled") === "true") {
+    // Handle Stripe checkout redirect — canceled
+    if (searchParams.get("canceled") === "true") {
       toast.info("Checkout canceled — no changes were made.");
       router.replace("/settings?tab=billing", { scroll: false });
     }
@@ -204,6 +203,33 @@ function SettingsPageInner() {
   const currentPlan: SubscriptionPlan = (firmSettings?.subscriptionPlan as SubscriptionPlan | undefined) ?? "starter";
   const isPro      = currentPlan === "professional" || currentPlan === "enterprise";
   const isBusiness = currentPlan === "enterprise";
+
+  // After Stripe checkout success, verify the session and activate the plan
+  const [checkoutVerified, setCheckoutVerified] = useState(false);
+  useEffect(() => {
+    if (checkoutVerified) return;
+    const sessionId = searchParams.get("session_id");
+    const isSuccess = searchParams.get("success") === "true";
+    if (!isSuccess || !sessionId || !userId || !firmId) return;
+
+    setCheckoutVerified(true);
+    toast.success("Activating your subscription…");
+
+    verifyCheckoutAction({ userId, firmId, sessionId })
+      .then((result) => {
+        if (result.success) {
+          toast.success("Subscription activated!");
+        } else {
+          toast.error(result.error ?? "Could not verify subscription");
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to verify checkout session");
+      })
+      .finally(() => {
+        router.replace("/settings?tab=billing", { scroll: false });
+      });
+  }, [searchParams, userId, firmId, checkoutVerified, verifyCheckoutAction, router]);
 
   // Redirect non-business users away from the org tab (business-only) to account
   useEffect(() => {
