@@ -842,68 +842,117 @@ export const sendEngagementLetterEmail = action({
     const clientName =
       (client as any).contactName || (client as any).companyName || "Client";
 
+    const navyColor = "#243E63";
+    const goldColor = "#C8A96E";
+    const ctaColor = primaryColor;
+    const firmLogoUrl = (firm as any).logoUrl as string | undefined;
+
     const html = `
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f8fafc;color:#1e293b;line-height:1.6;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;background:#fff;">
-    <tr>
-      <td style="background:linear-gradient(135deg,${primaryColor} 0%,${secondaryColor} 100%);padding:36px 32px;border-radius:12px 12px 0 0;">
-        <h1 style="margin:0;font-size:22px;font-weight:700;color:#fff;">${firm.name}</h1>
-        <p style="margin:6px 0 0;font-size:14px;color:rgba(255,255,255,0.9);">Engagement Letter — ready to sign</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:32px;">
-        <p style="margin:0 0 16px;font-size:16px;color:#334155;">Dear ${clientName},</p>
-        <p style="margin:0 0 24px;font-size:15px;color:#475569;">
-          Thank you for accepting our proposal. Please review and sign your engagement letter at your earliest convenience.
-        </p>
-        ${hasMultipleLetters ? `
-            <p style="margin:0 0 16px;font-size:14px;color:#475569;">You have <strong>${allLetters.length} engagement letters</strong> to sign for this proposal. Please sign each one below:</p>
-            ${allLetters.map((l, i) => {
-              const lUrl = l.signingToken ? `${siteUrl}/sign/${l.signingToken}` : signingUrl;
-              return `
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
-                <tr><td style="padding:16px 24px;">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Engagement Letter from ${firm.name}</title>
+  <!--[if mso]><style>body,table,td{font-family:Arial,Helvetica,sans-serif !important;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f1f5f9" style="background-color:#f1f5f9;">
+    <tr><td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e2e8f0;">
+
+        <!-- Header bar -->
+        <tr>
+          <td bgcolor="${navyColor}" style="background-color:${navyColor};padding:28px 32px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                ${firmLogoUrl ? `<td width="48" valign="middle" style="padding-right:14px;"><img src="${firmLogoUrl}" width="44" height="44" alt="${firm.name}" style="display:block;border:0;outline:none;width:44px;height:44px;object-fit:contain;" /></td>` : ""}
+                <td>
+                  <h1 style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">${firm.name}</h1>
+                  <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,0.75);font-family:Arial,Helvetica,sans-serif;">Engagement Letter</p>
+                </td>
+                <td align="right" valign="top" width="90">
+                  <table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};padding:5px 14px;font-size:10px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.08em;text-transform:uppercase;">SIGN</td></tr></table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Gold accent strip -->
+        <tr><td bgcolor="${goldColor}" style="background-color:${goldColor};height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:32px 32px 24px;font-family:Arial,Helvetica,sans-serif;">
+            <p style="margin:0 0 8px;font-size:15px;color:#334155;">Dear ${clientName},</p>
+            <p style="margin:0 0 28px;font-size:14px;color:#64748b;line-height:1.6;">Thank you for accepting our proposal. Please review and sign your engagement letter at your earliest convenience.</p>
+
+            ${hasMultipleLetters ? `
+              <p style="margin:0 0 16px;font-size:14px;color:#475569;font-family:Arial,Helvetica,sans-serif;">You have <strong>${allLetters.length} engagement letters</strong> to sign for this proposal:</p>
+              ${allLetters.map((l, i) => {
+                const lUrl = l.signingToken ? `${siteUrl}/sign/${l.signingToken}` : signingUrl;
+                return `
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f8fafc" style="background-color:#f8fafc;border:1px solid #e2e8f0;margin:0 0 12px;">
+                  <tr><td style="padding:14px 22px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>
+                          <p style="margin:0;font-size:11px;font-weight:700;color:${goldColor};letter-spacing:0.06em;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;">Letter ${i + 1} of ${allLetters.length}</p>
+                          <p style="margin:4px 0 0;font-size:14px;color:#334155;font-family:Arial,Helvetica,sans-serif;"><strong>${l.letterNumber}</strong> &mdash; ${l.serviceType || "General"}</p>
+                        </td>
+                        <td align="right" valign="middle">
+                          <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${lUrl}" style="height:36px;v-text-anchor:middle;width:80px;" arcsize="0%" fillcolor="${navyColor}" stroke="f"><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;">Sign</center></v:roundrect><![endif]-->
+                          <!--[if !mso]><!--><a href="${lUrl}" style="display:inline-block;background-color:${navyColor};color:#ffffff;padding:9px 22px;text-decoration:none;font-weight:700;font-size:13px;font-family:Arial,Helvetica,sans-serif;border-radius:5px;">Sign</a><!--<![endif]-->
+                        </td>
+                      </tr>
+                    </table>
+                  </td></tr>
+                </table>`;
+              }).join("")}
+            ` : `
+              <!-- Letter details card -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f8fafc" style="background-color:#f8fafc;border:1px solid #e2e8f0;margin:0 0 28px;">
+                <tr><td style="padding:18px 22px;">
+                  <p style="margin:0 0 14px;font-size:11px;font-weight:700;color:${goldColor};letter-spacing:0.08em;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;">Letter Details</p>
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                    <tr>
-                      <td>
-                        <p style="margin:0;font-size:13px;font-weight:600;color:${primaryColor};">Letter ${i + 1} of ${allLetters.length}</p>
-                        <p style="margin:4px 0 0;font-size:14px;color:#334155;"><strong>${l.letterNumber}</strong> — ${l.serviceType || "General"}</p>
-                      </td>
-                      <td align="right" valign="middle">
-                        <a href="${lUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:10px 24px;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px;">Sign</a>
-                      </td>
-                    </tr>
+                    <tr><td style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Letter number</td><td align="right" style="padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${result.letterNumber}</td></tr>
+                    <tr><td style="padding:7px 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Proposal</td><td align="right" style="padding:7px 0;font-size:13px;color:#1e293b;font-family:Arial,Helvetica,sans-serif;">${proposal.title}</td></tr>
                   </table>
                 </td></tr>
-              </table>`;
-            }).join("")}
-        ` : `
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
-              <tr><td style="padding:20px 24px;">
-                <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${primaryColor};letter-spacing:0.05em;text-transform:uppercase;">Letter details</p>
-                <p style="margin:0;font-size:14px;color:#334155;"><strong>Letter number:</strong> ${result.letterNumber}</p>
-                <p style="margin:6px 0 0;font-size:14px;color:#334155;"><strong>Proposal:</strong> ${proposal.title}</p>
-              </td></tr>
+              </table>
+
+              <!-- CTA button -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:8px 0 28px;">
+                <tr><td align="center">
+                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${signingUrl}" style="height:48px;v-text-anchor:middle;width:260px;" arcsize="0%" fillcolor="${navyColor}" stroke="f"><w:anchorlock/><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Sign Engagement Letter</center></v:roundrect><![endif]-->
+                  <!--[if !mso]><!--><a href="${signingUrl}" style="display:inline-block;background-color:${navyColor};color:#ffffff;padding:14px 44px;text-decoration:none;font-weight:700;font-size:15px;font-family:Arial,Helvetica,sans-serif;border-radius:6px;">Sign Engagement Letter</a><!--<![endif]-->
+                </td></tr>
+              </table>
+
+              <p style="margin:0 0 28px;font-size:13px;color:#94a3b8;text-align:center;font-family:Arial,Helvetica,sans-serif;">Review and sign your engagement letter online.<br>If you have any questions, please reach out.</p>
+            `}
+
+            <p style="margin:0;font-size:14px;color:#334155;font-family:Arial,Helvetica,sans-serif;">Kind regards,<br><strong>${firm.name}</strong></p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#f8fafc" style="background-color:#f8fafc;padding:20px 32px;border-top:1px solid #e2e8f0;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><p style="margin:0;font-size:12px;font-weight:700;color:#334155;font-family:Arial,Helvetica,sans-serif;">${firm.name}</p><p style="margin:3px 0 0;font-size:11px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">Powered by NorthPact</p></td>
+                <td align="right" valign="middle"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="background-color:${goldColor};width:28px;height:3px;font-size:1px;line-height:1px;">&nbsp;</td></tr></table></td>
+              </tr>
             </table>
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:32px 0 24px;">
-              <tr><td align="center">
-                <a href="${signingUrl}" style="display:inline-block;background:${primaryColor};color:#fff !important;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">Sign Engagement Letter</a>
-              </td></tr>
-            </table>
-            <p style="margin:0 0 8px;font-size:13px;color:#94a3b8;text-align:center;">Or copy this link:<br>${signingUrl}</p>
-        `}
-        <p style="margin:24px 0 0;font-size:15px;color:#334155;">Kind regards,<br><strong>${firm.name}</strong></p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:24px 32px;background:linear-gradient(135deg,#e0f2fe 0%,#f3e8ff 50%,#e0e7ff 100%);border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
-        <p style="margin:0;font-size:12px;color:#64748b;">Powered by NorthPact</p>
-      </td>
-    </tr>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
   </table>
 </body>
 </html>`;
