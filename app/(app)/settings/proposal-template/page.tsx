@@ -374,11 +374,29 @@ export default function ProposalTemplatePage() {
               <textarea className={textareaCls} value={missionStatement} onChange={(e) => setMissionStatement(e.target.value)}
                 placeholder="To empower businesses..." />
             </Field>
-            <Field label="Why choose us?" hint="Bullet points highlighting your strengths">
+            <Field label="Why choose us?" hint="Drag to reorder. Bullet points highlighting your strengths.">
               <div className="space-y-2">
                 {whyChooseUsItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                  <div key={idx}
+                    draggable
+                    onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); (e.currentTarget as HTMLElement).style.opacity = "0.5"; }}
+                    onDragEnd={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                    onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const from = Number(e.dataTransfer.getData("text/plain"));
+                      const to = idx;
+                      if (from === to) return;
+                      setWhyChooseUsItems((prev) => {
+                        const next = [...prev];
+                        const [moved] = next.splice(from, 1);
+                        next.splice(to, 0, moved);
+                        return next;
+                      });
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0 cursor-grab active:cursor-grabbing" />
                     <input className={cn(inputCls, "flex-1")} value={item}
                       onChange={(e) => setWhyChooseUsItems((prev) => prev.map((v, i) => i === idx ? e.target.value : v))} placeholder="e.g. Deep SA expertise" />
                     <button type="button" onClick={() => setWhyChooseUsItems((prev) => prev.filter((_, i) => i !== idx))}
