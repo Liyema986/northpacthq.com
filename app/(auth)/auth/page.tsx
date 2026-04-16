@@ -70,6 +70,13 @@ function AuthPageContent() {
   const inviteInvalid = Boolean(inviteToken && inviteReady && invitePreview === null);
   const inviteLocked = Boolean(invitePreview);
 
+  // Show access denied message when kicked out
+  useEffect(() => {
+    if (searchParams.get("reason") === "access_denied") {
+      toast.error("Access denied — your account no longer exists. Please contact your administrator.");
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (inviteToken) {
       try {

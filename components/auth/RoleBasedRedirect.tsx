@@ -2,6 +2,8 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
+import { useConvexAuth } from "convex/react";
+import { useClerk } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -57,6 +59,8 @@ function isFirmAdminPath(pathname: string | null): boolean {
 export function RoleBasedRedirect() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isAuthenticated } = useConvexAuth();
+  const { signOut: clerkSignOut } = useClerk();
   const me = useQuery(api.users.getCurrentUser);
 
   // undefined = not yet initialised (sentinel for "first render with resolved user").
@@ -65,6 +69,13 @@ export function RoleBasedRedirect() {
   useEffect(() => {
     if (me === undefined) return; // Convex still loading
     if (isPublicPath(pathname)) return;
+
+    // User deleted from DB but still has a Clerk session → force sign-out
+    if (me === null && isAuthenticated) {
+      toast.error("Access denied — your account no longer exists.");
+      clerkSignOut({ redirectUrl: "/auth?reason=access_denied" });
+      return;
+    }
 
     const role = me?.role ?? null;
     const prevRole = prevRoleRef.current;

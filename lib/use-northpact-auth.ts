@@ -5,7 +5,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useConvexAuth } from "convex/react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { useClerk } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -22,17 +22,16 @@ export interface AuthUser {
 export function useNorthPactAuth() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const convexUser = useQuery(api.users.getCurrentUser);
-  const ensureCurrentUser = useMutation(api.clerkSync.ensureCurrentUser);
   const { signOut: clerkSignOut } = useClerk();
   const router = useRouter();
 
-  // Auto-provision: if Clerk says authenticated but Convex has no user record yet
-  // (happens when signing up before the webhook was configured, or on first login)
+  // If Clerk says authenticated but Convex has no user record, the user was
+  // deleted from the DB. Force sign-out and redirect to /auth.
   useEffect(() => {
     if (isAuthenticated && convexUser === null) {
-      ensureCurrentUser({}).catch(console.error);
+      clerkSignOut({ redirectUrl: "/auth?reason=access_denied" });
     }
-  }, [isAuthenticated, convexUser, ensureCurrentUser]);
+  }, [isAuthenticated, convexUser, clerkSignOut]);
 
   const user: AuthUser | null =
     convexUser

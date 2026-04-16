@@ -7,7 +7,8 @@
  * Cascading: Tables are cleared in dependency order to avoid orphan references.
  */
 
-import { mutation } from "./_generated/server";
+import { action, internalMutation, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import type { TableNames } from "./_generated/dataModel";
 import { requirePermission } from "./lib/permissions";
@@ -50,22 +51,61 @@ const TABLES: TableNames[] = [
   "firms",
 ] as const;
 
-export const clearAllData = mutation(async (ctx) => {
-  const results: Record<string, number> = {};
+/** Internal mutation: deletes one batch and stays under the read limit. */
+export const _deleteBatch = internalMutation({
+  args: { batchSize: v.number() },
+  handler: async (ctx, args) => {
+    const results: Record<string, number> = {};
+    let totalDeleted = 0;
+    let remaining = args.batchSize;
 
-  for (const tableName of TABLES) {
-    const docs = await ctx.db.query(tableName).collect();
-    for (const doc of docs) {
-      await ctx.db.delete(doc._id);
+    for (const tableName of TABLES) {
+      if (remaining <= 0) break;
+      const docs = await ctx.db.query(tableName).take(remaining);
+      for (const doc of docs) {
+        await ctx.db.delete(doc._id);
+      }
+      if (docs.length > 0) {
+        results[tableName] = docs.length;
+        totalDeleted += docs.length;
+        remaining -= docs.length;
+      }
     }
-    results[tableName] = docs.length;
-  }
 
-  return {
-    message: "All table data cleared successfully.",
-    counts: results,
-    totalDeleted: Object.values(results).reduce((a, b) => a + b, 0),
-  };
+    return { results, totalDeleted };
+  },
+});
+
+/**
+ * One-click nuke. Run once — it loops the batched deletes internally.
+ */
+export const clearAllData = action({
+  args: {},
+  handler: async (ctx) => {
+    const BATCH = 500;
+    const totals: Record<string, number> = {};
+    let grandTotal = 0;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const { results, totalDeleted } = await ctx.runMutation(
+        internal.clearData._deleteBatch,
+        { batchSize: BATCH },
+      );
+      if (totalDeleted === 0) break;
+
+      grandTotal += totalDeleted;
+      for (const [table, count] of Object.entries(results)) {
+        totals[table] = (totals[table] ?? 0) + count;
+      }
+    }
+
+    return {
+      message: "All table data cleared successfully.",
+      counts: totals,
+      totalDeleted: grandTotal,
+    };
+  },
 });
 
 /**

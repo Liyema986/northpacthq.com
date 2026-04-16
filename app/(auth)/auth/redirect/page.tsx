@@ -4,12 +4,14 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { useConvexAuth } from "convex/react";
+import { useClerk } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
 
 export default function AuthRedirectPage() {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
+  const { signOut: clerkSignOut } = useClerk();
   const user = useQuery(api.users.getCurrentUser);
   const redirectHandled = useRef(false);
 
@@ -18,22 +20,32 @@ export default function AuthRedirectPage() {
     if (!isAuthenticated) return;
     if (user === undefined) return; // still loading
     if (redirectHandled.current) return;
+
+    // User deleted from DB — force sign-out
+    if (user === null) {
+      redirectHandled.current = true;
+      clerkSignOut({ redirectUrl: "/auth?reason=access_denied" });
+      return;
+    }
+
     redirectHandled.current = true;
 
     // Flag new users (created within last 90 seconds) for welcome confetti
     try {
-      if (user && Date.now() - user._creationTime < 90_000) {
+      if (Date.now() - user._creationTime < 90_000) {
         sessionStorage.setItem("northpact_new_user_welcome", "1");
       }
     } catch {}
 
     router.replace("/dashboard");
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, clerkSignOut]);
 
   // Safety net — never hang forever
   useEffect(() => {
     const t = setTimeout(() => {
-      router.replace("/dashboard");
+      if (!redirectHandled.current) {
+        router.replace("/auth");
+      }
     }, 12000);
     return () => clearTimeout(t);
   }, [router]);
