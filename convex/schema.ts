@@ -228,6 +228,8 @@ export default defineSchema({
     jobTitle: v.optional(v.string()),
     /** Short bio for proposal team page */
     bio: v.optional(v.string()),
+    /** Photo shown on proposals (separate from profile avatar) */
+    proposalPhoto: v.optional(v.string()),
     /** Contact phone number */
     phone: v.optional(v.string()),
     // Pending invite (email link → /auth?invite=…); cleared when Clerk account links

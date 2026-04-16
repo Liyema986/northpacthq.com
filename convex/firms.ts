@@ -151,7 +151,7 @@ export const getProposalTemplateData = query({
         role: u.jobTitle ?? "",
         bio: u.bio ?? "",
         phone: u.phone ?? "",
-        avatar: u.avatar ?? "",
+        proposalPhoto: u.proposalPhoto ?? "",
       }));
 
     return {
@@ -281,7 +281,7 @@ export const updateTeamMember = mutation({
 });
 
 /**
- * Upload/update a team member's avatar (for proposal template).
+ * Upload/update a team member's proposal photo (separate from profile avatar).
  * Requires canManageFirm permission.
  */
 export const updateTeamMemberAvatar = mutation({
@@ -297,13 +297,13 @@ export const updateTeamMemberAvatar = mutation({
     if (!target) return { success: false };
     const url = await ctx.storage.getUrl(args.storageId);
     if (!url) return { success: false };
-    await ctx.db.patch(args.targetUserId, { avatar: url });
+    await ctx.db.patch(args.targetUserId, { proposalPhoto: url });
     return { success: true, avatarUrl: url };
   },
 });
 
 /**
- * Clear a team member's avatar.
+ * Clear a team member's proposal photo.
  * Requires canManageFirm permission.
  */
 export const clearTeamMemberAvatar = mutation({
@@ -316,7 +316,7 @@ export const clearTeamMemberAvatar = mutation({
     await requirePermission(ctx, args.userId, "canManageFirm");
     const target = await ctx.db.get(args.targetUserId);
     if (!target) return { success: false };
-    await ctx.db.patch(args.targetUserId, { avatar: undefined });
+    await ctx.db.patch(args.targetUserId, { proposalPhoto: undefined });
     return { success: true };
   },
 });

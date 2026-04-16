@@ -103,7 +103,7 @@ export const getProposalAcceptSession = query({
           name: u.name,
           role: u.jobTitle ?? undefined,
           bio: u.bio ?? undefined,
-          avatarUrl: u.avatar ?? undefined,
+          avatarUrl: u.proposalPhoto ?? u.avatar ?? undefined,
         });
       }
     }
@@ -113,7 +113,7 @@ export const getProposalAcceptSession = query({
         name: advisor.name,
         role: advisor.jobTitle ?? undefined,
         bio: advisor.bio ?? undefined,
-        avatarUrl: advisor.avatar ?? undefined,
+        avatarUrl: advisor.proposalPhoto ?? advisor.avatar ?? undefined,
       });
     }
 

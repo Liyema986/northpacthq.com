@@ -201,7 +201,7 @@ export default function ProposalTemplatePage() {
     data.teamMembers.forEach((m) => { edits[m._id] = { jobTitle: m.role, bio: m.bio, phone: m.phone }; });
     setTeamEdits(edits);
     const avatars: Record<string, string | null> = {};
-    data.teamMembers.forEach((m) => { avatars[m._id] = m.avatar || null; });
+    data.teamMembers.forEach((m) => { avatars[m._id] = m.proposalPhoto || null; });
     setTeamAvatars(avatars);
     setCoverLogoPreview(data.coverImageUrl);
     setFooterLogoPreview(data.footerImageUrl);
@@ -290,7 +290,7 @@ export default function ProposalTemplatePage() {
     valuesStatement: isSectionEnabled("about") ? (valuesStatement || undefined) : undefined,
     website: website || undefined,
     teamMembers: isSectionEnabled("team")
-      ? (data?.teamMembers ?? []).map((m) => ({ name: m.name, role: teamEdits[m._id]?.jobTitle || m.role, bio: teamEdits[m._id]?.bio || m.bio, avatarUrl: teamAvatars[m._id] || m.avatar || undefined }))
+      ? (data?.teamMembers ?? []).map((m) => ({ name: m.name, role: teamEdits[m._id]?.jobTitle || m.role, bio: teamEdits[m._id]?.bio || m.bio, avatarUrl: teamAvatars[m._id] || m.proposalPhoto || undefined }))
       : undefined,
     feesIntroductionText: feesIntroText || undefined, paymentTermsText: paymentTermsText || undefined,
     whatHappensNextText: whatHappensNextText || undefined,
