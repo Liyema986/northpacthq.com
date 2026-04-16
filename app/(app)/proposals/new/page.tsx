@@ -990,6 +990,12 @@ function NewProposalInner() {
                 const allEntityIds = proposal.entities.map((e) => e.id);
                 const templateId = item.serviceTemplateId;
 
+                // No entities set up — just open the item directly
+                if (allEntityIds.length === 0) {
+                  setEditingItemIds([item.id]);
+                  return;
+                }
+
                 // Find all existing per-entity items for this service template
                 const siblings = proposal.items.filter(
                   (i) => i.serviceTemplateId === templateId
@@ -1006,7 +1012,7 @@ function NewProposalInner() {
                 }
 
                 // If all entities already have per-entity items, just open them
-                if (allEntityIds.every((eid) => coveredEntityIds.has(eid))) {
+                if (allEntityIds.every((eid) => coveredEntityIds.has(eid)) && existingPerEntity.length > 0) {
                   setEditingItemIds(existingPerEntity.map((i) => i.id));
                   return;
                 }
@@ -1040,10 +1046,12 @@ function NewProposalInner() {
                   ]);
                 }
 
-                setEditingItemIds([
+                const allIds = [
                   ...existingPerEntity.map((i) => i.id),
                   ...newItems.map((i) => i.id),
-                ]);
+                ];
+                // Fallback: if splitting produced nothing, open the original item
+                setEditingItemIds(allIds.length > 0 ? allIds : [item.id]);
               }}
             onRemoveItem={(id, contextEntityId) => {
                 const item = proposal.items.find((i) => i.id === id);
