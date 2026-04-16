@@ -2,7 +2,7 @@
 
 /** Real auth hook backed by Clerk + Convex. */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useConvexAuth } from "convex/react";
 import { useQuery } from "convex/react";
@@ -26,9 +26,11 @@ export function useNorthPactAuth() {
   const router = useRouter();
 
   // If Clerk says authenticated but Convex has no user record, the user was
-  // deleted from the DB. Force sign-out and redirect to /auth.
+  // deleted from the DB. Force sign-out and redirect to /auth (fire once).
+  const signOutFired = useRef(false);
   useEffect(() => {
-    if (isAuthenticated && convexUser === null) {
+    if (isAuthenticated && convexUser === null && !signOutFired.current) {
+      signOutFired.current = true;
       clerkSignOut({ redirectUrl: "/auth?reason=access_denied" });
     }
   }, [isAuthenticated, convexUser, clerkSignOut]);

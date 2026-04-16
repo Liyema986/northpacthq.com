@@ -65,14 +65,15 @@ export function RoleBasedRedirect() {
 
   // undefined = not yet initialised (sentinel for "first render with resolved user").
   const prevRoleRef = useRef<string | null | undefined>(undefined);
+  const signOutFired = useRef(false);
 
   useEffect(() => {
     if (me === undefined) return; // Convex still loading
     if (isPublicPath(pathname)) return;
 
-    // User deleted from DB but still has a Clerk session → force sign-out
-    if (me === null && isAuthenticated) {
-      toast.error("Access denied — your account no longer exists.");
+    // User deleted from DB but still has a Clerk session → force sign-out (once)
+    if (me === null && isAuthenticated && !signOutFired.current) {
+      signOutFired.current = true;
       clerkSignOut({ redirectUrl: "/auth?reason=access_denied" });
       return;
     }
