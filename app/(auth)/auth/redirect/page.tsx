@@ -2,32 +2,36 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { useConvexAuth } from "convex/react";
-import { useClerk } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Loader2 } from "lucide-react";
 
 export default function AuthRedirectPage() {
   const router = useRouter();
   const { isAuthenticated } = useConvexAuth();
-  const { signOut: clerkSignOut } = useClerk();
   const user = useQuery(api.users.getCurrentUser);
+  const ensureCurrentUser = useMutation(api.clerkSync.ensureCurrentUser);
   const redirectHandled = useRef(false);
+  const provisionFired = useRef(false);
 
-  // Redirect once we know the user's role
+  // This page is hit right after Clerk sign-up/login.
+  // If user is null, they're new and need a Convex record — provision them.
   useEffect(() => {
     if (!isAuthenticated) return;
     if (user === undefined) return; // still loading
-    if (redirectHandled.current) return;
-
-    // User deleted from DB — force sign-out
-    if (user === null) {
-      redirectHandled.current = true;
-      clerkSignOut({ redirectUrl: "/auth?reason=access_denied" });
-      return;
+    if (user === null && !provisionFired.current) {
+      provisionFired.current = true;
+      ensureCurrentUser({}).catch(console.error);
+      return; // wait for the query to re-fire with the new user
     }
+  }, [isAuthenticated, user, ensureCurrentUser]);
 
+  // Redirect once we have a valid user
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (!user) return; // still loading or provisioning
+    if (redirectHandled.current) return;
     redirectHandled.current = true;
 
     // Flag new users (created within last 90 seconds) for welcome confetti
@@ -38,7 +42,7 @@ export default function AuthRedirectPage() {
     } catch {}
 
     router.replace("/dashboard");
-  }, [isAuthenticated, user, router, clerkSignOut]);
+  }, [isAuthenticated, user, router]);
 
   // Safety net — never hang forever
   useEffect(() => {
