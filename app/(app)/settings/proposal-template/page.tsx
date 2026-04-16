@@ -320,8 +320,15 @@ export default function ProposalTemplatePage() {
   const isLoading = !userId || data === undefined;
 
   // ── Map section key → PDF page number (dynamic based on enabled sections) ──
-  // Real page map from PDF generation — updated after each render
+  // Real page map from PDF generation — only update if values changed
   const [pdfPageMap, setPdfPageMap] = useState<Record<string, number>>({});
+  const handlePageMap = useCallback((map: Record<string, number>) => {
+    setPdfPageMap((prev) => {
+      const keys = Object.keys(map);
+      if (keys.length === Object.keys(prev).length && keys.every((k) => prev[k] === map[k])) return prev;
+      return map;
+    });
+  }, []);
   const scrollToPage = pdfPageMap[activeSection] ?? 1;
 
   // ── Section editor content ──
@@ -723,7 +730,7 @@ export default function ProposalTemplatePage() {
             onDownloadReady={(fn) => { downloadFnRef.current = fn; }}
             hideDownloadButton
             scrollToPage={scrollToPage}
-            onPageMap={setPdfPageMap}
+            onPageMap={handlePageMap}
           />
         </div>
 

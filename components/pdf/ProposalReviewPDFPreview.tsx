@@ -207,6 +207,7 @@ export function ProposalReviewPDFPreview({
 
   // When only the page changes (not the PDF data), update the iframe src to navigate
   const prevPageRef = useRef(scrollToPage);
+  const onPageMapRef = useRef<Record<string, number>>({});
   useEffect(() => {
     if (!scrollToPage || !pdfDataUrl || !iframeRef.current) return;
     if (prevPageRef.current === scrollToPage) return;
@@ -1495,7 +1496,12 @@ export function ProposalReviewPDFPreview({
       }
 
       // ── Output ──
-      if (onPageMap) onPageMap(pageMap);
+      // Use ref-stable callback to avoid re-render loops
+      if (onPageMap) {
+        onPageMapRef.current = pageMap;
+        // Defer to avoid setState during render cycle
+        queueMicrotask(() => onPageMap(onPageMapRef.current));
+      }
       const blob = doc.output("blob");
       const url = URL.createObjectURL(blob);
       setPdfDataUrl(url);
