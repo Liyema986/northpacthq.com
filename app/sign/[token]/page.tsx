@@ -12,6 +12,7 @@ import { SignaturePad } from "@/components/signature/SignaturePad";
 import { CheckCircle, AlertTriangle, FileText, Clock, Shield, Loader2, Pen, X, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { letterBodyToHtml } from "@/lib/letter-body-html";
 import confetti from "canvas-confetti";
 
 const NAVY = "#243E63";
@@ -191,10 +192,10 @@ export default function SigningPage() {
           </div>
           <p className="text-[13px] text-slate-500 mb-4">Please review the engagement letter carefully before signing.</p>
           <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-            <div className="h-[450px] overflow-y-auto scrollbar-hide p-6 sm:p-8">
+            <div className="px-6 py-10 sm:px-10 sm:py-12">
               <div
-                className="prose prose-sm max-w-none prose-headings:text-slate-800 prose-p:text-slate-600 prose-p:leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: signingSession.letter?.content || "" }}
+                className="engagement-letter-body w-full font-serif text-[14.5px] leading-[1.8] text-slate-900"
+                dangerouslySetInnerHTML={{ __html: letterBodyToHtml(signingSession.letter?.content || "") }}
               />
             </div>
           </div>
