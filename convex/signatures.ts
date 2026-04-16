@@ -73,7 +73,18 @@ export const getSigningSession = query({
     }
 
     if (session.status === "signed") {
-      return { error: "This document has already been signed" };
+      const letter = await ctx.db.get(session.letterId);
+      const firm = letter ? await ctx.db.get(letter.firmId) : null;
+      const client = letter ? await ctx.db.get(letter.clientId) : null;
+      const sigData = letter?.signatureData as { signerName?: string; signedAt?: number } | undefined;
+      return {
+        error: "already_signed",
+        signedBy: sigData?.signerName ?? "Unknown",
+        signedAt: session.signedAt ?? session._creationTime,
+        letterNumber: letter?.letterNumber ?? "—",
+        firmName: firm?.name ?? "Unknown Firm",
+        clientName: client?.companyName ?? "Unknown Client",
+      };
     }
 
     if (Date.now() > session.expiresAt) {

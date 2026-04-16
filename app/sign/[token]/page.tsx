@@ -75,7 +75,78 @@ export default function SigningPage() {
     }
   };
 
-  // ── Error state ──
+  // ── Already signed — show proper confirmation ──
+  if (signingSession?.error === "already_signed") {
+    const signedDate = signingSession.signedAt
+      ? new Date(signingSession.signedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+      : "—";
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: "#f8fafc" }}>
+        <div className="border-b border-slate-100 bg-white">
+          <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${NAVY}10` }}>
+                <FileText className="h-5 w-5" style={{ color: NAVY }} />
+              </div>
+              <div>
+                <h1 className="text-[15px] font-semibold text-slate-800">{signingSession.firmName}</h1>
+                <p className="text-[12px] text-slate-400">Engagement Letter &bull; {signingSession.letterNumber}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[14px] font-semibold text-slate-700">{signingSession.clientName}</p>
+              <p className="text-[11px] text-slate-400">Client</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center px-6 py-20">
+          <div className="w-full max-w-lg text-center">
+            <div className="flex justify-center mb-5">
+              <div className="h-20 w-20 rounded-full flex items-center justify-center" style={{ backgroundColor: `${GOLD}20` }}>
+                <CheckCircle className="h-10 w-10" style={{ color: GOLD }} />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2" style={{ color: GOLD }}>Document Signed</h1>
+            <p className="text-[15px] text-slate-500 mb-8">This engagement letter has already been signed.</p>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-w-sm mx-auto text-left mb-8">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Document</p>
+                <p className="text-[14px] text-slate-700 font-medium">{signingSession.letterNumber}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Signed by</p>
+                <p className="text-[14px] text-slate-700 font-medium">{signingSession.signedBy}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Date signed</p>
+                <p className="text-[14px] text-slate-700 font-medium">{signedDate}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Status</p>
+                <p className="text-[14px] font-medium" style={{ color: GOLD }}>Complete</p>
+              </div>
+            </div>
+
+            <div className="h-px max-w-xs mx-auto mb-6" style={{ backgroundColor: `${GOLD}40` }} />
+
+            <p className="text-[13px] text-slate-400 mb-6">A copy of the signed document was sent to the signer's email address.</p>
+
+            <Button size="lg" variant="outline" className="rounded-full px-6 text-[14px]" onClick={() => window.close()}>
+              <X className="h-4 w-4 mr-2" /> Close
+            </Button>
+
+            <p className="text-center mt-8 text-[11px] text-slate-400">
+              Powered by <span className="font-semibold" style={{ color: GOLD }}>NorthPact</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Error state (expired, not found, etc.) ──
   if (signingSession?.error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#f8fafc" }}>
