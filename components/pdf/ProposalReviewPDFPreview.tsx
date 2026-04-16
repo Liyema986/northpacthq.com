@@ -1185,26 +1185,39 @@ export function ProposalReviewPDFPreview({
         { marker: "M2+", title: "Month 2 Onwards: Regular Service Delivery", description: "Ongoing monthly services, regular reporting, quarterly reviews, and continuous support." },
       ];
 
-      {
-        const stepH = 18;
+      if (timelineSteps.length > 0) {
         const tlPad = 10;
-        const titleH = 10;
-        const tlCardH = titleH + timelineSteps.length * stepH + tlPad * 2;
+        const tlContentW = W - M * 2 - tlPad * 2 - 22;
 
-        // If card won't fit, use remaining space
-        const tlStartY = Math.min(y, H - tlCardH - 15);
+        // Pre-measure each step height
+        const stepMeasured = timelineSteps.map((step) => {
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          const descLines = doc.splitTextToSize(step.description, tlContentW);
+          const h = 14 + descLines.length * 4;
+          return { ...step, descLines, h };
+        });
+        const totalStepsH = stepMeasured.reduce((sum, s) => sum + s.h, 0);
+        const titleH = 14;
+        const tlCardH = titleH + totalStepsH + tlPad * 2;
+
+        // New page if card won't fit
+        if (y + tlCardH > H - 15) {
+          doc.addPage();
+          y = pageHeader(doc, "Service Summary & Timeline");
+        }
 
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(M, tlStartY, W - M * 2, tlCardH, 4, 4, "F");
+        doc.roundedRect(M, y, W - M * 2, tlCardH, 4, 4, "F");
 
         doc.setFontSize(16);
         doc.setTextColor(...hexToRgb(primary));
         doc.setFont("helvetica", "bold");
-        doc.text("Service Delivery Timeline", M + tlPad, tlStartY + tlPad + 4);
+        doc.text("Service Delivery Timeline", M + tlPad, y + tlPad + 4);
 
-        let ty = tlStartY + tlPad + titleH + 6;
-        timelineSteps.slice(0, 3).forEach((step) => {
-          // Marker circle (50x50 in HTML → 8mm radius)
+        let ty = y + tlPad + titleH + 6;
+        stepMeasured.forEach((step) => {
+          // Marker circle
           doc.setFillColor(...lerpColor(hexToRgb(primary), [255, 255, 255], 0.82));
           doc.circle(M + tlPad + 8, ty + 2, 7, "F");
           doc.setFontSize(9);
@@ -1218,15 +1231,16 @@ export function ProposalReviewPDFPreview({
           doc.setFont("helvetica", "bold");
           doc.text(step.title, M + tlPad + 20, ty);
 
-          // Description
+          // Description (all lines, not just first)
           doc.setFontSize(9);
           doc.setTextColor(75, 85, 99);
           doc.setFont("helvetica", "normal");
-          const descLines = doc.splitTextToSize(step.description, W - M * 2 - tlPad * 2 - 22);
-          doc.text(descLines[0] || "", M + tlPad + 20, ty + 6);
+          doc.text(step.descLines, M + tlPad + 20, ty + 6);
 
-          ty += stepH;
+          ty += step.h;
         });
+
+        y += tlCardH + 8;
       }
 
       // ════════════════════════════════════════════════════════════════════

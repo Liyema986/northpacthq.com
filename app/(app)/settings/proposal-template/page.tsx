@@ -551,33 +551,40 @@ export default function ProposalTemplatePage() {
       case "timeline":
         return (
           <div className="space-y-3">
-            <p className="text-[12px] text-muted-foreground">Onboarding timeline steps on the Service Summary page.</p>
+            <p className="text-[12px] text-muted-foreground">Onboarding timeline steps shown on the Service Summary page.</p>
             {timelineSteps.map((step, idx) => (
-              <div key={idx} className="rounded-lg border border-border p-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Field label="Marker">
-                    <input className={cn(inputCls, "w-20")} value={step.marker}
-                      onChange={(e) => setTimelineSteps((prev) => prev.map((s, i) => i === idx ? { ...s, marker: e.target.value } : s))} placeholder="W1" />
-                  </Field>
-                  <div className="flex-1">
+              <div key={idx} className="rounded-lg border border-border overflow-hidden">
+                <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 border-b border-border">
+                  <div className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                    style={{ background: `${ACCENT}20`, color: ACCENT }}>
+                    {step.marker || (idx + 1)}
+                  </div>
+                  <span className="text-[12px] font-semibold text-slate-700 flex-1 truncate">Step {idx + 1}</span>
+                  <button type="button" onClick={() => setTimelineSteps((prev) => prev.filter((_, i) => i !== idx))}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="p-3 space-y-2">
+                  <div className="grid grid-cols-[64px_1fr] gap-2">
+                    <Field label="Marker">
+                      <input className={cn(inputCls, "text-center")} value={step.marker}
+                        onChange={(e) => setTimelineSteps((prev) => prev.map((s, i) => i === idx ? { ...s, marker: e.target.value } : s))} placeholder="W1" />
+                    </Field>
                     <Field label="Title">
                       <input className={inputCls} value={step.title}
                         onChange={(e) => setTimelineSteps((prev) => prev.map((s, i) => i === idx ? { ...s, title: e.target.value } : s))} placeholder="Week 1: Onboarding" />
                     </Field>
                   </div>
-                  <button type="button" onClick={() => setTimelineSteps((prev) => prev.filter((_, i) => i !== idx))}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive mt-5">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <Field label="Description">
+                    <textarea className={cn(textareaCls, "min-h-[50px]")} value={step.description}
+                      onChange={(e) => setTimelineSteps((prev) => prev.map((s, i) => i === idx ? { ...s, description: e.target.value } : s))} placeholder="Initial meeting, system setup..." />
+                  </Field>
                 </div>
-                <Field label="Description">
-                  <input className={inputCls} value={step.description}
-                    onChange={(e) => setTimelineSteps((prev) => prev.map((s, i) => i === idx ? { ...s, description: e.target.value } : s))} placeholder="Initial meeting..." />
-                </Field>
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" className="gap-1.5"
-              onClick={() => setTimelineSteps((prev) => [...prev, { marker: "", title: "", description: "" }])}>
+              onClick={() => setTimelineSteps((prev) => [...prev, { marker: `W${prev.length + 1}`, title: "", description: "" }])}>
               <Plus className="h-3.5 w-3.5" /> Add step
             </Button>
           </div>
