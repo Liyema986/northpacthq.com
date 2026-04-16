@@ -65,6 +65,8 @@ export default function ProposalTemplatePage() {
   const data = useQuery(api.firms.getProposalTemplateData, userId ? { userId } : "skip");
   const updateTemplate = useMutation(api.firms.updateProposalTemplate);
   const updateTeamMember = useMutation(api.firms.updateTeamMember);
+  const updateTeamMemberAvatar = useMutation(api.firms.updateTeamMemberAvatar);
+  const clearTeamMemberAvatar = useMutation(api.firms.clearTeamMemberAvatar);
 
   const generateUploadUrl = useMutation(api.authFunctions.generateLogoUploadUrl);
   const updateFirmMut = useMutation(api.authFunctions.updateFirm);
@@ -104,6 +106,35 @@ export default function ProposalTemplatePage() {
   const [teamEdits, setTeamEdits] = useState<Record<string, { jobTitle: string; bio: string; phone: string }>>({});
   const [coverLogoPreview, setCoverLogoPreview] = useState<string | null>(null);
   const [footerLogoPreview, setFooterLogoPreview] = useState<string | null>(null);
+  const [teamAvatars, setTeamAvatars] = useState<Record<string, string | null>>({});
+  const teamAvatarInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const handleTeamAvatarUpload = useCallback(async (file: File, memberId: string) => {
+    if (!userId) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please upload an image (PNG, JPG, or WebP)."); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("Image must be 2 MB or smaller."); return; }
+    try {
+      const uploadUrl = await generateUploadUrl({ userId });
+      const res = await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": file.type }, body: file });
+      if (!res.ok) { toast.error("Upload failed"); return; }
+      const json = (await res.json()) as { storageId?: Id<"_storage"> };
+      if (!json.storageId) { toast.error("Upload failed"); return; }
+      const result = await updateTeamMemberAvatar({ userId, targetUserId: memberId as Id<"users">, storageId: json.storageId });
+      if (result.avatarUrl) {
+        setTeamAvatars((prev) => ({ ...prev, [memberId]: result.avatarUrl! }));
+      }
+      toast.success("Photo uploaded");
+    } catch { toast.error("Upload failed"); }
+  }, [userId, generateUploadUrl, updateTeamMemberAvatar]);
+
+  const handleClearTeamAvatar = useCallback(async (memberId: string) => {
+    if (!userId) return;
+    try {
+      await clearTeamMemberAvatar({ userId, targetUserId: memberId as Id<"users"> });
+      setTeamAvatars((prev) => ({ ...prev, [memberId]: null }));
+      toast.success("Photo removed");
+    } catch { toast.error("Failed to remove photo"); }
+  }, [userId, clearTeamMemberAvatar]);
 
   const handleImageUpload = useCallback(async (
     file: File,
@@ -169,6 +200,9 @@ export default function ProposalTemplatePage() {
     const edits: Record<string, { jobTitle: string; bio: string; phone: string }> = {};
     data.teamMembers.forEach((m) => { edits[m._id] = { jobTitle: m.role, bio: m.bio, phone: m.phone }; });
     setTeamEdits(edits);
+    const avatars: Record<string, string | null> = {};
+    data.teamMembers.forEach((m) => { avatars[m._id] = m.avatar || null; });
+    setTeamAvatars(avatars);
     setCoverLogoPreview(data.coverImageUrl);
     setFooterLogoPreview(data.footerImageUrl);
   }, [data]);
@@ -256,7 +290,7 @@ export default function ProposalTemplatePage() {
     valuesStatement: isSectionEnabled("about") ? (valuesStatement || undefined) : undefined,
     website: website || undefined,
     teamMembers: isSectionEnabled("team")
-      ? (data?.teamMembers ?? []).map((m) => ({ name: m.name, role: teamEdits[m._id]?.jobTitle || m.role, bio: teamEdits[m._id]?.bio || m.bio, avatarUrl: m.avatar || undefined }))
+      ? (data?.teamMembers ?? []).map((m) => ({ name: m.name, role: teamEdits[m._id]?.jobTitle || m.role, bio: teamEdits[m._id]?.bio || m.bio, avatarUrl: teamAvatars[m._id] || m.avatar || undefined }))
       : undefined,
     feesIntroductionText: feesIntroText || undefined, paymentTermsText: paymentTermsText || undefined,
     whatHappensNextText: whatHappensNextText || undefined,
@@ -279,7 +313,7 @@ export default function ProposalTemplatePage() {
     primaryColor, secondaryColor, introText, coverQuote, coverQuoteAuthor,
     closingQuote, closingQuoteAuthor, aboutUsHtml, missionStatement,
     whyChooseUsItems, valuesStatement, website, feesIntroText, paymentTermsText,
-    whatHappensNextText, timelineSteps, sections, teamEdits,
+    whatHappensNextText, timelineSteps, sections, teamEdits, teamAvatars,
     footerText, footerAddress, disclaimer, signOffBlock, bankingDetails,
   ]);
 
@@ -443,15 +477,38 @@ export default function ProposalTemplatePage() {
             {(data?.teamMembers ?? []).map((member) => {
               const edits = teamEdits[member._id] ?? { jobTitle: member.role, bio: member.bio, phone: member.phone };
               const phoneInvalid = edits.phone && !isValidPhone(edits.phone);
+              const avatarUrl = teamAvatars[member._id] ?? null;
               return (
-                <div key={member._id} className="rounded-lg border border-border p-3 space-y-2">
+                <div key={member._id} className="rounded-lg border border-border p-3 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
-                      {member.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)}
+                    <div className="relative group shrink-0">
+                      <input ref={(el) => { teamAvatarInputRefs.current[member._id] = el; }} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleTeamAvatarUpload(f, member._id); e.target.value = ""; }} />
+                      <div className={cn(
+                        "h-14 w-14 rounded-full overflow-hidden flex items-center justify-center border-2 cursor-pointer transition-all",
+                        avatarUrl ? "border-slate-200 hover:border-[#C8A96E]" : "border-dashed border-slate-300 bg-slate-50 hover:border-[#C8A96E] hover:bg-slate-100"
+                      )} onClick={() => teamAvatarInputRefs.current[member._id]?.click()}>
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt={member.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-sm font-bold text-muted-foreground">
+                            {member.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)}
+                          </span>
+                        )}
+                      </div>
+                      {avatarUrl && (
+                        <button type="button"
+                          onClick={(e) => { e.stopPropagation(); handleClearTeamAvatar(member._id); }}
+                          className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Remove photo">
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground truncate">{member.name}</p>
                       <p className="text-[11px] text-muted-foreground">{member.email}</p>
+                      <p className="text-[10px] text-muted-foreground/60 mt-0.5">Click photo to {avatarUrl ? "replace" : "upload"}</p>
                     </div>
                   </div>
                   <Field label="Job title" hint={!edits.jobTitle.trim() ? "Required — shown on the proposal" : undefined}>

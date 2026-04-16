@@ -279,3 +279,44 @@ export const updateTeamMember = mutation({
     return { success: true };
   },
 });
+
+/**
+ * Upload/update a team member's avatar (for proposal template).
+ * Requires canManageFirm permission.
+ */
+export const updateTeamMemberAvatar = mutation({
+  args: {
+    userId: v.id("users"),
+    targetUserId: v.id("users"),
+    storageId: v.id("_storage"),
+  },
+  returns: v.object({ success: v.boolean(), avatarUrl: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    await requirePermission(ctx, args.userId, "canManageFirm");
+    const target = await ctx.db.get(args.targetUserId);
+    if (!target) return { success: false };
+    const url = await ctx.storage.getUrl(args.storageId);
+    if (!url) return { success: false };
+    await ctx.db.patch(args.targetUserId, { avatar: url });
+    return { success: true, avatarUrl: url };
+  },
+});
+
+/**
+ * Clear a team member's avatar.
+ * Requires canManageFirm permission.
+ */
+export const clearTeamMemberAvatar = mutation({
+  args: {
+    userId: v.id("users"),
+    targetUserId: v.id("users"),
+  },
+  returns: v.object({ success: v.boolean() }),
+  handler: async (ctx, args) => {
+    await requirePermission(ctx, args.userId, "canManageFirm");
+    const target = await ctx.db.get(args.targetUserId);
+    if (!target) return { success: false };
+    await ctx.db.patch(args.targetUserId, { avatar: undefined });
+    return { success: true };
+  },
+});
