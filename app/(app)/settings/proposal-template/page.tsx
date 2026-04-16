@@ -185,6 +185,16 @@ export default function ProposalTemplatePage() {
       toast.error("Please enter a valid website URL or leave it blank.");
       return;
     }
+    const invalidPhone = Object.values(teamEdits).find((e) => e.phone.trim() && !/^\+?[\d\s()-]{7,20}$/.test(e.phone.trim()));
+    if (invalidPhone) {
+      toast.error("Please fix the invalid phone number in your team details.");
+      return;
+    }
+    const missingTitle = Object.values(teamEdits).find((e) => !e.jobTitle.trim());
+    if (missingTitle) {
+      toast.error("Please add a job title for all team members.");
+      return;
+    }
     setSaving(true);
     try {
       await updateTemplate({
@@ -425,12 +435,14 @@ export default function ProposalTemplatePage() {
             </Field>
           </div>
         );
-      case "team":
+      case "team": {
+        const isValidPhone = (p: string) => !p.trim() || /^\+?[\d\s()-]{7,20}$/.test(p.trim());
         return (
           <div className="space-y-3">
             <p className="text-[12px] text-muted-foreground">Edit team member details shown on the proposal.</p>
             {(data?.teamMembers ?? []).map((member) => {
               const edits = teamEdits[member._id] ?? { jobTitle: member.role, bio: member.bio, phone: member.phone };
+              const phoneInvalid = edits.phone && !isValidPhone(edits.phone);
               return (
                 <div key={member._id} className="rounded-lg border border-border p-3 space-y-2">
                   <div className="flex items-center gap-3">
@@ -442,12 +454,12 @@ export default function ProposalTemplatePage() {
                       <p className="text-[11px] text-muted-foreground">{member.email}</p>
                     </div>
                   </div>
-                  <Field label="Job title">
-                    <input className={inputCls} value={edits.jobTitle} placeholder="e.g. Senior Accountant"
+                  <Field label="Job title" hint={!edits.jobTitle.trim() ? "Required — shown on the proposal" : undefined}>
+                    <input className={cn(inputCls, !edits.jobTitle.trim() && "border-red-400 focus:border-red-500")} value={edits.jobTitle} placeholder="e.g. Senior Accountant"
                       onChange={(e) => setTeamEdits((prev) => ({ ...prev, [member._id]: { ...edits, jobTitle: e.target.value } }))} />
                   </Field>
-                  <Field label="Phone">
-                    <input className={inputCls} value={edits.phone} placeholder="+27 ..."
+                  <Field label="Phone" hint={phoneInvalid ? "Enter a valid phone number (e.g. +27 82 123 4567)" : undefined}>
+                    <input className={cn(inputCls, phoneInvalid && "border-red-400 focus:border-red-500")} value={edits.phone} placeholder="+27 82 123 4567"
                       onChange={(e) => setTeamEdits((prev) => ({ ...prev, [member._id]: { ...edits, phone: e.target.value } }))} />
                   </Field>
                   <Field label="Bio">
@@ -457,11 +469,15 @@ export default function ProposalTemplatePage() {
                 </div>
               );
             })}
-            {(!data?.teamMembers || data.teamMembers.length === 0) && (
-              <p className="text-sm text-muted-foreground">No team members. Add them in Settings &gt; People.</p>
-            )}
+            <div className="pt-1">
+              <Link href="/settings?tab=people"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <Plus className="h-3.5 w-3.5" /> Add team members in Settings
+              </Link>
+            </div>
           </div>
         );
+      }
       case "fees":
         return (
           <div className="space-y-4">
