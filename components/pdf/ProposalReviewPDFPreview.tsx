@@ -197,19 +197,19 @@ export function ProposalReviewPDFPreview({
     };
   }, [pdfDataUrl]);
 
-  // Scroll PDF to page when scrollToPage changes — use hash navigation to avoid reload
+  // Build the iframe src with the current page target
+  const iframeSrc = pdfDataUrl
+    ? `${pdfDataUrl}#toolbar=0&view=FitV&navpanes=0&scrollbar=1&page=${scrollToPage ?? 1}`
+    : null;
+
+  // When only the page changes (not the PDF data), update the iframe src to navigate
+  const prevPageRef = useRef(scrollToPage);
   useEffect(() => {
     if (!scrollToPage || !pdfDataUrl || !iframeRef.current) return;
-    try {
-      // Try updating just the hash (no iframe reload)
-      const win = iframeRef.current.contentWindow;
-      if (win) {
-        win.location.hash = `page=${scrollToPage}`;
-      }
-    } catch {
-      // Cross-origin fallback — won't cause full re-gen since pdfDataUrl hasn't changed
-    }
-  }, [scrollToPage]);
+    if (prevPageRef.current === scrollToPage) return;
+    prevPageRef.current = scrollToPage;
+    iframeRef.current.src = `${pdfDataUrl}#toolbar=0&view=FitV&navpanes=0&scrollbar=1&page=${scrollToPage}`;
+  }, [scrollToPage, pdfDataUrl]);
 
   useEffect(() => {
     // Small debounce so we don't re-gen on every keystroke
@@ -1548,10 +1548,10 @@ export function ProposalReviewPDFPreview({
           <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#C8A96E" }} />
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Generating PDF preview...</p>
         </div>
-      ) : pdfDataUrl ? (
+      ) : iframeSrc ? (
         <iframe
           ref={iframeRef}
-          src={`${pdfDataUrl}#toolbar=0&view=FitV&navpanes=0&scrollbar=1`}
+          src={iframeSrc}
           className="w-full flex-1 border-none min-h-[800px]"
           style={{ height: "800px" }}
           title="Proposal PDF Preview"

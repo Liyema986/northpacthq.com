@@ -320,26 +320,28 @@ export default function ProposalTemplatePage() {
   const isLoading = !userId || data === undefined;
 
   // ── Map section key → PDF page number (dynamic based on enabled sections) ──
+  // Map each editor section to the PDF page it corresponds to.
+  // Must match the actual page order in ProposalReviewPDFPreview.
   const sectionPageMap = (() => {
     const map: Record<SectionKey, number> = {} as Record<SectionKey, number>;
-    let page = 1;
-    map.branding = 1; // cover page
-    map.cover = page; page++; // 1: cover
-    page++; // 2: contents
-    map.intro = page; page++; // 3: introduction
-    if (isSectionEnabled("about") && (aboutUsHtml || missionStatement || whyChooseUsItems.length)) {
-      map.about = page; page++;
-    } else { map.about = page; }
-    if (isSectionEnabled("team") && (data?.teamMembers?.length ?? 0) > 0) {
-      map.team = page; page++;
-    } else { map.team = page; }
-    map.fees = page; page++; // fees (may span multiple pages but point to first)
-    // skip extra fee pages
-    map.timeline = page; page++; // service summary + timeline
-    page++; // all services
-    map.nextSteps = page; page++; // next steps
-    map.closing = page; // closing
-    map.footer = 2; // footer is on all standard pages, show contents
+    let p = 1;
+    map.branding = p;             // 1: cover page
+    map.cover = p; p++;
+    p++;                          // 2: contents
+    map.intro = p; p++;           // 3: introduction
+    const hasAbout = isSectionEnabled("about") && (aboutUsHtml || missionStatement || whyChooseUsItems.length);
+    if (hasAbout) { map.about = p; p++; } else { map.about = p; }
+    const hasTeam = isSectionEnabled("team") && (data?.teamMembers?.length ?? 0) > 0;
+    if (hasTeam) { map.team = p; p++; } else { map.team = p; }
+    map.fees = p; p++;            // fees page 1
+    p++;                          // fees page 2 (entity breakdown)
+    // fees may add more pages dynamically — skip investment summary page
+    p++;                          // investment summary
+    map.timeline = p; p++;        // service summary & timeline
+    p++;                          // all services
+    map.nextSteps = p; p++;       // next steps
+    map.closing = p;              // closing page
+    map.footer = 2;               // footer visible on contents page
     return map;
   })();
 
