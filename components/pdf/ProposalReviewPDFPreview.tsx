@@ -80,7 +80,8 @@ function stripHtml(html: string): string {
 }
 
 function fmtCurrency(amount: number, currency: string): string {
-  return `${currency} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const symbol = currency === "ZAR" ? "R" : currency;
+  return `${symbol} ${amount.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -794,7 +795,7 @@ export function ProposalReviewPDFPreview({
 
         autoTable(d, {
           startY,
-          head: [["SERVICES", `${subLabel}\n${currency}`]],
+          head: [["SERVICES", `${subLabel}\n${currency === "ZAR" ? "R" : currency}`]],
           body: rows,
           theme: "striped",
           headStyles: {
@@ -856,7 +857,7 @@ export function ProposalReviewPDFPreview({
         const entityNames = proposalEntities.map(e => e.name);
         const headRow = ["Service", ...entityNames, "Amount"];
         const tableBody: string[][] = [];
-        const rowMeta: { isCategory?: boolean; isGrandTotal?: boolean }[] = [];
+        const rowMeta: { isCategory?: boolean; isGrandTotal?: boolean; isTotalRow?: boolean }[] = [];
 
         feeCategories.forEach(group => {
           if (group.label) {
@@ -876,9 +877,23 @@ export function ProposalReviewPDFPreview({
           });
         });
 
+        // Subtotal row
+        const subtotalRow = new Array(headRow.length).fill("");
+        subtotalRow[0] = "Subtotal (excl. VAT)";
+        subtotalRow[headRow.length - 1] = fmtCurrency(netTotal, currency);
+        tableBody.push(subtotalRow);
+        rowMeta.push({ isTotalRow: true });
+
+        // VAT row
+        const vatRow = new Array(headRow.length).fill("");
+        vatRow[0] = "VAT (15%)";
+        vatRow[headRow.length - 1] = fmtCurrency(tax, currency);
+        tableBody.push(vatRow);
+        rowMeta.push({ isTotalRow: true });
+
         // Grand total row
         const grandRow = new Array(headRow.length).fill("");
-        grandRow[0] = "Grand Total";
+        grandRow[0] = "Grand Total (incl. VAT)";
         grandRow[headRow.length - 1] = fmtCurrency(gross, currency);
         tableBody.push(grandRow);
         rowMeta.push({ isGrandTotal: true });
@@ -910,6 +925,11 @@ export function ProposalReviewPDFPreview({
               data.cell.styles.fontSize = 8;
               data.cell.styles.halign = "right";
             }
+            if (meta.isTotalRow) {
+              data.cell.styles.fillColor = [243, 244, 246];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.fontSize = 10;
+            }
             if (meta.isGrandTotal) {
               data.cell.styles.fillColor = hexToRgb(primary);
               data.cell.styles.textColor = [255, 255, 255];
@@ -920,7 +940,7 @@ export function ProposalReviewPDFPreview({
           didDrawCell: (data) => {
             if (data.section !== "body") return;
             const meta = rowMeta[data.row.index];
-            if (meta?.isCategory || meta?.isGrandTotal) return;
+            if (meta?.isCategory || meta?.isGrandTotal || meta?.isTotalRow) return;
             // Draw entity badges for entity columns
             const colIdx = data.column.index;
             if (colIdx >= 1 && colIdx < headRow.length - 1) {
