@@ -320,32 +320,9 @@ export default function ProposalTemplatePage() {
   const isLoading = !userId || data === undefined;
 
   // ── Map section key → PDF page number (dynamic based on enabled sections) ──
-  // Map each editor section to the PDF page it corresponds to.
-  // Must match the actual page order in ProposalReviewPDFPreview.
-  const sectionPageMap = (() => {
-    const map: Record<SectionKey, number> = {} as Record<SectionKey, number>;
-    let p = 1;
-    map.branding = p;             // 1: cover page
-    map.cover = p; p++;
-    p++;                          // 2: contents
-    map.intro = p; p++;           // 3: introduction
-    const hasAbout = isSectionEnabled("about") && (aboutUsHtml || missionStatement || whyChooseUsItems.length);
-    if (hasAbout) { map.about = p; p++; } else { map.about = p; }
-    const hasTeam = isSectionEnabled("team") && (data?.teamMembers?.length ?? 0) > 0;
-    if (hasTeam) { map.team = p; p++; } else { map.team = p; }
-    map.fees = p; p++;            // fees page 1
-    p++;                          // fees page 2 (entity breakdown)
-    // fees may add more pages dynamically — skip investment summary page
-    p++;                          // investment summary
-    map.timeline = p; p++;        // service summary & timeline
-    p++;                          // all services
-    map.nextSteps = p; p++;       // next steps
-    map.closing = p;              // closing page
-    map.footer = 2;               // footer visible on contents page
-    return map;
-  })();
-
-  const scrollToPage = sectionPageMap[activeSection] ?? 1;
+  // Real page map from PDF generation — updated after each render
+  const [pdfPageMap, setPdfPageMap] = useState<Record<string, number>>({});
+  const scrollToPage = pdfPageMap[activeSection] ?? 1;
 
   // ── Section editor content ──
   const renderSectionEditor = () => {
@@ -746,6 +723,7 @@ export default function ProposalTemplatePage() {
             onDownloadReady={(fn) => { downloadFnRef.current = fn; }}
             hideDownloadButton
             scrollToPage={scrollToPage}
+            onPageMap={setPdfPageMap}
           />
         </div>
 

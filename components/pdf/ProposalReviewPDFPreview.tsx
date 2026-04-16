@@ -61,6 +61,8 @@ export interface ProposalReviewPDFPreviewProps {
   hideDownloadButton?: boolean;
   /** Scroll the PDF viewer to this page number (1-based) */
   scrollToPage?: number;
+  /** Callback with actual section → page number mapping after PDF generation */
+  onPageMap?: (map: Record<string, number>) => void;
 }
 
 function getServicePrice(item: LineItemWithPrice): number {
@@ -185,6 +187,7 @@ export function ProposalReviewPDFPreview({
   proposalData,
   hideDownloadButton,
   scrollToPage,
+  onPageMap,
 }: ProposalReviewPDFPreviewProps) {
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(true);
@@ -229,6 +232,8 @@ export function ProposalReviewPDFPreview({
       const W = doc.internal.pageSize.getWidth();
       const H = doc.internal.pageSize.getHeight();
       const M = 15; // margin
+      const pageMap: Record<string, number> = {};
+      const currentPage = () => doc.getNumberOfPages();
 
       // ── Resolve data ──
       const pd = proposalData;
@@ -352,6 +357,7 @@ export function ProposalReviewPDFPreview({
 
       // ════════════════════════════════════════════════════════════════════
       // PAGE 1: COVER PAGE — matches risen_proposal_template.html exactly
+      pageMap.cover = currentPage(); pageMap.branding = currentPage(); // page 1
       // ════════════════════════════════════════════════════════════════════
       drawGradientBg(doc, primary, secondary);
 
@@ -458,7 +464,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       // PAGE 2: CONTENTS
       // ════════════════════════════════════════════════════════════════════
-      doc.addPage();
+      doc.addPage(); pageMap.footer = currentPage();
       let y = pageHeader(doc, "Contents");
 
       const tocEntries = [
@@ -514,7 +520,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       // PAGE 3: INTRODUCTION — HTML .intro-content (white card, rounded)
       // ════════════════════════════════════════════════════════════════════
-      doc.addPage();
+      doc.addPage(); pageMap.intro = currentPage();
       y = pageHeader(doc, "Introduction");
 
       const introParas = customIntroText
@@ -564,7 +570,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       const hasAboutUs = pd?.aboutUsHtml || pd?.missionStatement || pd?.whyChooseUsItems?.length;
       if (hasAboutUs) {
-        doc.addPage();
+        doc.addPage(); pageMap.about = currentPage();
         y = pageHeader(doc, `About ${firmName}`);
 
         // White card container (HTML .about-content: bg white, padding 40px, border-radius 16px)
@@ -686,7 +692,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       const team = pd?.teamMembers ?? [];
       if (team.length > 0) {
-        doc.addPage();
+        doc.addPage(); pageMap.team = currentPage();
         y = pageHeader(doc, "Your Dedicated Team");
 
         const colW = (W - M * 2 - 10) / 2;
@@ -805,7 +811,7 @@ export function ProposalReviewPDFPreview({
       };
 
       // Fees page 1: Investment & Fees
-      doc.addPage();
+      doc.addPage(); pageMap.fees = currentPage();
       y = pageHeader(doc, "Investment & Fees");
 
       // Fees intro card
@@ -1129,7 +1135,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       // SERVICE SUMMARY & TIMELINE PAGE
       // ════════════════════════════════════════════════════════════════════
-      doc.addPage();
+      doc.addPage(); pageMap.timeline = currentPage();
       y = pageHeader(doc, "Service Summary & Timeline");
 
       // ── "Services We'll Deliver" card (matching HTML .summary-section) ──
@@ -1306,7 +1312,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       // NEXT STEPS PAGE
       // ════════════════════════════════════════════════════════════════════
-      doc.addPage();
+      doc.addPage(); pageMap.nextSteps = currentPage();
       y = pageHeader(doc, "Next Steps");
 
       // Intro card (HTML .steps-intro: white card, rounded)
@@ -1432,7 +1438,7 @@ export function ProposalReviewPDFPreview({
       // ════════════════════════════════════════════════════════════════════
       // CLOSING PAGE — matches HTML .closing-page exactly
       // ════════════════════════════════════════════════════════════════════
-      doc.addPage();
+      doc.addPage(); pageMap.closing = currentPage();
       drawGradientBg(doc, primary, secondary);
 
       const closeQuote = pd?.closingQuote || "";
@@ -1489,6 +1495,7 @@ export function ProposalReviewPDFPreview({
       }
 
       // ── Output ──
+      if (onPageMap) onPageMap(pageMap);
       const blob = doc.output("blob");
       const url = URL.createObjectURL(blob);
       setPdfDataUrl(url);
