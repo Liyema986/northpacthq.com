@@ -357,9 +357,9 @@ export default function ProposalTemplatePage() {
       case "intro":
         return (
           <div className="space-y-4">
-            <Field label="Default introduction text" hint="Use [CLIENT_NAME] as a placeholder for the client's name.">
+            <Field label="Default introduction text" hint="[CLIENT_NAME] is automatically replaced with the client's name.">
               <textarea className={cn(textareaCls, "min-h-[160px]")} value={introText} onChange={(e) => setIntroText(e.target.value)}
-                placeholder="Hello [CLIENT_NAME]! Thank you for considering us..." />
+                placeholder="Dear [CLIENT_NAME],&#10;&#10;Thank you for the opportunity to present this proposal..." />
             </Field>
           </div>
         );
