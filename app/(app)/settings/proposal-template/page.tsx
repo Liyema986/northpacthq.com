@@ -177,8 +177,14 @@ export default function ProposalTemplatePage() {
   const toggleSection = (key: string, val: boolean) => setSections((prev) => ({ ...prev, [key]: val }));
 
   // ── Save ──
+  const isValidWebsite = (url: string) => !url.trim() || /^(https?:\/\/)?[\w][\w.-]*\.[a-z]{2,}(\/\S*)?$/i.test(url.trim());
+
   const handleSave = useCallback(async () => {
     if (!userId) return;
+    if (!isValidWebsite(website)) {
+      toast.error("Please enter a valid website URL or leave it blank.");
+      return;
+    }
     setSaving(true);
     try {
       await updateTemplate({
@@ -414,8 +420,8 @@ export default function ProposalTemplatePage() {
               <textarea className={textareaCls} value={valuesStatement} onChange={(e) => setValuesStatement(e.target.value)}
                 placeholder="Integrity, Excellence, Innovation..." />
             </Field>
-            <Field label="Website">
-              <input className={inputCls} value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="www.yourfirm.co.za" />
+            <Field label="Website" hint={website && !/^(https?:\/\/)?[\w][\w.-]*\.[a-z]{2,}(\/\S*)?$/i.test(website.trim()) ? "Please enter a valid website (e.g. www.yourfirm.co.za)" : undefined}>
+              <input className={cn(inputCls, website && !/^(https?:\/\/)?[\w][\w.-]*\.[a-z]{2,}(\/\S*)?$/i.test(website.trim()) && "border-red-400 focus:border-red-500")} value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="www.yourfirm.co.za" />
             </Field>
           </div>
         );
