@@ -112,6 +112,35 @@ function drawGradientBg(doc: jsPDF, primary: string, secondary: string) {
 
 type LoadedImage = { dataUrl: string; aspectRatio: number } | null;
 
+/** Load an image and crop it into a circle (for team avatars in PDF). */
+async function loadCircularImage(url: string, size = 200): Promise<string | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(null); return; }
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      // Cover-fit: center-crop the image into the circle
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      const scale = Math.max(size / w, size / h);
+      const sw = w * scale;
+      const sh = h * scale;
+      ctx.drawImage(img, (size - sw) / 2, (size - sh) / 2, sw, sh);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
 async function loadImageWithDimensions(url: string): Promise<LoadedImage> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -271,6 +300,18 @@ export function ProposalReviewPDFPreview({
       if (!coverImg) coverImg = headerImg;
       if (footerLogoSrc) footerImg = await loadImageWithDimensions(footerLogoSrc);
       if (!footerImg) footerImg = headerImg;
+
+      // Pre-load team member circular avatars
+      const teamAvatarMap: Record<number, string> = {};
+      const teamForAvatars = pd?.teamMembers ?? [];
+      await Promise.all(
+        teamForAvatars.slice(0, 4).map(async (member, idx) => {
+          if (member.avatarUrl) {
+            const circImg = await loadCircularImage(member.avatarUrl);
+            if (circImg) teamAvatarMap[idx] = circImg;
+          }
+        })
+      );
 
       // ── Helper: standard page background (#FAFBFC like HTML template) ──
       const addPageBg = (d: jsPDF) => {
@@ -663,16 +704,23 @@ export function ProposalReviewPDFPreview({
           doc.setFillColor(...hexToRgb(primary));
           doc.rect(cx, cy, colW, 1.5, "F");
 
-          // Initials circle
+          // Avatar circle (photo or initials fallback)
           const circleX = cx + colW / 2;
           const circleY = cy + 15;
-          doc.setFillColor(...lerpColor(hexToRgb(primary), [255, 255, 255], 0.8));
-          doc.circle(circleX, circleY, 10, "F");
-          doc.setFontSize(14);
-          doc.setTextColor(...hexToRgb(primary));
-          doc.setFont("helvetica", "bold");
-          const initials = member.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
-          doc.text(initials, circleX, circleY + 4, { align: "center" });
+          const circleR = 10;
+          if (teamAvatarMap[idx]) {
+            // Circular photo
+            doc.addImage(teamAvatarMap[idx], "PNG", circleX - circleR, circleY - circleR, circleR * 2, circleR * 2, `team-avatar-${idx}`, "FAST");
+          } else {
+            // Initials fallback
+            doc.setFillColor(...lerpColor(hexToRgb(primary), [255, 255, 255], 0.8));
+            doc.circle(circleX, circleY, circleR, "F");
+            doc.setFontSize(14);
+            doc.setTextColor(...hexToRgb(primary));
+            doc.setFont("helvetica", "bold");
+            const initials = member.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+            doc.text(initials, circleX, circleY + 4, { align: "center" });
+          }
 
           // Name
           doc.setFontSize(12);
