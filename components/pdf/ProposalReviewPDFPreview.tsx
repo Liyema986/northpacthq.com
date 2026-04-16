@@ -593,7 +593,7 @@ export function ProposalReviewPDFPreview({
             doc.setFontSize(11);
             doc.setFont("helvetica", "normal");
             itemData.forEach((d) => {
-              doc.setTextColor(...hexToRgb(primary));
+              doc.setFillColor(...hexToRgb(primary));
               doc.circle(aboutCardX + aboutPad + 4, ay - 1.5, 1.5, "F");
               doc.setTextColor(75, 85, 99);
               doc.text(d.lines, aboutCardX + aboutPad + 10, ay);
