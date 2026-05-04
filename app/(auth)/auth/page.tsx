@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSignIn, useSignUp } from "@clerk/nextjs";
+import { useSignIn, useSignUp, useAuth, useClerk } from "@clerk/nextjs";
 import type { OAuthStrategy, EmailCodeFactor } from "@clerk/types";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,22 @@ function AuthPageContent() {
   const searchParams = useSearchParams();
   const { isLoaded: signInLoaded, signIn, setActive: setActiveSignIn } = useSignIn();
   const { isLoaded: signUpLoaded, signUp, setActive: setActiveSignUp } = useSignUp();
+  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { signOut } = useClerk();
+  const [sessionCleared, setSessionCleared] = useState(false);
+  const sessionClearStarted = useRef(false);
+
+  // If a stale Clerk session exists when the user lands here, sign it out
+  // automatically so signIn.create() doesn't fail with "You're already signed in".
+  useEffect(() => {
+    if (!authLoaded || sessionClearStarted.current) return;
+    sessionClearStarted.current = true;
+    if (isSignedIn) {
+      signOut().catch(() => {}).finally(() => setSessionCleared(true));
+    } else {
+      setSessionCleared(true);
+    }
+  }, [authLoaded, isSignedIn, signOut]);
 
   const inviteToken = searchParams.get("invite");
   const tabFromUrl = searchParams.get("tab");
@@ -347,6 +363,14 @@ function AuthPageContent() {
       </Button>
     </div>
   );
+
+  if (!sessionCleared) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white">
+        <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-svh">
